@@ -29,8 +29,8 @@ If you prefer a single `{{TITLE}}` token, run a wrap pass first that produces th
 three line strings, then replace.
 
 ## Brand colors used
-- Background `#0A0A0B` · White text `#FAFAFA` · Muted gray `#A1A1AA`
-- Neon-green accent `#B6FF3B` (badge, waveform, wordmark "DroppZ", flame, rule)
+- Background `#000000` · White text `#E8E8E8` · Muted gray `#A8A8A8`
+- Venom neon-green accent `#00EC88` (badge, waveform, wordmark "DroppZ", flame, rule)
 - Violet `#5B3BFF` is available in the system but kept off this card for restraint.
 
 ## Design notes
