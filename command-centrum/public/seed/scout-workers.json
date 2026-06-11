@@ -1,0 +1,1037 @@
+{
+  "systemConfig": {
+    "autoScoutingEnabled": false,
+    "autoScoutingChangedAt": "2026-05-16T14:56:48.536Z",
+    "modeNote": "DEV MODE — cron disabled. Use Run Scout to trigger workers manually."
+  },
+  "workers": [
+    {
+      "id": "wkr-spotify-playlists",
+      "name": "Spotify Playlists Worker",
+      "platform": "spotify_playlists",
+      "category": "music",
+      "description": "Sleduje kurátorované playlists (Spotify Top 50 per region + custom playlist registry). Detekuje nově přidané tracky a rank shifts.",
+      "enabled": true,
+      "status": "idle",
+      "health": "green",
+      "config": {
+        "id": "wkr-spotify-playlists",
+        "name": "Spotify Playlists Worker",
+        "platform": "spotify_playlists",
+        "enabled": true,
+        "scheduleCron": "0 */4 * * *",
+        "rateLimitPerSecond": 15,
+        "config": {
+          "playlist_registry_db": "playlists",
+          "track_rank_shifts": true,
+          "shift_threshold": 5
+        },
+        "secretRef": "env:SPOTIFY_CLIENT_ID",
+        "gatewayId": "spotify_gateway"
+      },
+      "kpi": {
+        "itemsToday": 28,
+        "itemsWeek": 184,
+        "errorsToday": 0,
+        "latencyP95Ms": 380,
+        "spark7d": [
+          22,
+          25,
+          31,
+          28,
+          19,
+          21,
+          28
+        ]
+      },
+      "sourceCount": 12,
+      "lastRunAt": "2026-05-16T04:00:00.000Z",
+      "nextRunAt": "2026-05-16T08:00:00.000Z",
+      "createdAt": "2026-04-12T10:00:00.000Z",
+      "updatedAt": "2026-05-16T04:00:00.000Z"
+    },
+    {
+      "id": "wkr-spotify-artists",
+      "name": "Spotify Artists Worker",
+      "platform": "spotify_artists",
+      "category": "music",
+      "description": "Sleduje artist profily z AIL DB (Artist Intelligence Library) — new releases (albums + singles) per artist. Trigger: artist.is_tracking_active=true.",
+      "enabled": true,
+      "status": "idle",
+      "health": "green",
+      "config": {
+        "id": "wkr-spotify-artists",
+        "name": "Spotify Artists Worker",
+        "platform": "spotify_artists",
+        "enabled": true,
+        "scheduleCron": "0 */3 * * *",
+        "rateLimitPerSecond": 15,
+        "config": {
+          "ail_source": "artists",
+          "include_groups": "album,single",
+          "market": "EU"
+        },
+        "secretRef": "env:SPOTIFY_CLIENT_ID",
+        "gatewayId": "spotify_gateway"
+      },
+      "kpi": {
+        "itemsToday": 19,
+        "itemsWeek": 128,
+        "errorsToday": 0,
+        "latencyP95Ms": 445,
+        "spark7d": [
+          12,
+          15,
+          18,
+          23,
+          14,
+          11,
+          19
+        ]
+      },
+      "sourceCount": 16,
+      "lastRunAt": "2026-05-16T05:00:00.000Z",
+      "nextRunAt": "2026-05-16T08:00:00.000Z",
+      "createdAt": "2026-04-12T10:00:00.000Z",
+      "updatedAt": "2026-05-16T05:00:00.000Z"
+    },
+    {
+      "id": "wkr-apple-music",
+      "name": "Apple Music Worker",
+      "platform": "apple_music",
+      "category": "music",
+      "description": "iTunes Search API (public) + Apple Music charts. Volá Apple Music Gateway, soft throttle 20 req/min.",
+      "enabled": true,
+      "status": "idle",
+      "health": "green",
+      "config": {
+        "id": "wkr-apple-music",
+        "name": "Apple Music Worker",
+        "platform": "apple_music",
+        "enabled": true,
+        "scheduleCron": "0 */3 * * *",
+        "rateLimitPerSecond": 0.33,
+        "config": {
+          "countries": [
+            "us",
+            "gb",
+            "de",
+            "fr",
+            "it",
+            "es",
+            "pl",
+            "cz"
+          ]
+        },
+        "gatewayId": "apple_music_gateway"
+      },
+      "kpi": {
+        "itemsToday": 19,
+        "itemsWeek": 138,
+        "errorsToday": 0,
+        "latencyP95Ms": 580,
+        "spark7d": [
+          12,
+          18,
+          22,
+          25,
+          18,
+          24,
+          19
+        ]
+      },
+      "sourceCount": 28,
+      "lastRunAt": "2026-05-16T05:00:00.000Z",
+      "nextRunAt": "2026-05-16T08:00:00.000Z",
+      "createdAt": "2026-04-12T10:00:00.000Z",
+      "updatedAt": "2026-05-16T05:00:00.000Z"
+    },
+    {
+      "id": "wkr-deezer",
+      "name": "Deezer Worker",
+      "platform": "deezer",
+      "category": "music",
+      "description": "Deezer public API — artist tracking + new releases. Bez auth, 50 req/5s soft limit.",
+      "enabled": true,
+      "status": "idle",
+      "health": "green",
+      "config": {
+        "id": "wkr-deezer",
+        "name": "Deezer Worker",
+        "platform": "deezer",
+        "enabled": true,
+        "scheduleCron": "0 */4 * * *",
+        "rateLimitPerSecond": 10,
+        "config": {
+          "locale": "en_US"
+        },
+        "gatewayId": "deezer_gateway"
+      },
+      "kpi": {
+        "itemsToday": 8,
+        "itemsWeek": 54,
+        "errorsToday": 0,
+        "latencyP95Ms": 510,
+        "spark7d": [
+          6,
+          8,
+          11,
+          9,
+          7,
+          5,
+          8
+        ]
+      },
+      "sourceCount": 14,
+      "lastRunAt": "2026-05-16T04:00:00.000Z",
+      "nextRunAt": "2026-05-16T08:00:00.000Z",
+      "createdAt": "2026-04-12T10:00:00.000Z",
+      "updatedAt": "2026-05-16T04:00:00.000Z"
+    },
+    {
+      "id": "wkr-instagram",
+      "name": "Instagram Worker",
+      "platform": "instagram",
+      "category": "social",
+      "description": "Graph API — profile posts + story announcements. Vyžaduje Meta Business approval. Šedý stav dokud schvalovací proces neproběhne.",
+      "enabled": false,
+      "status": "auth_pending",
+      "health": "amber",
+      "config": {
+        "id": "wkr-instagram",
+        "name": "Instagram Worker",
+        "platform": "instagram",
+        "enabled": false,
+        "scheduleCron": "0 */2 * * *",
+        "rateLimitPerSecond": 0.05,
+        "config": {
+          "fields": "id,caption,media_url,permalink,timestamp"
+        },
+        "secretRef": "env:META_GRAPH_TOKEN",
+        "gatewayId": "instagram_gateway"
+      },
+      "kpi": {
+        "itemsToday": 0,
+        "itemsWeek": 0,
+        "errorsToday": 0,
+        "latencyP95Ms": 0,
+        "spark7d": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "sourceCount": 0,
+      "blockerNote": "Meta Business verification pending (žádost vyplněna). Worker scaffold ready — switch enabled=true až po approval.",
+      "createdAt": "2026-05-16T10:00:00.000Z",
+      "updatedAt": "2026-05-16T10:00:00.000Z"
+    },
+    {
+      "id": "wkr-tiktok",
+      "name": "TikTok Worker",
+      "platform": "tiktok",
+      "category": "social",
+      "description": "TikTok for Developers — creator posts + trending sounds. Vyžaduje TikTok Business approval.",
+      "enabled": false,
+      "status": "auth_pending",
+      "health": "amber",
+      "config": {
+        "id": "wkr-tiktok",
+        "name": "TikTok Worker",
+        "platform": "tiktok",
+        "enabled": false,
+        "scheduleCron": "0 */2 * * *",
+        "rateLimitPerSecond": 1,
+        "config": {
+          "fields": "id,desc,create_time,share_url,music"
+        },
+        "secretRef": "env:TIKTOK_CLIENT_KEY",
+        "gatewayId": "tiktok_gateway"
+      },
+      "kpi": {
+        "itemsToday": 0,
+        "itemsWeek": 0,
+        "errorsToday": 0,
+        "latencyP95Ms": 0,
+        "spark7d": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "sourceCount": 0,
+      "blockerNote": "TikTok Business Center verification pending. Worker scaffold ready.",
+      "createdAt": "2026-05-16T10:00:00.000Z",
+      "updatedAt": "2026-05-16T10:00:00.000Z"
+    },
+    {
+      "id": "wkr-youtube",
+      "name": "YouTube Worker",
+      "platform": "youtube",
+      "category": "social",
+      "description": "Channel uploads + trending music + Topic channels (audio drops). Volá YouTube Gateway, 10k units/day quota.",
+      "enabled": true,
+      "status": "idle",
+      "health": "amber",
+      "config": {
+        "id": "wkr-youtube",
+        "name": "YouTube Worker",
+        "platform": "youtube",
+        "enabled": true,
+        "scheduleCron": "0 */4 * * *",
+        "rateLimitPerSecond": 5,
+        "config": {
+          "regionCode": "EU",
+          "videoCategoryId": 10,
+          "include_topic_channels": true
+        },
+        "secretRef": "env:YOUTUBE_API_KEY",
+        "gatewayId": "youtube_gateway"
+      },
+      "kpi": {
+        "itemsToday": 54,
+        "itemsWeek": 388,
+        "errorsToday": 1,
+        "latencyP95Ms": 720,
+        "spark7d": [
+          42,
+          55,
+          62,
+          48,
+          39,
+          58,
+          54
+        ]
+      },
+      "quota": {
+        "limit": 10000,
+        "used": 6240,
+        "sharePct": 100,
+        "workerUsed": 6240,
+        "poolKey": "youtube_data_api_v3",
+        "resetsAtUtc": "2026-05-17T00:00:00.000Z"
+      },
+      "sourceCount": 78,
+      "lastRunAt": "2026-05-16T04:30:00.000Z",
+      "nextRunAt": "2026-05-16T08:30:00.000Z",
+      "lastError": "Quota usage at 62 % — pacing OK",
+      "createdAt": "2026-04-12T10:00:00.000Z",
+      "updatedAt": "2026-05-16T04:30:00.000Z"
+    },
+    {
+      "id": "wkr-rss",
+      "name": "RSS Worker",
+      "platform": "rss",
+      "category": "media",
+      "description": "123+ RSS feedů v 17 jazycích. Volá RSS Gateway (sdílený s blogs + magazines), per-host throttle 1 req/s.",
+      "enabled": true,
+      "status": "running",
+      "health": "green",
+      "config": {
+        "id": "wkr-rss",
+        "name": "RSS Worker",
+        "platform": "rss",
+        "enabled": true,
+        "scheduleCron": "*/15 * * * *",
+        "rateLimitPerSecond": 1,
+        "config": {
+          "host_throttle_ms": 1000,
+          "feed_timeout_ms": 8000
+        },
+        "gatewayId": "rss_gateway"
+      },
+      "kpi": {
+        "itemsToday": 312,
+        "itemsWeek": 2104,
+        "errorsToday": 4,
+        "latencyP95Ms": 1850,
+        "spark7d": [
+          285,
+          301,
+          298,
+          322,
+          276,
+          310,
+          312
+        ]
+      },
+      "sourceCount": 123,
+      "lastRunAt": "2026-05-16T07:00:00.000Z",
+      "nextRunAt": "2026-05-16T07:15:00.000Z",
+      "createdAt": "2026-04-12T10:00:00.000Z",
+      "updatedAt": "2026-05-16T07:00:00.000Z"
+    },
+    {
+      "id": "wkr-blogs",
+      "name": "Blogs Worker",
+      "platform": "blogs",
+      "category": "media",
+      "description": "Music blogs bez RSS — fetch + parse přes Web Gateway. Hot New Hip Hop, On the Rise, indie blogs.",
+      "enabled": true,
+      "status": "idle",
+      "health": "green",
+      "config": {
+        "id": "wkr-blogs",
+        "name": "Blogs Worker",
+        "platform": "blogs",
+        "enabled": true,
+        "scheduleCron": "0 */1 * * *",
+        "rateLimitPerSecond": 0.5,
+        "config": {
+          "user_agent": "HotDroppZ-Scout/1.0",
+          "respect_robots": true
+        },
+        "gatewayId": "web_gateway"
+      },
+      "kpi": {
+        "itemsToday": 42,
+        "itemsWeek": 280,
+        "errorsToday": 1,
+        "latencyP95Ms": 2100,
+        "spark7d": [
+          38,
+          45,
+          41,
+          39,
+          48,
+          35,
+          42
+        ]
+      },
+      "sourceCount": 22,
+      "lastRunAt": "2026-05-16T06:30:00.000Z",
+      "nextRunAt": "2026-05-16T07:30:00.000Z",
+      "createdAt": "2026-04-12T10:00:00.000Z",
+      "updatedAt": "2026-05-16T06:30:00.000Z"
+    },
+    {
+      "id": "wkr-magazines",
+      "name": "Magazines Worker",
+      "platform": "magazines",
+      "category": "media",
+      "description": "Pitchfork, Rolling Stone, Complex, FADER — editorial reviews + features. Sdílí RSS+Web Gateway.",
+      "enabled": true,
+      "status": "idle",
+      "health": "green",
+      "config": {
+        "id": "wkr-magazines",
+        "name": "Magazines Worker",
+        "platform": "magazines",
+        "enabled": true,
+        "scheduleCron": "0 */2 * * *",
+        "rateLimitPerSecond": 0.5,
+        "config": {
+          "categories": [
+            "reviews",
+            "features",
+            "news"
+          ]
+        },
+        "gatewayId": "web_gateway"
+      },
+      "kpi": {
+        "itemsToday": 28,
+        "itemsWeek": 192,
+        "errorsToday": 0,
+        "latencyP95Ms": 1650,
+        "spark7d": [
+          22,
+          31,
+          28,
+          25,
+          32,
+          24,
+          28
+        ]
+      },
+      "sourceCount": 18,
+      "lastRunAt": "2026-05-16T06:00:00.000Z",
+      "nextRunAt": "2026-05-16T08:00:00.000Z",
+      "createdAt": "2026-04-12T10:00:00.000Z",
+      "updatedAt": "2026-05-16T06:00:00.000Z"
+    },
+    {
+      "id": "wkr-charts",
+      "name": "Charts Worker",
+      "platform": "charts",
+      "category": "signals",
+      "description": "Cross-platform chart aggregator — Spotify Top 50 (per region) + iTunes Top RSS + Official Charts UK/DE/FR. Rank shift detection.",
+      "enabled": true,
+      "status": "idle",
+      "health": "green",
+      "config": {
+        "id": "wkr-charts",
+        "name": "Charts Worker",
+        "platform": "charts",
+        "enabled": true,
+        "scheduleCron": "0 */6 * * *",
+        "rateLimitPerSecond": 2,
+        "config": {
+          "rank_shift_threshold": 5,
+          "sources": [
+            "spotify_top",
+            "itunes_top",
+            "official_charts_uk",
+            "official_charts_de"
+          ]
+        },
+        "gatewayId": "charts_gateway"
+      },
+      "kpi": {
+        "itemsToday": 14,
+        "itemsWeek": 96,
+        "errorsToday": 0,
+        "latencyP95Ms": 950,
+        "spark7d": [
+          12,
+          15,
+          14,
+          18,
+          11,
+          12,
+          14
+        ]
+      },
+      "sourceCount": 14,
+      "lastRunAt": "2026-05-16T06:00:00.000Z",
+      "nextRunAt": "2026-05-16T12:00:00.000Z",
+      "createdAt": "2026-04-12T10:00:00.000Z",
+      "updatedAt": "2026-05-16T06:00:00.000Z"
+    },
+    {
+      "id": "wkr-trends",
+      "name": "Trends Worker",
+      "platform": "trends",
+      "category": "signals",
+      "description": "Attention waves — Google Trends RSS, TikTok hashtag tracking, podcasts mentions. Heuristic search-volume spike detection.",
+      "enabled": true,
+      "status": "idle",
+      "health": "green",
+      "config": {
+        "id": "wkr-trends",
+        "name": "Trends Worker",
+        "platform": "trends",
+        "enabled": true,
+        "scheduleCron": "0 */6 * * *",
+        "rateLimitPerSecond": 1,
+        "config": {
+          "regions": [
+            "US",
+            "GB",
+            "DE",
+            "FR",
+            "CZ"
+          ],
+          "min_spike_pct": 50
+        },
+        "gatewayId": "trends_gateway"
+      },
+      "kpi": {
+        "itemsToday": 11,
+        "itemsWeek": 78,
+        "errorsToday": 0,
+        "latencyP95Ms": 1100,
+        "spark7d": [
+          9,
+          14,
+          11,
+          10,
+          13,
+          8,
+          11
+        ]
+      },
+      "sourceCount": 9,
+      "lastRunAt": "2026-05-16T06:00:00.000Z",
+      "nextRunAt": "2026-05-16T12:00:00.000Z",
+      "createdAt": "2026-04-12T10:00:00.000Z",
+      "updatedAt": "2026-05-16T06:00:00.000Z"
+    }
+  ],
+  "sources": [
+    {
+      "id": "src-spp-1",
+      "workerId": "wkr-spotify-playlists",
+      "platform": "spotify_playlists",
+      "name": "Spotify Top 50 — Global",
+      "handle": "playlist:37i9dQZEVXbMDoHDwVN2tF",
+      "scheduleCron": "0 */4 * * *",
+      "lastRunAt": "2026-05-16T04:00:00.000Z",
+      "lastItemsFound": 12,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-spp-2",
+      "workerId": "wkr-spotify-playlists",
+      "platform": "spotify_playlists",
+      "name": "Spotify Top 50 — USA",
+      "handle": "playlist:37i9dQZEVXbLRQDuF5jeBp",
+      "scheduleCron": "0 */4 * * *",
+      "lastRunAt": "2026-05-16T04:00:00.000Z",
+      "lastItemsFound": 8,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-spp-3",
+      "workerId": "wkr-spotify-playlists",
+      "platform": "spotify_playlists",
+      "name": "Spotify Top 50 — UK",
+      "handle": "playlist:37i9dQZEVXbLnolsZ8PSNw",
+      "scheduleCron": "0 */4 * * *",
+      "lastRunAt": "2026-05-16T04:00:00.000Z",
+      "lastItemsFound": 5,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-spp-4",
+      "workerId": "wkr-spotify-playlists",
+      "platform": "spotify_playlists",
+      "name": "RapCaviar",
+      "handle": "playlist:37i9dQZF1DX0XUsuxWHRQd",
+      "scheduleCron": "0 */4 * * *",
+      "lastRunAt": "2026-05-16T04:00:00.000Z",
+      "lastItemsFound": 3,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-spa-1",
+      "workerId": "wkr-spotify-artists",
+      "platform": "spotify_artists",
+      "name": "Drake (AIL)",
+      "handle": "3TVXtAsR1Inumwj472S9r4",
+      "scheduleCron": "0 */3 * * *",
+      "lastRunAt": "2026-05-16T05:00:00.000Z",
+      "lastItemsFound": 2,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-spa-2",
+      "workerId": "wkr-spotify-artists",
+      "platform": "spotify_artists",
+      "name": "Travis Scott (AIL)",
+      "handle": "0Y5tJX1MQlPlqiwlOH1tJY",
+      "scheduleCron": "0 */3 * * *",
+      "lastRunAt": "2026-05-16T05:00:00.000Z",
+      "lastItemsFound": 0,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-spa-3",
+      "workerId": "wkr-spotify-artists",
+      "platform": "spotify_artists",
+      "name": "Kendrick Lamar (AIL)",
+      "handle": "2YZyLoL8N0Wb9xBt1NhZWg",
+      "scheduleCron": "0 */3 * * *",
+      "lastRunAt": "2026-05-16T05:00:00.000Z",
+      "lastItemsFound": 0,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-spa-4",
+      "workerId": "wkr-spotify-artists",
+      "platform": "spotify_artists",
+      "name": "Yzomandias (AIL — CZ)",
+      "handle": "5fk9R8XCY8KyA8M6KJpvgU",
+      "scheduleCron": "0 */3 * * *",
+      "lastRunAt": "2026-05-16T05:00:00.000Z",
+      "lastItemsFound": 1,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-am-1",
+      "workerId": "wkr-apple-music",
+      "platform": "apple_music",
+      "name": "Apple Music Top 100 — US",
+      "handle": "rss:apple-most-played:us",
+      "scheduleCron": "0 */6 * * *",
+      "lastRunAt": "2026-05-16T06:00:00.000Z",
+      "lastItemsFound": 4,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-am-2",
+      "workerId": "wkr-apple-music",
+      "platform": "apple_music",
+      "name": "Drake (Apple Music)",
+      "handle": "apple:271256",
+      "scheduleCron": "0 */3 * * *",
+      "lastRunAt": "2026-05-16T05:00:00.000Z",
+      "lastItemsFound": 1,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-dz-1",
+      "workerId": "wkr-deezer",
+      "platform": "deezer",
+      "name": "Deezer Top Tracks — FR",
+      "handle": "deezer:chart:0",
+      "scheduleCron": "0 */4 * * *",
+      "lastRunAt": "2026-05-16T04:00:00.000Z",
+      "lastItemsFound": 3,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-dz-2",
+      "workerId": "wkr-deezer",
+      "platform": "deezer",
+      "name": "Booba (Deezer)",
+      "handle": "deezer:artist:5078",
+      "scheduleCron": "0 */4 * * *",
+      "lastRunAt": "2026-05-16T04:00:00.000Z",
+      "lastItemsFound": 0,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-yt-1",
+      "workerId": "wkr-youtube",
+      "platform": "youtube",
+      "name": "DrakeOfficial",
+      "handle": "UCByOQJjav0CUDwxCk-jVNRQ",
+      "scheduleCron": "0 */5 * * *",
+      "lastRunAt": "2026-05-16T04:30:00.000Z",
+      "lastItemsFound": 1,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-yt-2",
+      "workerId": "wkr-youtube",
+      "platform": "youtube",
+      "name": "Drake - Topic (YT Music)",
+      "handle": "UCQHX6ViZmPsWiYSFAyS0a3Q",
+      "scheduleCron": "0 */2 * * *",
+      "lastRunAt": "2026-05-16T06:00:00.000Z",
+      "lastItemsFound": 2,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-yt-3",
+      "workerId": "wkr-youtube",
+      "platform": "youtube",
+      "name": "Trending Music — US",
+      "handle": "trending:US:10",
+      "scheduleCron": "0 */6 * * *",
+      "lastRunAt": "2026-05-16T06:00:00.000Z",
+      "lastItemsFound": 3,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-rss-1",
+      "workerId": "wkr-rss",
+      "platform": "rss",
+      "name": "Pitchfork",
+      "handle": "https://pitchfork.com/rss/news/",
+      "scheduleCron": "*/15 * * * *",
+      "lastRunAt": "2026-05-16T07:00:00.000Z",
+      "lastItemsFound": 5,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-rss-2",
+      "workerId": "wkr-rss",
+      "platform": "rss",
+      "name": "Hip-Hop DX",
+      "handle": "https://hiphopdx.com/rss/news",
+      "scheduleCron": "*/15 * * * *",
+      "lastRunAt": "2026-05-16T07:00:00.000Z",
+      "lastItemsFound": 8,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-rss-3",
+      "workerId": "wkr-rss",
+      "platform": "rss",
+      "name": "Hot New Hip Hop",
+      "handle": "https://www.hotnewhiphop.com/rss/",
+      "scheduleCron": "*/15 * * * *",
+      "lastRunAt": "2026-05-16T07:00:00.000Z",
+      "lastItemsFound": 11,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-rss-4",
+      "workerId": "wkr-rss",
+      "platform": "rss",
+      "name": "Refresher (CZ)",
+      "handle": "https://refresher.cz/rss",
+      "scheduleCron": "*/15 * * * *",
+      "lastRunAt": "2026-05-16T07:00:00.000Z",
+      "lastItemsFound": 3,
+      "status": "active",
+      "errorCount": 1,
+      "lastError": "timeout 8s",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-bl-1",
+      "workerId": "wkr-blogs",
+      "platform": "blogs",
+      "name": "Stereogum",
+      "handle": "https://www.stereogum.com/",
+      "scheduleCron": "0 */1 * * *",
+      "lastRunAt": "2026-05-16T06:30:00.000Z",
+      "lastItemsFound": 6,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-bl-2",
+      "workerId": "wkr-blogs",
+      "platform": "blogs",
+      "name": "Lyrical Lemonade",
+      "handle": "https://lyricallemonade.com/",
+      "scheduleCron": "0 */1 * * *",
+      "lastRunAt": "2026-05-16T06:30:00.000Z",
+      "lastItemsFound": 4,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-mg-1",
+      "workerId": "wkr-magazines",
+      "platform": "magazines",
+      "name": "Pitchfork — reviews",
+      "handle": "https://pitchfork.com/reviews/",
+      "scheduleCron": "0 */2 * * *",
+      "lastRunAt": "2026-05-16T06:00:00.000Z",
+      "lastItemsFound": 3,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-mg-2",
+      "workerId": "wkr-magazines",
+      "platform": "magazines",
+      "name": "FADER",
+      "handle": "https://www.thefader.com/",
+      "scheduleCron": "0 */2 * * *",
+      "lastRunAt": "2026-05-16T06:00:00.000Z",
+      "lastItemsFound": 4,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-mg-3",
+      "workerId": "wkr-magazines",
+      "platform": "magazines",
+      "name": "Complex Music",
+      "handle": "https://www.complex.com/music",
+      "scheduleCron": "0 */2 * * *",
+      "lastRunAt": "2026-05-16T06:00:00.000Z",
+      "lastItemsFound": 5,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-ch-1",
+      "workerId": "wkr-charts",
+      "platform": "charts",
+      "name": "Spotify Top 50 — Global rank",
+      "handle": "spotify:playlist:37i9dQZEVXbMDoHDwVN2tF",
+      "scheduleCron": "0 */6 * * *",
+      "lastRunAt": "2026-05-16T06:00:00.000Z",
+      "lastItemsFound": 4,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-ch-2",
+      "workerId": "wkr-charts",
+      "platform": "charts",
+      "name": "Official UK Charts (RSS)",
+      "handle": "https://www.officialcharts.com/charts/feeds/",
+      "scheduleCron": "0 0 */1 * *",
+      "lastRunAt": "2026-05-16T00:00:00.000Z",
+      "lastItemsFound": 5,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-tr-1",
+      "workerId": "wkr-trends",
+      "platform": "trends",
+      "name": "Google Trends — Music US",
+      "handle": "trends:google:music:US",
+      "scheduleCron": "0 */6 * * *",
+      "lastRunAt": "2026-05-16T06:00:00.000Z",
+      "lastItemsFound": 4,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "id": "src-tr-2",
+      "workerId": "wkr-trends",
+      "platform": "trends",
+      "name": "TikTok hashtags rising",
+      "handle": "trends:tiktok:rising:music",
+      "scheduleCron": "0 */6 * * *",
+      "lastRunAt": "2026-05-16T06:00:00.000Z",
+      "lastItemsFound": 7,
+      "status": "active",
+      "createdAt": "2026-04-12T10:00:00.000Z"
+    }
+  ],
+  "recentRuns": [
+    {
+      "id": "run-001",
+      "workerId": "wkr-rss",
+      "startedAt": "2026-05-16T07:00:00.000Z",
+      "endedAt": "2026-05-16T07:01:32.000Z",
+      "status": "done",
+      "itemsFound": 312,
+      "itemsInserted": 287,
+      "itemsSkipped": 25,
+      "durationMs": 92000,
+      "errors": [],
+      "triggeredBy": "cron"
+    },
+    {
+      "id": "run-002",
+      "workerId": "wkr-blogs",
+      "startedAt": "2026-05-16T06:30:00.000Z",
+      "endedAt": "2026-05-16T06:31:48.000Z",
+      "status": "done",
+      "itemsFound": 42,
+      "itemsInserted": 41,
+      "itemsSkipped": 1,
+      "durationMs": 108000,
+      "errors": [],
+      "triggeredBy": "cron"
+    },
+    {
+      "id": "run-003a",
+      "workerId": "wkr-spotify-playlists",
+      "startedAt": "2026-05-16T04:00:00.000Z",
+      "endedAt": "2026-05-16T04:01:14.000Z",
+      "status": "done",
+      "itemsFound": 28,
+      "itemsInserted": 24,
+      "itemsSkipped": 4,
+      "durationMs": 74000,
+      "errors": [],
+      "triggeredBy": "cron"
+    },
+    {
+      "id": "run-003b",
+      "workerId": "wkr-spotify-artists",
+      "startedAt": "2026-05-16T05:00:00.000Z",
+      "endedAt": "2026-05-16T05:00:57.000Z",
+      "status": "done",
+      "itemsFound": 19,
+      "itemsInserted": 17,
+      "itemsSkipped": 2,
+      "durationMs": 57000,
+      "errors": [],
+      "triggeredBy": "cron"
+    },
+    {
+      "id": "run-004",
+      "workerId": "wkr-charts",
+      "startedAt": "2026-05-16T06:00:00.000Z",
+      "endedAt": "2026-05-16T06:01:05.000Z",
+      "status": "done",
+      "itemsFound": 14,
+      "itemsInserted": 14,
+      "itemsSkipped": 0,
+      "durationMs": 65000,
+      "errors": [],
+      "triggeredBy": "cron"
+    },
+    {
+      "id": "run-005",
+      "workerId": "wkr-youtube",
+      "startedAt": "2026-05-16T04:30:00.000Z",
+      "endedAt": "2026-05-16T04:32:14.000Z",
+      "status": "done",
+      "itemsFound": 54,
+      "itemsInserted": 51,
+      "itemsSkipped": 3,
+      "durationMs": 134000,
+      "quotaUsed": 412,
+      "errors": [
+        {
+          "code": "RATE_LIMIT",
+          "message": "Spent 412 units (quota usage now 62 %)"
+        }
+      ],
+      "triggeredBy": "cron"
+    },
+    {
+      "id": "run-006",
+      "workerId": "wkr-apple-music",
+      "startedAt": "2026-05-16T05:00:00.000Z",
+      "endedAt": "2026-05-16T05:00:55.000Z",
+      "status": "done",
+      "itemsFound": 19,
+      "itemsInserted": 19,
+      "itemsSkipped": 0,
+      "durationMs": 55000,
+      "errors": [],
+      "triggeredBy": "cron"
+    },
+    {
+      "id": "run-007",
+      "workerId": "wkr-deezer",
+      "startedAt": "2026-05-16T04:00:00.000Z",
+      "endedAt": "2026-05-16T04:00:48.000Z",
+      "status": "done",
+      "itemsFound": 8,
+      "itemsInserted": 8,
+      "itemsSkipped": 0,
+      "durationMs": 48000,
+      "errors": [],
+      "triggeredBy": "cron"
+    },
+    {
+      "id": "run-008",
+      "workerId": "wkr-magazines",
+      "startedAt": "2026-05-16T06:00:00.000Z",
+      "endedAt": "2026-05-16T06:01:34.000Z",
+      "status": "done",
+      "itemsFound": 28,
+      "itemsInserted": 28,
+      "itemsSkipped": 0,
+      "durationMs": 94000,
+      "errors": [],
+      "triggeredBy": "cron"
+    },
+    {
+      "id": "run-009",
+      "workerId": "wkr-trends",
+      "startedAt": "2026-05-16T06:00:00.000Z",
+      "endedAt": "2026-05-16T06:00:22.000Z",
+      "status": "done",
+      "itemsFound": 11,
+      "itemsInserted": 11,
+      "itemsSkipped": 0,
+      "durationMs": 22000,
+      "errors": [],
+      "triggeredBy": "cron"
+    }
+  ]
+}

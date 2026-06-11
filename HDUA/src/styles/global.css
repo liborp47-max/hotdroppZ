@@ -1,0 +1,118 @@
+/* Web-only global styles (ignored on native by Expo). Without a full-height
+ * html/body/#root chain, React-Native-Web flex:1 collapses and lists can't
+ * scroll. This gives the app a bounded viewport height so FlashList/ScrollView
+ * scroll internally. */
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #000000;
+  overflow: hidden; /* app scrolls inside its own lists, not the page */
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------------------------------------------------------------------------
+ * iPhone device frame (web only). On anything wider than a phone we center the
+ * app inside an iPhone-sized bezel with Dynamic Island + home indicator, so the
+ * web build reads as a real handset instead of a stretched desktop page.
+ * Below 480px (actual phones / narrow windows) the app stays full-bleed.
+ * ------------------------------------------------------------------------- */
+@media (min-width: 480px) {
+  body {
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #1a1a1d 0%, #050506 60%, #000 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+  }
+
+  #root {
+    /* iPhone 15 / 14 logical resolution */
+    flex: none;
+    width: 393px;
+    height: 852px;
+    max-height: calc(100vh - 48px);
+    box-sizing: border-box;
+    /* reserve status-bar (Dynamic Island) + home-indicator safe areas */
+    padding-top: 50px;
+    padding-bottom: 24px;
+    border-radius: 52px;
+    overflow: hidden;
+    background-color: #000000;
+    position: relative;
+    box-shadow:
+      0 0 0 2px #3a3a3c,            /* outer titanium rim */
+      0 0 0 13px #0c0c0d,           /* black bezel */
+      0 0 0 15px #2a2a2c,           /* side button band */
+      0 26px 60px rgba(0, 0, 0, 0.65),
+      0 6px 18px rgba(0, 0, 0, 0.45);
+  }
+
+  /* Dynamic Island */
+  #root::before {
+    content: '';
+    position: absolute;
+    top: 13px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 118px;
+    height: 33px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 2147483647;
+    pointer-events: none;
+  }
+
+  /* Home indicator */
+  #root::after {
+    content: '';
+    position: absolute;
+    bottom: 9px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 134px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 999px;
+    z-index: 2147483647;
+    pointer-events: none;
+  }
+}
+
+/* Venom scrolling bar — thin, glowing, HDCC-matched. */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #1aee99 0%, #00e085 55%, #00b870 100%);
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 8px rgba(0, 224, 133, 0.55);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #1aee99;
+  box-shadow: 0 0 12px rgba(0, 224, 133, 0.8);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #00e085 rgba(255, 255, 255, 0.04);
+}

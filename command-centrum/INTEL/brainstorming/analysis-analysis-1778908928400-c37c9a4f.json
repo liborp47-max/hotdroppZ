@@ -1,0 +1,167 @@
+{
+  "id": "analysis-1778908928400-c37c9a4f",
+  "brainstormingItemId": "improvement-1778908923162-12e63608",
+  "sourceIdea": "Improve Hd central / Ceo / Missions",
+  "categories": [
+    {
+      "id": "goals",
+      "title": "Cile",
+      "points": [
+        {
+          "id": "improvement-1778908923162-12e63608-goals-mission-alignment",
+          "category": "goals",
+          "label": "Mission alignment",
+          "description": "Keep the change tied to CEO goals, current plan and measurable system impact.",
+          "impact": "P0",
+          "recommended": true
+        },
+        {
+          "id": "improvement-1778908923162-12e63608-goals-section-objective",
+          "category": "goals",
+          "label": "Section objective",
+          "description": "Define exactly what Hd central / Ceo / Missions should do better after the upgrade.",
+          "impact": "P0",
+          "recommended": true
+        }
+      ]
+    },
+    {
+      "id": "features",
+      "title": "Funkce",
+      "points": [
+        {
+          "id": "improvement-1778908923162-12e63608-features-improvement-trigger",
+          "category": "features",
+          "label": "Improvement trigger",
+          "description": "Preserve the arrow-up trigger and make the generated proposal visible in the brainstorming backlog.",
+          "impact": "P0",
+          "recommended": true
+        },
+        {
+          "id": "improvement-1778908923162-12e63608-features-prompt-linkage",
+          "category": "features",
+          "label": "Prompt linkage",
+          "description": "Attach the generated prompt to the original brainstorming item with a visible P action.",
+          "impact": "P0",
+          "recommended": true
+        },
+        {
+          "id": "improvement-1778908923162-12e63608-features-status-workflow",
+          "category": "features",
+          "label": "Status workflow",
+          "description": "Support open, selected, in progress, done and archived states for improvement ideas.",
+          "impact": "P1",
+          "recommended": false
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "title": "Data",
+      "points": [
+        {
+          "id": "improvement-1778908923162-12e63608-data-structured-artifact",
+          "category": "data",
+          "label": "Structured artifact",
+          "description": "Save title, source section, current state, problems, ideas, impact, tools, agents, steps, priority and status.",
+          "impact": "P0",
+          "recommended": true
+        },
+        {
+          "id": "improvement-1778908923162-12e63608-data-intel-storage",
+          "category": "data",
+          "label": "Intel storage",
+          "description": "Persist analysis selections in INTEL / brainstorming and final prompts in INTEL / brainstorming / prompts.",
+          "impact": "P0",
+          "recommended": true
+        },
+        {
+          "id": "improvement-1778908923162-12e63608-data-traceability",
+          "category": "data",
+          "label": "Traceability",
+          "description": "Keep stable IDs between source idea, analysis, selected points and generated prompt.",
+          "impact": "P1",
+          "recommended": false
+        }
+      ]
+    },
+    {
+      "id": "ux",
+      "title": "UI / UX",
+      "points": [
+        {
+          "id": "improvement-1778908923162-12e63608-ux-popup-tabs",
+          "category": "ux",
+          "label": "Popup tabs",
+          "description": "Use a compact tabbed popup with checkbox groups for goals, features, data, UX, risks and implementation.",
+          "impact": "P1",
+          "recommended": true
+        },
+        {
+          "id": "improvement-1778908923162-12e63608-ux-copy-action",
+          "category": "ux",
+          "label": "Copy action",
+          "description": "Expose a copy button next to the final prompt so it can be reused instantly.",
+          "impact": "P1",
+          "recommended": true
+        }
+      ]
+    },
+    {
+      "id": "risks",
+      "title": "Rizika",
+      "points": [
+        {
+          "id": "improvement-1778908923162-12e63608-risks-scope-control",
+          "category": "risks",
+          "label": "Scope control",
+          "description": "Avoid broad redesign and keep the change inside existing architecture and UI patterns.",
+          "impact": "P0",
+          "recommended": true
+        },
+        {
+          "id": "improvement-1778908923162-12e63608-risks-missing-data-fallback",
+          "category": "risks",
+          "label": "Missing data fallback",
+          "description": "If live data is incomplete, mark assumptions and still produce a safe interim prompt.",
+          "impact": "P1",
+          "recommended": false
+        }
+      ]
+    },
+    {
+      "id": "implementation",
+      "title": "Implementace",
+      "points": [
+        {
+          "id": "improvement-1778908923162-12e63608-implementation-api-routes",
+          "category": "implementation",
+          "label": "API routes",
+          "description": "Add server endpoints for listing proposals, creating analyses, saving selections and generating prompts.",
+          "impact": "P1",
+          "recommended": true
+        },
+        {
+          "id": "improvement-1778908923162-12e63608-implementation-client-refresh",
+          "category": "implementation",
+          "label": "Client refresh",
+          "description": "Refresh the listing after every analysis, prompt creation or status update.",
+          "impact": "P2",
+          "recommended": false
+        },
+        {
+          "id": "improvement-1778908923162-12e63608-implementation-verification",
+          "category": "implementation",
+          "label": "Verification",
+          "description": "Run lint or build after implementation and document any blocker.",
+          "impact": "P1",
+          "recommended": true
+        }
+      ]
+    }
+  ],
+  "createdByAgent": "BRAINSTORMING AGENT",
+  "createdAt": "2026-05-16T05:22:08.399Z",
+  "updatedAt": "2026-05-16T05:22:51.065Z",
+  "status": "prompt_created"
+}

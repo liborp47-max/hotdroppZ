@@ -1,0 +1,43 @@
+import type { PipelineStep } from './types'
+
+export const pipelineSeed: PipelineStep[] = [
+  {
+    id: 'intake',
+    name: 'Intake & Triage',
+    purpose: 'Zachytit vstup, validovat scope a stanovit prioritu.',
+    principle: 'Evidence first, no assumptions.',
+    aiPowered: true,
+    input: 'User request, logs, recent changes',
+    output: 'Normalized task and triage verdict',
+    rules: ['Deterministicky popis problému', 'Jedna priorita na task'],
+    settings: ['strict-validation=true', 'max-context=high'],
+    limits: ['Bez destruktivnich prikazu', 'Nezavadet neoverene fixy'],
+    health: 'GREEN',
+  },
+  {
+    id: 'analysis',
+    name: 'Hypothesis Matrix',
+    purpose: 'Vyhodnotit mozne priciny a testy pro falsifikaci.',
+    principle: 'Minimal cost checks first.',
+    aiPowered: true,
+    input: 'Baseline error, stack trace',
+    output: 'Ranked hypotheses + test plan',
+    rules: ['3-5 hypotez', 'Jasne falsifikacni kroky'],
+    settings: ['max-hypotheses=5', 'rank-by=likelihood'],
+    limits: ['Bez broad rewrites', 'Nezakryvat nejistotu'],
+    health: 'AMBER',
+  },
+  {
+    id: 'remediation',
+    name: 'Patch & Verify',
+    purpose: 'Nasadit minimalni fix a overit bez regresi.',
+    principle: 'Smallest safe change wins.',
+    aiPowered: true,
+    input: 'Validated root cause',
+    output: 'Patch, test output, residual risk',
+    rules: ['Fix pouze root cause', 'Run focused verification'],
+    settings: ['regression-check=adjacent-paths', 'observability=on'],
+    limits: ['Maximalne 3 pokusy fixu v souboru'],
+    health: 'GREEN',
+  },
+]

@@ -1,0 +1,56 @@
+{
+  "id": "improvement-1780446480751-d9cfb498",
+  "title": "Improve Monetization",
+  "sourceSection": "Monetization",
+  "route": "/monetization",
+  "currentState": [
+    "Monetization is reachable as a dashboard section and can now trigger a global improvement run.",
+    "System context has 54 dashboard page routes, 21 registered agent folders and 107 plan missions.",
+    "Latest plan update detected at 2026-06-03T00:16:47.469Z.",
+    "Captured UI snapshot: Monetization | Monetization0 active campaigns · 0 active slotsCampaignsNew CampaignNameClientBudgetStartEndStatusNo campaigns yet. Create your first one.Ad SlotsNew SlotPositionTypeCampaignStatusarticle-bottomnativeUnassignedOffarticle-bott..."
+  ],
+  "detectedProblems": [
+    "Monetization does not yet expose explicit success metrics, owner map and next-action checkpoints in one compact control surface.",
+    "Ideas can be created faster than they can be converted into validated implementation prompts.",
+    "Improvement decisions need a stable link between the source section, selected brainstorming points and final prompt artifact.",
+    "Audit context exists (7 recent files sampled), but section-level actions need clearer traceability back to CEO / Brainstorming."
+  ],
+  "improvementIdeas": [
+    "Add a compact Monetization improvement brief with current state, weak points, dependencies and measurable expected impact.",
+    "Convert every good idea into selectable brainstorming points before implementation so the CEO keeps control over scope.",
+    "Generate a ready-to-run prompt from selected points and attach it directly to the source idea.",
+    "Track status from open to selected, in progress, done or archived so the improvement backlog stays operational.",
+    "Keep all artifacts in INTEL / brainstorming so agents, CEO and future tools share one source of truth."
+  ],
+  "expectedImpact": [
+    "Faster conversion from vague idea to executable prompt.",
+    "Clearer CEO control over what gets selected, built and archived.",
+    "Better traceability between UI section, data artifact, agent output and final implementation prompt."
+  ],
+  "requiredTools": [
+    "Next.js dashboard UI",
+    "INTEL file storage",
+    "CEO / Brainstorming listing",
+    "Global agent registry",
+    "Existing Plan, Audit and Agent context"
+  ],
+  "suggestedAgents": [
+    "IMPROOVMENT MANAGER",
+    "BRAINSTORMING AGENT",
+    "CEO",
+    "System Architect",
+    "Prompt Engineer",
+    "QA / Testing"
+  ],
+  "implementationSteps": [
+    "Create or update the source section without redesigning unrelated pages.",
+    "Persist a structured improvement proposal in INTEL / brainstorming.",
+    "Run Brainstorming Agent analysis and let the user select concrete points.",
+    "Generate a final prompt connected to the original item.",
+    "Expose prompt open and copy actions in the brainstorming listing."
+  ],
+  "priority": "P2",
+  "createdAt": "2026-06-03T00:28:00.740Z",
+  "updatedAt": "2026-06-03T00:28:00.740Z",
+  "status": "open"
+}

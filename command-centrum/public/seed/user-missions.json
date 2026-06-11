@@ -1,0 +1,958 @@
+{
+  "source": "manual",
+  "actorAgent": "system-audit",
+  "upsert": true,
+  "missions": [
+    {
+      "moduleId": "SCOUT",
+      "moduleName": "Scout Operator (pipeline)",
+      "modulePath": "command-centrum/lib/pipeline/scout.ts, ai/agents/scout.py",
+      "purpose": "Skenuje RSS, Reddit a Twitter, identifikuje trendující příležitosti a vrací strukturovaný seznam scout items seřazený podle virality.",
+      "currentState": "Python agent (scout.py) je hotov, TypeScript wrapper v command-centrum je stub; RSS ingest není implementován.",
+      "goal": "Implementovat full Scout pipeline včetně RSS ingestu, dedupe a persistence raw scout items s idempotenčním klíčem.",
+      "priority": "P0",
+      "phase": "Foundation",
+      "estimatedComplexity": "L",
+      "domains": ["PIPELINE"],
+      "successCriteria": [
+        "RSS feeds načítány s timeout + retry policy",
+        "Žádný duplicate scout_item v DB",
+        "scout_runs zaznamenává itemsFound / itemsInserted / errorCount"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Implementovat RSS ingest + parser", "description": "Načíst aktivní RSS zdroje z DB/config, normalizovat do Scout item DTO včetně source metadata, per-source timeout + retry policy.", "owner": "backend-engineer", "estimatedDuration": "L" },
+        { "id": "02", "name": "Dedupe + persistence", "description": "Upsert raw scout items do scout_items s idempotenčním klíčem (source+url+published_at). Detekovat stuck items (>30 min v SCOUTED).", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Parametrizovat virality score → priority", "description": "Mapovat virality_score, urgency a content_potential z scout-python na HotDroppZ P0/P1/P2/P3 a category tagy.", "owner": "prompt-engineer", "estimatedDuration": "M" },
+        { "id": "04", "name": "Integration testy s RSS fixtures", "description": "3–5 reprezentativních RSS feedů, simulovat timeout/parse failure, validovat persistence bez hacků.", "owner": "qa", "estimatedDuration": "M" },
+        { "id": "05", "name": "Scout run metriky", "description": "Logovat itemsFound/itemsInserted/errorCount do scout_runs, alert pokud filter nemá co filtrovat (0 SCOUTED >5min).", "owner": "ai-pipeline", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "FILTER",
+      "moduleName": "Filter Operator (pipeline)",
+      "modulePath": "command-centrum/lib/pipeline/filter.ts",
+      "purpose": "Filtruje SCOUTED items podle pravidel (negativní keywords, off-topic, self-promo, duplicates) — zabrání plýtvání Groq API.",
+      "currentState": "Rule-based filter funguje, 40+ keywords, Reddit junk detection, music relevance guard; chybí A/B testování thresholdů.",
+      "goal": "Optimalizovat precision/recall, přidat ML-based scoring pro dark launches, dokumentovat false-positive rate.",
+      "priority": "P1",
+      "phase": "Validate",
+      "estimatedComplexity": "M",
+      "domains": ["PIPELINE", "QUALITY"],
+      "successCriteria": [
+        "A/B run baseline vs strict s metrikami",
+        "Filter rules editovatelné bez redeploy",
+        "False-positive rate < 5% (měřeno přes editorial recover akce)"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "A/B test keyword thresholds", "description": "Spustit 2 varianty filteru (baseline vs strict), měřit discard rate + downstream quality, ukládat variant_id pro analytics.", "owner": "qa", "estimatedDuration": "M" },
+        { "id": "02", "name": "Off-Topic + Self-Promo do DB", "description": "Migrovat OFF_TOPIC_KEYWORDS a SELF_PROMO_PATTERNS do filter_rules tabulky s versioningem, live edity bez redeploy.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Fallback scoring pro schválené zdroje", "description": "Whitelist věrohodných zdrojů (Genius, Spotify, Pitchfork) — bypass filtru pro P0/P1 releases.", "owner": "prompt-engineer", "estimatedDuration": "S" },
+        { "id": "04", "name": "Měřit false-positive rate", "description": "Feedback loop: editoři označí chybně discarded items, precision per keyword, měsíční review.", "owner": "analytics", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "TRANSLATOR",
+      "moduleName": "Translator (pipeline)",
+      "modulePath": "command-centrum/lib/pipeline/translator.ts",
+      "purpose": "Přeloží SCOUTED items z 8 jazyků do EN master copy — vstup pro Curator.",
+      "currentState": "Stub vracející originál; Groq integration pending; anglická master copy kritická pro downstream.",
+      "goal": "Implementovat skutečný překlad přes Groq llama-3.1-8b, cachovat master copy, validovat UTF-8.",
+      "priority": "P0",
+      "phase": "Build",
+      "estimatedComplexity": "M",
+      "domains": ["PIPELINE"],
+      "successCriteria": [
+        "english_master sloupec populated pro 100% TRANSLATED items",
+        "Per-item translation_confidence logované",
+        "Fallback na original při Groq failure"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Groq translation pro 8 jazyků", "description": "Volat Groq s TRANSLATOR_SYSTEM, batch mode (10 items/call), timeout 30s, fallback vrátit originál.", "owner": "backend-engineer", "estimatedDuration": "L" },
+        { "id": "02", "name": "Schema: english_master + language_detected", "description": "Migration ADD COLUMN english_master TEXT, language_detected na scout_items; backfill prázdné jako null.", "owner": "db-engineer", "estimatedDuration": "S" },
+        { "id": "03", "name": "Skip CZ/SK native", "description": "Pokud zdrojová řeč je CZ/SK, nepřekládat — copy do english_master s tagem; ušetřit Groq calls.", "owner": "prompt-engineer", "estimatedDuration": "S" },
+        { "id": "04", "name": "Quality check výstupu", "description": "Validovat min délka, absence placeholderů, entropy check; ukládat translation_confidence score.", "owner": "ai-validator", "estimatedDuration": "M" },
+        { "id": "05", "name": "Cache pro common expressions", "description": "Redis cache TTL 24h pro 100+ common hip-hop frází; snížit Groq load ~15%.", "owner": "performance", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "CURATOR",
+      "moduleName": "Curator (pipeline)",
+      "modulePath": "command-centrum/lib/pipeline/curator.ts",
+      "purpose": "Skóruje TRANSLATED items (0–20) — kategorie, klíčová slova, věrohodnost, recency.",
+      "currentState": "Rule-based scoring funguje, CATEGORY_WEIGHTS hardcoded, distribution enforcement. Chybí AI variant + A/B.",
+      "goal": "Přidat AI-based curator variant pro dark launch, kalibrovat thresholds, P0/P1 fast lane.",
+      "priority": "P1",
+      "phase": "Validate",
+      "estimatedComplexity": "M",
+      "domains": ["PIPELINE"],
+      "successCriteria": [
+        "attention_score_ai sloupec populated paralelně s rule-based",
+        "CATEGORY_WEIGHTS editovatelné v DB",
+        "Editor agree/disagree feedback loop běží"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "AI-based curator variant", "description": "Groq CURATOR_SYSTEM, vrátit score+tags+reasoning paralelně s rule-based, store jako attention_score_ai pro A/B.", "owner": "ai-pipeline", "estimatedDuration": "L" },
+        { "id": "02", "name": "CATEGORY_WEIGHTS do DB", "description": "Migrovat hardcoded weights (droppz=12, usa_rap=9) do curator_category_weights tabulky, live adjustments.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Drama/release detection rozšíření", "description": "Groq extract entit (BIG_ARTISTS, labels, chart debuts); zvýšit precision vs keyword matching.", "owner": "prompt-engineer", "estimatedDuration": "M" },
+        { "id": "04", "name": "Editor feedback loop", "description": "CMS akce 'agree' / 'disagree' u curated items; měsíční precision report per kategorie.", "owner": "analytics", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "CLUSTER",
+      "moduleName": "Cluster (pipeline)",
+      "modulePath": "command-centrum/lib/pipeline/cluster.ts",
+      "purpose": "Grupuje CURATED items do story_clusters pomocí Jaccard similarity na entity seznam.",
+      "currentState": "Funguje, 7 fixů na entity extraction, thresholds 0.22–0.40 Jaccard, cross-run dedup. False merges potlačeny.",
+      "goal": "Optimalizovat entity extraction pro EU artists, přidat semantic similarity fallback, vylepšit merged_context relevance.",
+      "priority": "P1",
+      "phase": "Validate",
+      "estimatedComplexity": "L",
+      "domains": ["PIPELINE"],
+      "successCriteria": [
+        "ENTITY_ALIASES pokrývá 50+ EU artistů",
+        "Semantic similarity fallback běží při Jaccard < threshold",
+        "Cluster regression test suite (10+ real cases) zelená"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "ENTITY_ALIASES pro EU rapery", "description": "Přidat 50+ emerging CZ/SK/PL/Balkán artistů, automatizovat sync s artist DB.", "owner": "prompt-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "Semantic similarity fallback", "description": "Pokud Jaccard < threshold ale entity overlap vysoký, zkusit cosine similarity na embeddings (Groq embed).", "owner": "ai-pipeline", "estimatedDuration": "L" },
+        { "id": "03", "name": "Merged_context sentence ranking", "description": "TF-IDF na entity relevance + frequency, vybrat top 10 nejinformativnějších vět místo prvních 3.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "04", "name": "Kvantifikovat cluster quality", "description": "Metriky: intra-cluster entity overlap %, confidence vs merged count; cluster_runs tabulka, měsíční report.", "owner": "analytics", "estimatedDuration": "S" },
+        { "id": "05", "name": "Optimalizovat cross-run dedup", "description": "Hash-based fast-path, denormalizovaný entity set jako JSON na clusteru; scaling pro 1000+ clusterů.", "owner": "performance", "estimatedDuration": "M" },
+        { "id": "06", "name": "Regression test suite", "description": "10+ real-world clusterů kde starý algoritmus selhal a nový vyhraje; gating před cluster.ts edits.", "owner": "qa", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "ENRICHMENT",
+      "moduleName": "Enrichment (pipeline)",
+      "modulePath": "command-centrum/lib/pipeline/enrichment.ts",
+      "purpose": "Obohacuje pending clusters o Spotify/YouTube/Genius/Apple Music URLs, artist intel, AI image selection.",
+      "currentState": "Funguje, 4 external API paralelně, AI image picker běží; chybí graceful degradation pri API výpadku.",
+      "goal": "Graceful degradation, artist-to-genre mapping, optimalizace rate-limitu.",
+      "priority": "P1",
+      "phase": "Validate",
+      "estimatedComplexity": "M",
+      "domains": ["PIPELINE"],
+      "successCriteria": [
+        "Fallback imagery při Spotify failure",
+        "Confidence score na matched artist",
+        "Spotify rate limit < 45 req/s s back-off"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Fallback generic imagery", "description": "Category-based fallback (rap → default mic, culture → city skyline) přes local asset server.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "Artist → genre + region mapping", "description": "Genre z Spotify artist tags (rap/rnb/pop) + EU country detection; store na artist record.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Spotify rate limiting + caching", "description": "Queue + back-off, cache popular artists TTL 24h; throughput stabilní pod 45 req/s.", "owner": "performance", "estimatedDuration": "M" },
+        { "id": "04", "name": "Release announcement lag tracking", "description": "Měřit latenci zdroj publish → detect; alert pokud > 2 dny (stale sources).", "owner": "analytics", "estimatedDuration": "S" },
+        { "id": "05", "name": "Confidence scoring na matched artist", "description": "Float 0–1 z string similarity + Spotify popularity + historical match rate místo bool.", "owner": "ai-validator", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "WRITER",
+      "moduleName": "Writer (pipeline)",
+      "modulePath": "command-centrum/lib/pipeline/writer.ts",
+      "purpose": "Generuje publikovatelné články z enriched clusterů — vstup merged_context + metadata, výstup title/body/JSON.",
+      "currentState": "Stub s notImplemented=true; TODO implementační popis existuje, Groq integration pending.",
+      "goal": "Plná implementace Groq generation, template rewrite pro feed cards, hallucination detection, fallbacky.",
+      "priority": "P0",
+      "phase": "Build",
+      "estimatedComplexity": "XL",
+      "domains": ["PIPELINE"],
+      "successCriteria": [
+        "Writer vrací 4 varianty (full, news, social, thread) per cluster",
+        "Hallucination detection s confidence score",
+        "Fallback nikdy nekrachne — vždy vrátí draft"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Article generation pipeline", "description": "Groq WRITER_SYSTEM, title + 500-800 word body, max 2000 output tokens, timeout 45s, fallback na cluster title.", "owner": "backend-engineer", "estimatedDuration": "L" },
+        { "id": "02", "name": "Template-based rewrite (feed cards)", "description": "1 article → 3 varianty (short 100w, medium 300w, snippet 50w); store všechny.", "owner": "prompt-engineer", "estimatedDuration": "L" },
+        { "id": "03", "name": "Hallucination detection", "description": "Entity jména musí být v merged_context; Groq fact-check + regex; confidence score per article.", "owner": "ai-validator", "estimatedDuration": "M" },
+        { "id": "04", "name": "Tone-of-voice enforcement", "description": "Short sentences, no 'As an AI', strong hooks; post-generation validator + rewrite prompt.", "owner": "prompt-engineer", "estimatedDuration": "M" },
+        { "id": "05", "name": "Fallback strategie", "description": "Pri Groq failure: cluster title + merged_context jako draft + log error; never crash.", "owner": "backend-engineer", "estimatedDuration": "S" },
+        { "id": "06", "name": "Integrace s Factory V2", "description": "Writer output (title + variants) napojit na template binder v FactoryCoordinatorV2.", "owner": "ai-pipeline", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "FEED_ENGINE",
+      "moduleName": "Feed Engine (pipeline)",
+      "modulePath": "command-centrum/lib/pipeline/feed-engine.ts",
+      "purpose": "Konvertuje enriched clusters + writer articles do feed_posts (MusicCard, VideoCard, AlbumCard).",
+      "currentState": "Rule-based media picker funguje, validace mediahint; chybí template binding + localized varianty.",
+      "goal": "Full card generation s structured metadata, template picker, multi-language varianty.",
+      "priority": "P1",
+      "phase": "Build",
+      "estimatedComplexity": "M",
+      "domains": ["PIPELINE", "FRONTEND"],
+      "successCriteria": [
+        "Card template auto-vybraný podle content_type + media",
+        "Card validation gate před publish",
+        "Localized varianty CS/DE/FR/PL"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Card template picker", "description": "Podle content_type (release/interview/feature) + media (spotify/youtube/image) vybrat MusicCard/VideoCard/AlbumCard/FeatureCard.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "Feed_posts metadata obohacení", "description": "title, subtitle, summary (50 chars), media URLs, artist, category, virality_score mapovat z writer + enrichment.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Card completeness validation", "description": "Required fields filled? URLs accessible? Image aspect ratio? Block incomplete cards.", "owner": "qa", "estimatedDuration": "S" },
+        { "id": "04", "name": "Multi-language varianty", "description": "Title + summary v CS/DE/FR/PL přes MULTILANG_TRANSLATOR; cache 7 dní.", "owner": "backend-engineer", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "MULTILANG",
+      "moduleName": "Multilang Translator (pipeline)",
+      "modulePath": "command-centrum/lib/pipeline/multilang.ts",
+      "purpose": "Lokalizuje finální posts + feed cards do CS/DE/FR/PL/IT/ES.",
+      "currentState": "Stub; placeholder 8 jazyků; Groq integration pending, schema localized_posts chybí.",
+      "goal": "Groq translation s entity preservation, storage localized variants, per-language SEO tagging.",
+      "priority": "P1",
+      "phase": "Build",
+      "estimatedComplexity": "M",
+      "domains": ["PIPELINE"],
+      "successCriteria": [
+        "localized_posts tabulka populated pro CS/DE/FR/PL/IT/ES",
+        "Artist names zachovány v translaci",
+        "Per-language SEO tagy generované"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Groq MULTILANG_TRANSLATOR per jazyk", "description": "Batch 10 articles/call, preserve names list, timeout 45s, fallback keep original; target CS/DE/FR/PL/IT/ES.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "Schema localized_posts", "description": "Migration: post_id, language, title, body, translated_at; upsert per article x jazyk; cache 7 dní.", "owner": "db-engineer", "estimatedDuration": "S" },
+        { "id": "03", "name": "Zachovat artist names", "description": "Groq prompt 'Preserve: [entities]'; validate translated text obsahuje jména.", "owner": "prompt-engineer", "estimatedDuration": "S" },
+        { "id": "04", "name": "Per-language SEO tagy", "description": "Tags, keywords, slug per jazyk; store v localized_posts metadata.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "05", "name": "Translation quality měření", "description": "Confidence_score per language pair; měsíční report; alert < 90%.", "owner": "qa", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "MONETIZER",
+      "moduleName": "Monetizer (pipeline)",
+      "modulePath": "command-centrum/lib/pipeline/monetizer.ts",
+      "purpose": "Skóruje finální posts pro monetizaci (ad slots, sponsorship fit) — CPM estimate, slot recommendations.",
+      "currentState": "Chybí — TODO v AUD-20260512-02; kritický pre-publication stage.",
+      "goal": "Groq-based scoring, ad slot picker, CPM calculator, brand-safety compliance check.",
+      "priority": "P1",
+      "phase": "Build",
+      "estimatedComplexity": "M",
+      "domains": ["PIPELINE", "ANALYTICS"],
+      "successCriteria": [
+        "post_monetization records pro 100% published posts",
+        "Compliance flags blokují publish pri risk > threshold",
+        "Revenue impact měřitelný"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Monetization scoring", "description": "Groq volání s post metadata; vrátit monetization_score (0-100), ad_fit_categories, cpm_estimate, compliance_flags.", "owner": "backend-engineer", "estimatedDuration": "L" },
+        { "id": "02", "name": "Ad slot picker", "description": "Match post score+category s ad_slots; vybrat top 3 + expected fill rate.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Brand safety + compliance check", "description": "Groq detekuje kontroverzi/brand-unfriendly keywords; block publish pri compliance_risk > threshold.", "owner": "security", "estimatedDuration": "M" },
+        { "id": "04", "name": "post_monetization persistence", "description": "Migrace tabulky (post_id, score, cpm, slot_ids, last_updated) — auditable trail.", "owner": "db-engineer", "estimatedDuration": "S" },
+        { "id": "05", "name": "Revenue impact tracking", "description": "Posts published, avg_cpm_estimate, actual_revenue, fill_rate; měsíční report ops/biz.", "owner": "analytics", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "DROPPZ_DETECTOR",
+      "moduleName": "DroppZ Detector (pipeline)",
+      "modulePath": "command-centrum/lib/pipeline/droppz-detector.ts",
+      "purpose": "Identifikuje P0/P1 release drops, klasifikuje urgency, triggeruje fast-lane curator bypass.",
+      "currentState": "Chybí — logic rozptýlený v curator.ts fast-lane; potřeba centralizace.",
+      "goal": "Centralizovat release detection, rule-based + AI hybrid, auto-publish P0, push notifications.",
+      "priority": "P0",
+      "phase": "Build",
+      "estimatedComplexity": "M",
+      "domains": ["PIPELINE", "DISTRIBUTION"],
+      "successCriteria": [
+        "Release detection v jednom souboru s testy",
+        "Auto-publish P0 s confidence > 0.9",
+        "Push notifikace + webhooks fungují"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Centralizovat release detection", "description": "Extract z curator.ts; detectRelease(item) v droppz-detector.ts; patterns 'drops', 'out now', 'official video' testy 100 vzorků.", "owner": "prompt-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "AI confidence scoring", "description": "Groq volání na top 10 candidates; confidence 0-1, is_official, audience_size; threshold > 0.85 = P0.", "owner": "ai-pipeline", "estimatedDuration": "M" },
+        { "id": "03", "name": "Auto-publish P0 drops", "description": "P0 drops top-100 artistů s confidence > 0.9 → auto-publish; fallback stage as draft.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "04", "name": "Push notifikace + webhooks", "description": "P0 drop → mobile push + webhook (Discord, Telegram); template '{artist} drops {title} — {url}'.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "05", "name": "Měřit P0 accuracy", "description": "Editor rating 'on_time' / 'late' / 'false_positive'; měsíční precision/recall; adjust threshold pokud < 90%.", "owner": "qa", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "CEO",
+      "moduleName": "CEO Cockpit (UI)",
+      "modulePath": "app/(dashboard)/hd-central/ceo",
+      "purpose": "Orchestration cockpit pro řízení strategických iniciativ, monitorování systému a CEO rozhodnutí.",
+      "currentState": "Core cockpit běží, Brainstorming + Intelligence se staví v Phase 2.",
+      "goal": "Centrální přehled o stavu všech misí, spuštění procesů, real-time progress.",
+      "priority": "P0",
+      "phase": "Foundation",
+      "estimatedComplexity": "XL",
+      "domains": ["FRONTEND", "OPERATIONS"],
+      "successCriteria": [
+        "Live dashboard se stavem 10 pipeline fází",
+        "Mission push do timeline + audit log",
+        "Alert system pro kritická selhání"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Live dashboard procesů", "description": "Real-time metriky z scout_runs + scheduler state + pipeline queues; health check 10 fází.", "owner": "frontend-engineer", "estimatedDuration": "L" },
+        { "id": "02", "name": "Mission push do timeline", "description": "Vybrat mission z Missions Inbox a poslat do Timeline; orchestrator trigger; audit log.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Pipeline control z cockpitu", "description": "Tlačítka Run Scout/Filter/Translator/Curator/atd. bez nutnosti otevřít jednotlivé stránky.", "owner": "ai-pipeline", "estimatedDuration": "M" },
+        { "id": "04", "name": "Brainstorming engine", "description": "AI návrhy upgradu filtrované podle Primary Mission a Current Plan → backlog.", "owner": "ai-pipeline", "estimatedDuration": "L" },
+        { "id": "05", "name": "Alert system pro kritická selhání", "description": "Pipeline error / model timeout / spike v discarded items → notification na CEO dashboard.", "owner": "devops", "estimatedDuration": "M" },
+        { "id": "06", "name": "CEO command interface design", "description": "Clean dark theme, high-contrast action buttons, macro commands (Run All, Pause, Reset).", "owner": "ui-ux-designer", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "BRAINSTORMING",
+      "moduleName": "CEO Brainstorming",
+      "modulePath": "app/(dashboard)/hd-central/ceo/brainstorming",
+      "purpose": "Automatizovaný generátor návrhů systémových upgradů, filtrovaných podle Primary Mission a Current Plan.",
+      "currentState": "Placeholder stránka, žádný backend ani AI integrace.",
+      "goal": "CEO dostane mission-aware AI návrhy upgradu zlepšující efektivitu pipelinu.",
+      "priority": "P1",
+      "phase": "Build",
+      "estimatedComplexity": "L",
+      "domains": ["FRONTEND", "PIPELINE"],
+      "successCriteria": [
+        "LangGraph agent generuje návrhy z bottlenecks",
+        "Thumbs-up/down feedback loop",
+        "Upvotované nápady jdou do backlogu"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Načíst Primary Mission + Current Plan", "description": "Brainstorming engine čte z planning modul a filtruje nápady podle strategických cílů.", "owner": "backend-engineer", "estimatedDuration": "S" },
+        { "id": "02", "name": "AI návrh generátor", "description": "LangGraph agent analyzuje pipeline metrics, zvýrazní bottlenecky, navrhne konkrétní upgrady.", "owner": "ai-pipeline", "estimatedDuration": "L" },
+        { "id": "03", "name": "UI s thumbs-up/down", "description": "CEO scrolluje návrhy, upvote/dismiss; upvotované → Product backlog.", "owner": "ui-ux-designer", "estimatedDuration": "M" },
+        { "id": "04", "name": "Feedback loop logging", "description": "Track které nápady byly schváleny / implementovány / metriky impact.", "owner": "analytics", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "MISSIONS_UI",
+      "moduleName": "CEO Missions Inbox",
+      "modulePath": "app/(dashboard)/hd-central/ceo/missions",
+      "purpose": "Inbox pro CEO missions — manuální push do Mission Timeline nebo batch processing.",
+      "currentState": "MissionsSection komponent existuje, Mission Timeline state management není finalizován.",
+      "goal": "CEO managuje mission kanál — assign, sleduje progress, eskaluje problémy.",
+      "priority": "P0",
+      "phase": "Build",
+      "estimatedComplexity": "M",
+      "domains": ["FRONTEND", "OPERATIONS"],
+      "successCriteria": [
+        "State machine draft → queued → running → done/failed",
+        "Bulk mission push UI s custom scheduling",
+        "SLA tracking + alerts"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Mission Timeline state machine", "description": "Atomické auditované transitions draft → queued → running → done/failed.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "Bulk push UI", "description": "Vybrat víc missions + push najednou + custom scheduling.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Priority/SLA tracking", "description": "Missions mají deadline, severity, owner agent; missed SLA → alert.", "owner": "backend-engineer", "estimatedDuration": "S" },
+        { "id": "04", "name": "Mission audit trail", "description": "Každý transition s timestamp/actor/reason; storage v SYSTEM/INFO/AUDITS/.", "owner": "db-engineer", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "PLAN_HQ",
+      "moduleName": "PLAN HQ — Strategic Planning",
+      "modulePath": "app/(dashboard)/hd-central/planning",
+      "purpose": "Strategické plánování — Primary Mission, quarterly Plan, goal tracking.",
+      "currentState": "PlanningRoomClient existuje, backend store pro Plan/Mission modely není plně implementován.",
+      "goal": "Jasný strategický plán s metrikami; pipeline rozhodnutí aligned s plánem.",
+      "priority": "P0",
+      "phase": "Foundation",
+      "estimatedComplexity": "XL",
+      "domains": ["FRONTEND", "BACKEND", "OPERATIONS"],
+      "successCriteria": [
+        "Primary Mission model + CRUD API",
+        "Quarterly Plan builder s milestones",
+        "Plan versioning + snapshots"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Primary Mission model", "description": "Mission má: title, description, success metrics, target audience, OKRs; CRUD API.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "Quarterly Plan builder", "description": "CEO/PM vytváří plán s milestones, resource allocation, risk management.", "owner": "frontend-engineer", "estimatedDuration": "L" },
+        { "id": "03", "name": "Plan → pipeline scheduling", "description": "Scout/Writer/Creator prioritu řídí Current Plan (source of truth), ne jen content.", "owner": "ai-pipeline", "estimatedDuration": "L" },
+        { "id": "04", "name": "Goal dashboard s burndown", "description": "Real-time OKR progress + visual burndown pro každý quarterly goal.", "owner": "analytics", "estimatedDuration": "M" },
+        { "id": "05", "name": "Plan versioning + snapshots", "description": "Historic Plan versions, compare quarters, audit trail změn.", "owner": "db-engineer", "estimatedDuration": "M" },
+        { "id": "06", "name": "Plan Manager UI", "description": "Intuitivní interface pro create/edit/approval; role-based access (CEO/PM/viewer).", "owner": "ui-ux-designer", "estimatedDuration": "L" }
+      ]
+    },
+    {
+      "moduleId": "AUDITOR",
+      "moduleName": "HD Central Auditor",
+      "modulePath": "app/(dashboard)/hd-central/auditor",
+      "purpose": "Compliance monitoring a system drift detection — reports Current State vs Primary Mission.",
+      "currentState": "Placeholder UI, audit data v SYSTEM/INFO/AUDITS/, dashboard se staví v M1.",
+      "goal": "Continuous audit zjistí misalignment, output = actionable insights.",
+      "priority": "P1",
+      "phase": "Build",
+      "estimatedComplexity": "M",
+      "domains": ["FRONTEND", "QUALITY"],
+      "successCriteria": [
+        "Audit listing UI s filtry",
+        "Compliance scoring algoritmus",
+        "Drift detection na pipeline distribution"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Audit listing UI", "description": "Tabulka audit files; filter type/date/status; click → detail view.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "Compliance scoring", "description": "Audit agent srovnává Primary Mission s pipeline behavior; score 0-100 + remediation plan.", "owner": "system-auditor", "estimatedDuration": "L" },
+        { "id": "03", "name": "Drift detection algoritmus", "description": "Odchylky v pipeline distribution, model usage, content quality; alerts pokud > threshold.", "owner": "analytics", "estimatedDuration": "M" },
+        { "id": "04", "name": "Generated prompts na findings", "description": "Auditor detekuje problem → nabídne regenerované prompty pro problémový modul.", "owner": "prompt-engineer", "estimatedDuration": "M" },
+        { "id": "05", "name": "Remediation tracker", "description": "Audit findings jako actionable tasks v mission queue; track implementation + effectiveness.", "owner": "backend-engineer", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "INTEL",
+      "moduleName": "Intel — Central Data Hub",
+      "modulePath": "app/(dashboard)/hd-central/intel",
+      "purpose": "Single pane of glass — agreguje runs, errors, audits, changes, sources.",
+      "currentState": "Placeholder s IntelMissionDone komponentou; backend neagreguje z více zdrojů.",
+      "goal": "Každý event queryable a auditovatelný; systémový health view.",
+      "priority": "P1",
+      "phase": "Build",
+      "estimatedComplexity": "L",
+      "domains": ["FRONTEND", "BACKEND", "DATABASE"],
+      "successCriteria": [
+        "Intel data model unified",
+        "Real-time event ingestion (Redis/Kafka)",
+        "Drill-down detail view"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Intel data model", "description": "Centrální log tabulka: scout_runs, api_errors, model_calls, audit_records — unified schema.", "owner": "db-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "Real-time event ingestion", "description": "Pipeline modules pushují events do Intel; low-latency message queue (Redis/Kafka).", "owner": "backend-engineer", "estimatedDuration": "L" },
+        { "id": "03", "name": "Intel search + filter UI", "description": "Search bar, date range, status/source filter; export CSV/JSON.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "04", "name": "Timeline visualization", "description": "Visual timeline všech events + correlation view (related events).", "owner": "ui-ux-designer", "estimatedDuration": "M" },
+        { "id": "05", "name": "Drill-down detail view", "description": "Click na event → full context: stack trace, request/response, related audits.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "06", "name": "Retention policy", "description": "Audit logs forever, run logs 90 dní, real-time events 7 dní.", "owner": "devops", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "ANALYTICS_UI",
+      "moduleName": "HD Central Analytics",
+      "modulePath": "app/(dashboard)/hd-central/analytics",
+      "purpose": "Pipeline metrics + feedback loops — stats o scout_items, posts, engagement, anomalies.",
+      "currentState": "Basic dashboard s views/clicks/shares, chybí pipeline-specific stats.",
+      "goal": "Product data pro continuous improvement — A/B results, model performance, content performance.",
+      "priority": "P1",
+      "phase": "Build",
+      "estimatedComplexity": "M",
+      "domains": ["ANALYTICS", "FRONTEND"],
+      "successCriteria": [
+        "Pipeline funnel viz drop-off per stage",
+        "Model performance tracking (Groq vs Claude)",
+        "Anomaly detection alerts"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Pipeline funnel dashboard", "description": "Scouted → Translated → Curated → Clustered → Written; drop-off rates per stage.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "Model performance tracking", "description": "Groq vs Claude token usage, latency, cost per article; A/B test results viz.", "owner": "analytics", "estimatedDuration": "M" },
+        { "id": "03", "name": "Content quality scoreboard", "description": "Per-category virality, engagement, fact-check success rate; insights.", "owner": "analytics", "estimatedDuration": "M" },
+        { "id": "04", "name": "Anomaly detection", "description": "Alert na traffic drop > 30%, cost spike, error rate surge; root cause suggestions.", "owner": "analytics", "estimatedDuration": "L" },
+        { "id": "05", "name": "Feedback → brainstorming", "description": "Analytics insights → Brainstorming engine proposals; data-driven improvements.", "owner": "ai-pipeline", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "SCOUT_HQ",
+      "moduleName": "Scout HQ (UI)",
+      "modulePath": "app/(dashboard)/scout-hq",
+      "purpose": "Scout pipeline oversight — RSS sources, artist tracking, P0/P1 detection.",
+      "currentState": "Overview + sub-modules (DroppZ Scout, Feed Scout, Normalization, Pool, Storage, Settings) jsou stubby.",
+      "goal": "Control room pro input layer; editorial vidí scout queue + priority řízení.",
+      "priority": "P0",
+      "phase": "Build",
+      "estimatedComplexity": "L",
+      "domains": ["FRONTEND"],
+      "successCriteria": [
+        "Scout items dashboard s bulk akcemi",
+        "RSS source manager s health status",
+        "DroppZ detector UI s manual override"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Scout items dashboard", "description": "Tabulka all SCOUTED items se status/priority/language; bulk actions (move to Translated, discard).", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "RSS source manager", "description": "Add/edit/delete feeds, toggle active/inactive, last fetch time, health status.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Artist tracking dashboard", "description": "Tracked artists, priority score, last checked; manual queue push pro hot releases.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "04", "name": "DroppZ detector UI", "description": "Manual override pro P0/P1 detection; queue s high-priority pending items.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "05", "name": "Scout run history", "description": "Log všech scout runs s timestamp/items count/errors; filterable.", "owner": "backend-engineer", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "SOURCES",
+      "moduleName": "Sources Registry",
+      "modulePath": "app/(dashboard)/sources",
+      "purpose": "Inventory management — RSS sources, artist DB, gallery, media library.",
+      "currentState": "RSS + Artist tracking builded; Gallery + Media stubby.",
+      "goal": "Central registry všech external sources; provenance tracking.",
+      "priority": "P1",
+      "phase": "Build",
+      "estimatedComplexity": "M",
+      "domains": ["FRONTEND", "DATABASE"],
+      "successCriteria": [
+        "RSS source management rozšířený",
+        "Artist CRM s full profile",
+        "Source performance report"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "RSS source management", "description": "Category/lang filtering, bulk enable/disable, health indicators, manual fetch trigger.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "Artist CRM database", "description": "Full artist profile: name, country, genre, Spotify/YouTube links, tracking status, last activity.", "owner": "frontend-engineer", "estimatedDuration": "L" },
+        { "id": "03", "name": "Gallery manager pro images", "description": "Upload/organize images, tag by artist/category; used by Creator pro visual briefs.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "04", "name": "Media library (Spotify/YouTube)", "description": "Embeddable player cards; track which songs/videos jsou mentioned v contentu.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "05", "name": "Source performance report", "description": "Which feeds produce most valuable content? Which artists drive engagement?", "owner": "analytics", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "FACTORY",
+      "moduleName": "Factory / Coordinator",
+      "modulePath": "app/(dashboard)/factory",
+      "purpose": "Content factory orchestration — coordinates Writer → Enrichment → Creator → Queue.",
+      "currentState": "FactoryDashboard existuje, Coordinator je stub.",
+      "goal": "High-throughput content assembly s parallelizací a quality gates.",
+      "priority": "P0",
+      "phase": "Build",
+      "estimatedComplexity": "XL",
+      "domains": ["PIPELINE", "BACKEND"],
+      "successCriteria": [
+        "Coordinator state machine + parallel execution",
+        "Work queue s prioritizací + SLA",
+        "Quality gate v Coordinator"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Coordinator state machine", "description": "Cluster → Story Builder → Writer → Enrichment → Creator; parallel kde možné, explicit dependencies.", "owner": "backend-engineer", "estimatedDuration": "L" },
+        { "id": "02", "name": "Work queue s prioritizací", "description": "High-priority stories (P0) skáčou frontu; SLA tracking; backpressure handling.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Pipeline orchestration UI", "description": "Visual flow diagram Writer → Enrichment → Creator; drag-and-drop retry/replay.", "owner": "ui-ux-designer", "estimatedDuration": "L" },
+        { "id": "04", "name": "Templates module", "description": "Editorial definuje content templates; Factory aplikuje na inbound stories (fast path).", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "05", "name": "Quality gate v Coordinator", "description": "Story Quality > threshold = pass; fail → manual review nebo re-run Writer.", "owner": "ai-validator", "estimatedDuration": "M" },
+        { "id": "06", "name": "Factory performance metrics", "description": "Throughput, latency, cost per post; model efficiency report.", "owner": "analytics", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "STORY_BUILDER",
+      "moduleName": "Story Builder",
+      "modulePath": "app/(dashboard)/story-builder",
+      "purpose": "Narrative construction — transforms clusters into story packages (hook + context + key facts).",
+      "currentState": "Frontend page builded, backend API existuje, prompt refinement probíhá.",
+      "goal": "Compelling narratives ready for Writer — human-quality story beats.",
+      "priority": "P1",
+      "phase": "Validate",
+      "estimatedComplexity": "M",
+      "domains": ["PIPELINE", "FRONTEND"],
+      "successCriteria": [
+        "Story Builder prompts A/B tested",
+        "Entity linking working",
+        "Approval workflow"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Optimize Story Builder prompts", "description": "A/B test narrative styles; měřit audience interest vs actual engagement post-publish.", "owner": "prompt-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "Entity linking", "description": "Primary/secondary entities; link na Artist database.", "owner": "backend-engineer", "estimatedDuration": "S" },
+        { "id": "03", "name": "Manual edit UI", "description": "Editorial tweak headline, narrative, facts; změny logované.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "04", "name": "Story approval workflow", "description": "Story draft → Editor review → approved → ready for Writer.", "owner": "backend-engineer", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "WRITER_UI",
+      "moduleName": "Writer (editor UI)",
+      "modulePath": "app/(dashboard)/writer",
+      "purpose": "Editor UI pro Writer — multi-format output (full_article, news_post, social, thread).",
+      "currentState": "Page builded, API integrated, multi-format live.",
+      "goal": "Multi-language brand-aligned obsah s tone variants pro multi-platform publishing.",
+      "priority": "P0",
+      "phase": "Validate",
+      "estimatedComplexity": "M",
+      "domains": ["FRONTEND", "PIPELINE"],
+      "successCriteria": [
+        "Tone variants A/B tested",
+        "Format variants generator (5 formátů)",
+        "Fact-check validation loop"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Refine Writer tone voices", "description": "Test journalistic vs editorial vs hype vs technical; měřit engagement per tone.", "owner": "prompt-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "Format variants generator", "description": "1 story → 5 formats (full_article, news_post, social, thread, headline); optimize per platform.", "owner": "ai-pipeline", "estimatedDuration": "M" },
+        { "id": "03", "name": "Writer performance analytics", "description": "Které tóny generují best engagement? Které formáty? Per-category breakdown.", "owner": "analytics", "estimatedDuration": "M" },
+        { "id": "04", "name": "Fact-check validation loop", "description": "Writer output → Fact Checker agent; hallucinations → return s feedback.", "owner": "ai-validator", "estimatedDuration": "M" },
+        { "id": "05", "name": "SEO keyword injection", "description": "Writer automaticky generuje keywords; Editor může override.", "owner": "backend-engineer", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "CREATOR",
+      "moduleName": "Creator (visual content)",
+      "modulePath": "app/(dashboard)/creator",
+      "purpose": "Visual content assembly — artist fact cards + multilingual captions + watermarked queue posts.",
+      "currentState": "Page builded, multi-language (en/cs/de), watermark baking implemented.",
+      "goal": "Brand-consistent watermarked visual cards; 1 fact → multi-platform queue posts.",
+      "priority": "P1",
+      "phase": "Validate",
+      "estimatedComplexity": "M",
+      "domains": ["FRONTEND", "PIPELINE"],
+      "successCriteria": [
+        "Languages rozšířené o PL/FR/IT",
+        "Template system pro variant layouts",
+        "Image prompt refinement live"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Rozšířit language support", "description": "Přidat PL, FR, IT; test caption quality per language.", "owner": "prompt-engineer", "estimatedDuration": "S" },
+        { "id": "02", "name": "Template system", "description": "Different visual templates (feed_card, story_card, reel); reusable layouts.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Image prompt refinement", "description": "Visual brief → image generation (DALL-E/Midjourney); fallback stock templates.", "owner": "ai-pipeline", "estimatedDuration": "L" },
+        { "id": "04", "name": "Creator queue status tracking", "description": "Post journey: generated → ready → published; backlog visibility.", "owner": "backend-engineer", "estimatedDuration": "S" },
+        { "id": "05", "name": "Batch export pro social", "description": "Export queue posts jako ZIP s assets + captions; ready for direct upload.", "owner": "frontend-engineer", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "FACT_BUILDER",
+      "moduleName": "Fact Builder",
+      "modulePath": "app/(dashboard)/creator-facts",
+      "purpose": "Artist fact package generator — extracts strongest fact, writes Did You Know angle.",
+      "currentState": "Page builded, fact extraction backend existuje, image planning WIP.",
+      "goal": "1 story → 1 premium fact package s multilingual targets a visual brief.",
+      "priority": "P1",
+      "phase": "Validate",
+      "estimatedComplexity": "M",
+      "domains": ["FRONTEND", "PIPELINE"],
+      "successCriteria": [
+        "Fact extraction confidence scoring",
+        "Why It Hits psychology analysis",
+        "Image plan generator working"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Optimize fact extraction", "description": "Měřit které facts mají highest engagement; refine confidence scoring.", "owner": "ai-pipeline", "estimatedDuration": "M" },
+        { "id": "02", "name": "Why It Hits analysis", "description": "Fact Builder generuje psychology-based explanation proč bude fact virální.", "owner": "prompt-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Image plan generator", "description": "Fact → image prompt (crop, color, style); fallback background template.", "owner": "ai-pipeline", "estimatedDuration": "M" },
+        { "id": "04", "name": "Manual fact approval workflow", "description": "Fact draft → Editor thumbs up/down → Creator queue; discarded facts logged.", "owner": "backend-engineer", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "FEED_UI",
+      "moduleName": "Feed Editorial Workflow",
+      "modulePath": "app/(dashboard)/feed",
+      "purpose": "Multi-stage feed management — Incoming → Editor → Multilanguage → Calendar → Approval → Published.",
+      "currentState": "Base page redirects; sub-moduly (incoming, editor, multilanguage atd.) jsou placeholders.",
+      "goal": "Editorial control center — approve/schedule/publish s multilang support.",
+      "priority": "P0",
+      "phase": "Build",
+      "estimatedComplexity": "XL",
+      "domains": ["FRONTEND", "DISTRIBUTION"],
+      "successCriteria": [
+        "6 stage stránek funguje (incoming → published)",
+        "WYSIWYG editor s live preview",
+        "Publish calendar s auto-publish"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Incoming stage dashboard", "description": "New posts from Writer/Creator; preview, bulk select, move to Editor.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "Editor stage s WYSIWYG", "description": "Rich text editor, image upload, SEO meta edit, live preview.", "owner": "frontend-engineer", "estimatedDuration": "L" },
+        { "id": "03", "name": "Multilanguage workflow", "description": "EN base → auto-translate CS/DE/PL/FR; human review toggle.", "owner": "ai-pipeline", "estimatedDuration": "M" },
+        { "id": "04", "name": "Publish Calendar", "description": "Schedule posts, visual calendar, auto-publish at scheduled time.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "05", "name": "Approval workflow", "description": "Editor submits → Reviewer checks compliance; approve/reject/request changes.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "06", "name": "Published archive", "description": "View/search all published posts; analytics per post; export.", "owner": "frontend-engineer", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "MONETIZATION_UI",
+      "moduleName": "Monetization Dashboard",
+      "modulePath": "app/(dashboard)/monetization",
+      "purpose": "Ad management — campaigns, ad slots, post monetization scoring, revenue tracking.",
+      "currentState": "Page builded, campaign/slot models existují, scoring backend WIP.",
+      "goal": "Maximize revenue per post; track campaign performance.",
+      "priority": "P2",
+      "phase": "Build",
+      "estimatedComplexity": "M",
+      "domains": ["FRONTEND", "ANALYTICS"],
+      "successCriteria": [
+        "Campaign manager UI funguje",
+        "Ad slot allocation engine paruje posts → slots",
+        "Revenue tracking per post"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Post monetization scoring", "description": "AI model scores každý post (0-100) pro advertiser fit; high score → premium slot.", "owner": "ai-pipeline", "estimatedDuration": "M" },
+        { "id": "02", "name": "Campaign manager UI", "description": "Create/edit campaigns; target audience, budget, duration; performance view.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Ad slot allocation engine", "description": "Auto-match high-scoring posts s available slots; manual override.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "04", "name": "Revenue tracking", "description": "Per-post CPM, total revenue; reporting CMS publishers.", "owner": "analytics", "estimatedDuration": "S" },
+        { "id": "05", "name": "Advertiser compliance check", "description": "Post content OK for advertiser? Filter inappropriate slots.", "owner": "ai-validator", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "PUBLISHED",
+      "moduleName": "Published Archive",
+      "modulePath": "app/(dashboard)/published",
+      "purpose": "Archive of published posts — searchable, filterable, analytics per post.",
+      "currentState": "Basic listing s filtry (category, date range) live.",
+      "goal": "Editorial má všechny publikované články — search, filter, download, performance tracking.",
+      "priority": "P2",
+      "phase": "Validate",
+      "estimatedComplexity": "S",
+      "domains": ["FRONTEND"],
+      "successCriteria": [
+        "Full-text search v title + content",
+        "Export workflows (CSV/JSON, images)",
+        "Inline metrics widget"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Full-text search rozšířený", "description": "Search v title + content; regex capable.", "owner": "backend-engineer", "estimatedDuration": "S" },
+        { "id": "02", "name": "Export workflows", "description": "Export jako CSV/JSON; bulk download images.", "owner": "frontend-engineer", "estimatedDuration": "S" },
+        { "id": "03", "name": "Inline metrics widget", "description": "Views/clicks/shares per post; quick engagement scan.", "owner": "frontend-engineer", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "AI_CONTROL",
+      "moduleName": "AI Control Panel",
+      "modulePath": "app/(dashboard)/ai-control",
+      "purpose": "LLM provider management — switch Groq/Anthropic/OpenAI per pipeline step; usage monitoring.",
+      "currentState": "Page builded, step configs + usage stats loaded, provider selection UI live.",
+      "goal": "Cost optimization — switch models per stage based on throughput/latency/cost.",
+      "priority": "P1",
+      "phase": "Validate",
+      "estimatedComplexity": "M",
+      "domains": ["PIPELINE", "OPERATIONS"],
+      "successCriteria": [
+        "Provider selection auto-recommendation",
+        "A/B testing framework pro providers",
+        "Fallback chain při primary failure"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Provider selection logic", "description": "Haiku vs Sonnet vs Groq cost/latency matrix; auto-recommendation.", "owner": "ai-pipeline", "estimatedDuration": "M" },
+        { "id": "02", "name": "A/B testing framework", "description": "Switch providers pro subset items; měřit quality/speed/cost; report results.", "owner": "analytics", "estimatedDuration": "M" },
+        { "id": "03", "name": "Usage alerts", "description": "Alert pokud token budget/day approaching limit; recommend provider switch.", "owner": "devops", "estimatedDuration": "S" },
+        { "id": "04", "name": "Model fallback chain", "description": "Primary fails → fallback provider automatic; graceful degradation.", "owner": "backend-engineer", "estimatedDuration": "S" },
+        { "id": "05", "name": "Provider performance dashboard", "description": "Success rate, avg latency, cost per token; trend over time.", "owner": "analytics", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "RSS_SOURCES",
+      "moduleName": "RSS Sources (page)",
+      "modulePath": "app/(dashboard)/sources",
+      "purpose": "RSS feed registry + management — add, toggle, monitor source health.",
+      "currentState": "UI builded, CRUD live, bulk toggle možné.",
+      "goal": "Editorial controls aktivní feeds; health monitoring.",
+      "priority": "P1",
+      "phase": "Validate",
+      "estimatedComplexity": "S",
+      "domains": ["FRONTEND"],
+      "successCriteria": [
+        "Feed health checker auto-detekuje broken (404, timeout)",
+        "Performance metrics per feed"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Feed health checker", "description": "Auto-detect broken feeds (404, timeout); alert editorial.", "owner": "devops", "estimatedDuration": "M" },
+        { "id": "02", "name": "Feed performance metrics", "description": "Track which feeds produce most valuable items; rank by quality.", "owner": "analytics", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "GALLERY",
+      "moduleName": "Gallery",
+      "modulePath": "app/(dashboard)/sources/gallery",
+      "purpose": "Image asset library — organize, tag, categorize images pro Creator.",
+      "currentState": "Page stub; backend asset management neexistuje.",
+      "goal": "Reusable image library pro Creator templates.",
+      "priority": "P2",
+      "phase": "Build",
+      "estimatedComplexity": "M",
+      "domains": ["FRONTEND", "BACKEND"],
+      "successCriteria": [
+        "S3 asset storage funguje",
+        "Gallery UI s filtry + drag-to-Creator",
+        "Upload workflow s auto-tag"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Asset storage architecture", "description": "S3 bucket; metadata: artist, category, upload date, usage count.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "Gallery UI s filtry", "description": "Browse by artist/category, search, drag-to-Creator integration.", "owner": "frontend-engineer", "estimatedDuration": "L" },
+        { "id": "03", "name": "Upload workflow", "description": "Drag-drop images, auto-tag artist/category, watermark detection.", "owner": "frontend-engineer", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "MEDIA",
+      "moduleName": "Media Library",
+      "modulePath": "app/(dashboard)/sources/media",
+      "purpose": "Music/video library integration — Spotify/YouTube embeds, quotes, fun facts.",
+      "currentState": "Sub-modules (fun-facts, quotes) minimal.",
+      "goal": "Embedded media enriches articles; click song → Spotify, click video → YouTube.",
+      "priority": "P2",
+      "phase": "Build",
+      "estimatedComplexity": "M",
+      "domains": ["FRONTEND", "DISTRIBUTION"],
+      "successCriteria": [
+        "Spotify + YouTube embed providers integrated",
+        "Fun-facts module library queryable",
+        "Quotes citable a shareable"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Spotify embed provider", "description": "API integration, cache song metadata, embeddable player widget.", "owner": "api-integration", "estimatedDuration": "M" },
+        { "id": "02", "name": "YouTube embed provider", "description": "Video metadata pull, embed player, track views.", "owner": "api-integration", "estimatedDuration": "M" },
+        { "id": "03", "name": "Fun-facts module", "description": "Artist + fact + source; queryable library; Creator pick-and-embed.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "04", "name": "Quotes module", "description": "Extracted quotes from articles; citable + shareable.", "owner": "frontend-engineer", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "CC_SCHEMA_MIGRATION",
+      "moduleName": "Cross-cutting · Schema migration discipline",
+      "modulePath": "command-centrum/supabase/**/*.sql, backend/prisma/migrations/**",
+      "purpose": "Sjednotit migraci schématu — replikabilní deployment + eliminovat manuální kroky onboardingu.",
+      "currentState": "30+ fragmentovaných SQL souborů v Supabase, INSTALL_ORDER.md neaktualizovaný, riziko divergence PostgreSQL vs Supabase.",
+      "goal": "Single MASTER_SCHEMA.sql s versionováním + health checkem + CI gate.",
+      "priority": "P0",
+      "phase": "Foundation",
+      "estimatedComplexity": "L",
+      "domains": ["DATABASE", "INFRASTRUCTURE"],
+      "successCriteria": [
+        "MASTER_SCHEMA.sql obsahuje 8 pipeline tabulek + verzionování",
+        "install-schema.sh + health check",
+        "CI gate na schema validation"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Konsolidace MASTER_SCHEMA.sql", "description": "Ověřit že obsahuje všech 8 pipeline tabulek; přidat timestamp versioning + checksum validation.", "owner": "db-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "Migration order manifest", "description": "MANIFEST.json: version, tables[], checksum + dependency mapping (FK pořadí).", "owner": "db-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Schema health check", "description": "pytest/sql skript ověří všechny tabulky/sloupce/indexy/FK po `supabase db push`.", "owner": "qa", "estimatedDuration": "M" },
+        { "id": "04", "name": "install-schema.sh single command", "description": "Stáhne MASTER_SCHEMA, spustí `supabase db push`, health check, reportuje status.", "owner": "devops", "estimatedDuration": "L" },
+        { "id": "05", "name": "CI/CD gate na schema validation", "description": "GitHub workflow schema-validation.yml spustí health check na merge; schema nesmí divergovat.", "owner": "devops", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "CC_DATA_CONSISTENCY",
+      "moduleName": "Cross-cutting · Single source of truth (Supabase)",
+      "modulePath": "backend/src/**/*.ts, command-centrum/app/api/**/*.ts, command-centrum/lib/pipeline/**/*.ts",
+      "purpose": "Eliminovat divergenci PostgreSQL Article / Supabase feed_posts / JSON file stores; migrovat vše na Supabase.",
+      "currentState": "scout_items v Supabase, Article model v PostgreSQL (nepoužívaný), writer_results.json + creator_queue.json jako primární store; bez atomických writes.",
+      "goal": "Všechny pipeline stage data v Supabase s transakcemi; JSON/PostgreSQL jen cache/archive.",
+      "priority": "P0",
+      "phase": "Build",
+      "estimatedComplexity": "XL",
+      "domains": ["DATABASE", "BACKEND"],
+      "successCriteria": [
+        "writer_results.json → Supabase feed_posts migrované",
+        "creator_queue.json → Supabase queue tabulka s locks",
+        "pipeline_run table pro end-to-end stage tracking"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Audit PostgreSQL Article model", "description": "Grep API routes + services; seznam nepoužívaných fieldů + routes.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "writer_results.json → feed_posts", "description": "Přepsat routes na Supabase reads; atomic writes s temp table pattern.", "owner": "backend-engineer", "estimatedDuration": "L" },
+        { "id": "03", "name": "creator_queue.json → Supabase queue", "description": "Tabulka creator_queue, Python runner direct DB writes, lock/idempotency na queue operations.", "owner": "backend-engineer", "estimatedDuration": "L" },
+        { "id": "04", "name": "Decommission Article model", "description": "Pokud nepoužívá, smazat Prisma model + migration; pokud archive, readonly snapshot.", "owner": "db-engineer", "estimatedDuration": "S" },
+        { "id": "05", "name": "pipeline_run table", "description": "Sloupce run_id, stage, status, started_at, ended_at, error_code; všechny stage logují; debugging stage failures.", "owner": "backend-engineer", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "CC_API_CONTRACT",
+      "moduleName": "Cross-cutting · API contract + E2E tests",
+      "modulePath": "backend/src/**/*.ts, command-centrum/**/__tests__/**, frontend-web/lib/api.ts",
+      "purpose": "API stabilita frontend ↔ backend ↔ Python runner; detekovat breaking changes před deployem.",
+      "currentState": "Versioning /api/v1 existuje, contract testy jen v command-centrum, frontend fallback na localhost, žádné E2E.",
+      "goal": "E2E pro Scout → Feed, OpenAPI validation, contract testing v CI.",
+      "priority": "P1",
+      "phase": "Validate",
+      "estimatedComplexity": "L",
+      "domains": ["BACKEND", "QUALITY"],
+      "successCriteria": [
+        "Frontend API URL fallback unified",
+        "OpenAPI spec generated z NestJS",
+        "Breaking change detection v CI"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Sjednotit API URL fallback", "description": "Frontend: `process.env.NEXT_PUBLIC_API_URL` validovaný na build time; fail pokud chybí.", "owner": "frontend-engineer", "estimatedDuration": "S" },
+        { "id": "02", "name": "OpenAPI spec ze Swagger", "description": "@nestjs/swagger v backend main.ts; generovat api.json na build; publish do artifacts.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "E2E Scout → Feed test", "description": "Playwright/Jest test: create scout_item, curator, cluster merge, writer, feed renders; CI gate.", "owner": "qa", "estimatedDuration": "L" },
+        { "id": "04", "name": "Request/response validation middleware", "description": "Zod/io-ts unified; middleware na /api/v1/*; runtime type checking.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "05", "name": "Breaking change detection v CI", "description": "swagger-cli porovnání main vs branch; fail pokud removing fields bez deprecation.", "owner": "devops", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "CC_DEPENDENCY_HYGIENE",
+      "moduleName": "Cross-cutting · Dependency vulnerabilities + Dependabot",
+      "modulePath": "backend/package.json, command-centrum/package.json, frontend-web/package.json, ai/requirements.txt",
+      "purpose": "Detekovat + auto-updatovat zastaralé/zranitelné balíčky across všech runtime.",
+      "currentState": "Žádný Dependabot, žádný `npm audit` v CI, Python requirements bez pinning, žádný Snyk.",
+      "goal": "Dependabot aktivovaný, npm audit gating v CI, weekly reports do Slack.",
+      "priority": "P1",
+      "phase": "Foundation",
+      "estimatedComplexity": "M",
+      "domains": ["SECURITY", "INFRASTRUCTURE"],
+      "successCriteria": [
+        "GitHub Dependabot konfigurovaný pro 3 npm + 1 pip",
+        "npm audit + safety check fail build na high/critical",
+        "Weekly Slack vulnerability report"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "GitHub Dependabot setup", "description": ".github/dependabot.yml; enable npm (backend, CC, frontend-web), pip (ai); weekly + patch/minor.", "owner": "devops", "estimatedDuration": "S" },
+        { "id": "02", "name": "CI workflow audit + safety", "description": "dependency-audit.yml; npm audit --audit-level=moderate + safety check; fail high/critical.", "owner": "devops", "estimatedDuration": "M" },
+        { "id": "03", "name": "Python requirements pinning", "description": "ai/requirements.txt na pinované verze (==); poetry.lock nebo pip-compile.", "owner": "ai-pipeline", "estimatedDuration": "S" },
+        { "id": "04", "name": "Weekly Slack report", "description": "GitHub Actions schedule; npm audit --json → parse high/critical → Slack.", "owner": "devops", "estimatedDuration": "M" },
+        { "id": "05", "name": "Dependabot auto-merge patches", "description": "GitHub Actions auto-merge Dependabot PR pro patch updates pokud testy projdou; minor/major manual.", "owner": "devops", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "CC_OBSERVABILITY",
+      "moduleName": "Cross-cutting · Metrics + alerting baseline",
+      "modulePath": "backend/src/**/*.ts, ai/**/*.py, command-centrum/lib/**/*.ts",
+      "purpose": "Metriky + alerty pro queue depth, approval rates, processing latency, worker zdraví.",
+      "currentState": "P2 observability BLOCKED; pipeline events nestandardizované; Sentry + UptimeRobot není setup.",
+      "goal": "PostAnalytics instrumentováno, Sentry live, custom Slack alerts.",
+      "priority": "P2",
+      "phase": "Validate",
+      "estimatedComplexity": "L",
+      "domains": ["ANALYTICS", "INFRASTRUCTURE"],
+      "successCriteria": [
+        "Pipeline event schema standardizováno",
+        "Sentry capture exceptions + performance",
+        "P95 latency SLO monitoring + Slack alerts"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Pipeline event schema", "description": "timestamp, stage, run_id, status, duration_ms, item_count, error_code; persist do PostAnalytics.", "owner": "analytics", "estimatedDuration": "M" },
+        { "id": "02", "name": "Sentry integrace", "description": "@sentry/node v NestJS, sentry-sdk v Python; DSN z env; capture exceptions + performance.", "owner": "devops", "estimatedDuration": "S" },
+        { "id": "03", "name": "Queue health metriky", "description": "queue_size, approval_rate, rejection_rate, worker_error_count; Slack hourly alert na anomalie.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "04", "name": "Processing latency SLO", "description": "P95 per stage (Scout 30s, Writer 60s, Feed 10s); daily query, alert P95 > target * 1.2.", "owner": "devops", "estimatedDuration": "M" },
+        { "id": "05", "name": "UptimeRobot heartbeat", "description": "/health endpoint vrací {status, pipeline_age_minutes}; UptimeRobot ping 5min; Slack downtime.", "owner": "devops", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "CC_RESOURCE_CLEANUP",
+      "moduleName": "Cross-cutting · Data retention + cleanup",
+      "modulePath": "command-centrum/lib/cleanup/**, backend/src/jobs/**",
+      "purpose": "Zamezit neomezenému růstu tabulek a ztrátě performance bez archivace.",
+      "currentState": "processed_urls roste bez cleanup, scout_items bez retention, readHistory bez archivace.",
+      "goal": "Weekly cleanup crons, TTL na temp tabulky, archivace staré records.",
+      "priority": "P2",
+      "phase": "Scale",
+      "estimatedComplexity": "M",
+      "domains": ["DATABASE", "INFRASTRUCTURE"],
+      "successCriteria": [
+        "processed_urls cleanup weekly cron",
+        "scout_items retention 30 dní → archive",
+        "Tabulka growth monitoring"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Cleanup processed_urls", "description": "Weekly cron: DELETE WHERE last_seen < NOW() - 7 days; log deleted count.", "owner": "devops", "estimatedDuration": "S" },
+        { "id": "02", "name": "scout_items retention", "description": "Staré > 30 dní → archive table; monthly job; archive queryable mimo hot path.", "owner": "db-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "ReadHistory archivace", "description": "read_history_archive tabulka; monthly job přesune staré records; analytical union obou.", "owner": "db-engineer", "estimatedDuration": "M" },
+        { "id": "04", "name": "Growth monitoring", "description": "Daily query pg_total_relation_size; Slack alert na anomální growth.", "owner": "devops", "estimatedDuration": "S" },
+        { "id": "05", "name": "TTL indexy", "description": "PostgreSQL 14+ TTL index na session/temp records; create_time + '7 days' → auto delete.", "owner": "db-engineer", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "CC_PERFORMANCE",
+      "moduleName": "Cross-cutting · Query profiling + N+1 protection",
+      "modulePath": "backend/src/**/*.service.ts, command-centrum/lib/**/*.ts",
+      "purpose": "Zamezit performance regressům — EXPLAIN ANALYZE guardrails + N+1 detection.",
+      "currentState": "Feed Promise.all (bezpečné nyní ale křehké); chybí composite indexy; žádné query profiling v CI.",
+      "goal": "EXPLAIN ANALYZE gating, N+1 linting rule, benchmark baseline.",
+      "priority": "P2",
+      "phase": "Build",
+      "estimatedComplexity": "M",
+      "domains": ["DATABASE", "BACKEND"],
+      "successCriteria": [
+        "Composite index na feed_posts (status, aiScore, publishedAt)",
+        "ESLint rule pro N+1 patterns",
+        "Slow query log + Slack alert > 5s"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Composite indexy feed query", "description": "Migration @@index([status, aiScore, publishedAt]); EXPLAIN ANALYZE; benchmark before/after.", "owner": "db-engineer", "estimatedDuration": "S" },
+        { "id": "02", "name": "N+1 linting + checklist", "description": "ESLint rule pro nested db queries bez Promise.all; code review checklist.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Slow query log monitoring", "description": "log_min_duration_statement=1000; export logging sink; Slack alert > 5s; weekly report.", "owner": "devops", "estimatedDuration": "M" },
+        { "id": "04", "name": "Benchmark suite", "description": "Targets: feed personalized < 300ms, cluster merge < 500ms, writer gen < 30s; before/after migrations.", "owner": "qa", "estimatedDuration": "L" },
+        { "id": "05", "name": "EXPLAIN ANALYZE gating", "description": "Pre-commit hook: Prisma migrations měnící indexy → EXPLAIN; fail pokud seq scan vs index scan.", "owner": "devops", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "CC_AUDIT_TRAIL",
+      "moduleName": "Cross-cutting · Status transition audit trail",
+      "modulePath": "command-centrum/supabase/schema-audit.sql, backend/src/**/*.service.ts",
+      "purpose": "Debugging pipeline failures + compliance; replay-able pipeline history.",
+      "currentState": "Status flow jen v updated_at; žádná transition history; nelze audit kdo/kdy.",
+      "goal": "status_history JSON column, audit_log tabulka, /api/v1/items/:id/replay endpoint.",
+      "priority": "P1",
+      "phase": "Build",
+      "estimatedComplexity": "M",
+      "domains": ["DATABASE", "BACKEND"],
+      "successCriteria": [
+        "status_history JSON na scout_items + triggery",
+        "audit_log tabulka + insert triggery",
+        "/items/:id/history + /items/:id/replay endpoints"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "status_history JSON column", "description": "Migration: jsonb na scout_items default [{status, changed_at, reason, user_id}]; trigger on status change.", "owner": "db-engineer", "estimatedDuration": "S" },
+        { "id": "02", "name": "audit_log tabulka", "description": "id, entity_type, entity_id, action, changes, changed_by, changed_at; trigger na scout_items + feed_posts + clusters.", "owner": "db-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "/items/:id/history endpoint", "description": "Query status_history + audit_log; chronologický seznam s timestamps + reasons.", "owner": "backend-engineer", "estimatedDuration": "S" },
+        { "id": "04", "name": "/items/:id/replay endpoint", "description": "Admin: vezme item, reset na CLUSTERED, znovu spustí enrichment+writer; audit log replay action.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "05", "name": "Pipeline failure triage UI", "description": "Failed items list, timeline view status transitions, filter stage/error/timeframe.", "owner": "frontend-engineer", "estimatedDuration": "L" }
+      ]
+    }
+  ]
+}

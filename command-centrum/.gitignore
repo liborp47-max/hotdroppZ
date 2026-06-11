@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Environment variables — never commit secrets
+.env.local
+.env.*.local
+.env
+
+# Build artifacts
+dist/
+
+# Electron desktop build artifacts
+dist-desktop/
+electron/.server-dist/
+
+# Machine-specific exported CA bundle (regenerated per machine)
+electron/certs/
+
+# Misc
+.DS_Store
+*.log

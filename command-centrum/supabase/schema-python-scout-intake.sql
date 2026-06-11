@@ -1,0 +1,37 @@
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Python Scout Intake — Schema Compatibility Check
+-- Generated: 2026-05-08
+-- Purpose: Ensure scout_items has all columns required by the Python
+--          supabase_writer.py intake layer.
+-- ─────────────────────────────────────────────────────────────────────────────
+--
+-- VERIFICATION RESULT: All required columns already exist in MASTER_SCHEMA.sql.
+-- No ALTER TABLE statements are needed.
+--
+-- Columns verified present in scout_items:
+--   url             text          — written by supabase_writer.py
+--   title           text NOT NULL — written by supabase_writer.py
+--   content         text          — written by supabase_writer.py (maps from summary)
+--   raw_content     text          — written by supabase_writer.py (truncated to 2000 chars)
+--   source          text NOT NULL — written by supabase_writer.py
+--   language        text          — written by supabase_writer.py (region hint)
+--   category        text          — written by supabase_writer.py
+--   status          text NOT NULL default 'SCOUTED' — Python always sets to 'SCOUTED'
+--   attention_score double precision — written by supabase_writer.py (virality_score * 10)
+--   priority        text default 'P3' — written by supabase_writer.py (P0-P3 mapping)
+--
+-- Unique index verified present:
+--   idx_scout_items_url_unique ON scout_items(url) WHERE url IS NOT NULL
+--   This index enforces deduplication. supabase_writer.py relies on HTTP 409
+--   from this constraint to skip-silently already-scouted URLs.
+--
+-- Status constraint verified covers 'SCOUTED':
+--   check (status in ('SCOUTED','TRANSLATED','CURATED','CLUSTERED','WRITTEN','discarded'))
+--   TypeScript CC pipeline reads WHERE status = 'SCOUTED' — contract honoured.
+--
+-- ─────────────────────────────────────────────────────────────────────────────
+-- NO SCHEMA CHANGES REQUIRED
+-- Run this file is a no-op. It documents what was verified.
+-- ─────────────────────────────────────────────────────────────────────────────
+
+select 'schema-python-scout-intake: all required columns verified, no migrations needed' as status;

@@ -1,0 +1,46 @@
+# electron-builder.yml — Windows packaging for HotDroppZ Command Center.
+# The Electron runtime files go into the asar; the Next.js standalone server is
+# shipped unpacked as resources/server (it spawns/reads files, so must be real
+# files on disk, not inside the archive).
+
+appId: com.hotdroppz.hdcc
+productName: HotDroppZ Command Center
+copyright: © HotDroppZ
+
+directories:
+  output: dist-desktop
+  buildResources: build
+
+# Only the Electron glue + package.json belong in the app bundle. The web app's
+# node_modules are NOT needed here — the server runs from extraResources with its
+# own traced dependencies.
+files:
+  - electron/**/*.cjs
+  - package.json
+  - '!electron/.server-dist/**'
+  - '!**/node_modules/**'
+
+# The assembled standalone server (built by electron/scripts/prepare-server.mjs).
+extraResources:
+  - from: electron/.server-dist
+    to: server
+    filter:
+      - '**/*'
+
+asar: true
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: public/icons/ICON.ico
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: HotDroppZ Command Center
+  artifactName: ${productName}-Setup-${version}.${ext}

@@ -1,0 +1,116 @@
+{
+  "id": "prompt-1778908971066-5ce4d74d",
+  "brainstormingItemId": "improvement-1778908923162-12e63608",
+  "sourceIdea": "Improve Hd central / Ceo / Missions",
+  "selectedPoints": [
+    {
+      "id": "improvement-1778908923162-12e63608-goals-mission-alignment",
+      "category": "goals",
+      "label": "Mission alignment",
+      "description": "Keep the change tied to CEO goals, current plan and measurable system impact.",
+      "impact": "P0",
+      "recommended": true
+    },
+    {
+      "id": "improvement-1778908923162-12e63608-goals-section-objective",
+      "category": "goals",
+      "label": "Section objective",
+      "description": "Define exactly what Hd central / Ceo / Missions should do better after the upgrade.",
+      "impact": "P0",
+      "recommended": true
+    },
+    {
+      "id": "improvement-1778908923162-12e63608-features-improvement-trigger",
+      "category": "features",
+      "label": "Improvement trigger",
+      "description": "Preserve the arrow-up trigger and make the generated proposal visible in the brainstorming backlog.",
+      "impact": "P0",
+      "recommended": true
+    },
+    {
+      "id": "improvement-1778908923162-12e63608-features-prompt-linkage",
+      "category": "features",
+      "label": "Prompt linkage",
+      "description": "Attach the generated prompt to the original brainstorming item with a visible P action.",
+      "impact": "P0",
+      "recommended": true
+    },
+    {
+      "id": "improvement-1778908923162-12e63608-features-status-workflow",
+      "category": "features",
+      "label": "Status workflow",
+      "description": "Support open, selected, in progress, done and archived states for improvement ideas.",
+      "impact": "P1",
+      "recommended": false
+    },
+    {
+      "id": "improvement-1778908923162-12e63608-data-structured-artifact",
+      "category": "data",
+      "label": "Structured artifact",
+      "description": "Save title, source section, current state, problems, ideas, impact, tools, agents, steps, priority and status.",
+      "impact": "P0",
+      "recommended": true
+    },
+    {
+      "id": "improvement-1778908923162-12e63608-data-intel-storage",
+      "category": "data",
+      "label": "Intel storage",
+      "description": "Persist analysis selections in INTEL / brainstorming and final prompts in INTEL / brainstorming / prompts.",
+      "impact": "P0",
+      "recommended": true
+    },
+    {
+      "id": "improvement-1778908923162-12e63608-ux-popup-tabs",
+      "category": "ux",
+      "label": "Popup tabs",
+      "description": "Use a compact tabbed popup with checkbox groups for goals, features, data, UX, risks and implementation.",
+      "impact": "P1",
+      "recommended": true
+    },
+    {
+      "id": "improvement-1778908923162-12e63608-ux-copy-action",
+      "category": "ux",
+      "label": "Copy action",
+      "description": "Expose a copy button next to the final prompt so it can be reused instantly.",
+      "impact": "P1",
+      "recommended": true
+    },
+    {
+      "id": "improvement-1778908923162-12e63608-risks-scope-control",
+      "category": "risks",
+      "label": "Scope control",
+      "description": "Avoid broad redesign and keep the change inside existing architecture and UI patterns.",
+      "impact": "P0",
+      "recommended": true
+    },
+    {
+      "id": "improvement-1778908923162-12e63608-risks-missing-data-fallback",
+      "category": "risks",
+      "label": "Missing data fallback",
+      "description": "If live data is incomplete, mark assumptions and still produce a safe interim prompt.",
+      "impact": "P1",
+      "recommended": false
+    },
+    {
+      "id": "improvement-1778908923162-12e63608-implementation-api-routes",
+      "category": "implementation",
+      "label": "API routes",
+      "description": "Add server endpoints for listing proposals, creating analyses, saving selections and generating prompts.",
+      "impact": "P1",
+      "recommended": true
+    },
+    {
+      "id": "improvement-1778908923162-12e63608-implementation-verification",
+      "category": "implementation",
+      "label": "Verification",
+      "description": "Run lint or build after implementation and document any blocker.",
+      "impact": "P1",
+      "recommended": true
+    }
+  ],
+  "generatedPrompt": "Vytvor nebo uprav cast systemu podle nasledujiciho zadani.\n\nKONTEXT:\n- Zdrojova polozka: Improve Hd central / Ceo / Missions\n- Zdrojova sekce: Hd central / Ceo / Missions\n- Rezim prace: modify an existing feature\n- Priorita: P0\n\nAKTUALNI STAV:\n- Hd central / Ceo / Missions is reachable as a dashboard section and can now trigger a global improvement run.\n- System context has 53 dashboard page routes, 21 registered agent folders and 62 plan missions.\n- Latest plan update detected at 2026-05-16T04:20:31.052Z.\n- Captured UI snapshot: Mission Inbox | CEO / MissionsMission Inbox62 totalinbox: 1timeline: 61inbox (1)timeline (61)all (62)USER MISSIONS (40)PriorityPhaseSelect allPush selectedPush all (1)SeqIDNamePhaseDomainPrioUrgStav—UM-MONETIZATION_UIMonetization Dashboard ...\n\nPROBLEMY K VYRESENI:\n- Hd central / Ceo / Missions does not yet expose explicit success metrics, owner map and next-action checkpoints in one compact control surface.\n- Ideas can be created faster than they can be converted into validated implementation prompts.\n- Improvement decisions need a stable link between the source section, selected brainstorming points and final prompt artifact.\n- Audit context exists (7 recent files sampled), but section-level actions need clearer traceability back to CEO / Brainstorming.\n\nVYBRANE BODY Z BRAINSTORMINGU:\nCile:\n- Mission alignment: Keep the change tied to CEO goals, current plan and measurable system impact.\n- Section objective: Define exactly what Hd central / Ceo / Missions should do better after the upgrade.\n\nFunkce:\n- Improvement trigger: Preserve the arrow-up trigger and make the generated proposal visible in the brainstorming backlog.\n- Prompt linkage: Attach the generated prompt to the original brainstorming item with a visible P action.\n- Status workflow: Support open, selected, in progress, done and archived states for improvement ideas.\n\nData:\n- Structured artifact: Save title, source section, current state, problems, ideas, impact, tools, agents, steps, priority and status.\n- Intel storage: Persist analysis selections in INTEL / brainstorming and final prompts in INTEL / brainstorming / prompts.\n\nUI / UX:\n- Popup tabs: Use a compact tabbed popup with checkbox groups for goals, features, data, UX, risks and implementation.\n- Copy action: Expose a copy button next to the final prompt so it can be reused instantly.\n\nRizika:\n- Scope control: Avoid broad redesign and keep the change inside existing architecture and UI patterns.\n- Missing data fallback: If live data is incomplete, mark assumptions and still produce a safe interim prompt.\n\nImplementace:\n- API routes: Add server endpoints for listing proposals, creating analyses, saving selections and generating prompts.\n- Verification: Run lint or build after implementation and document any blocker.\n\nPOZADOVANY VYSTUP:\n- nejdriv analyzuj existujici architekturu\n- pouzij stavajici UI styl, komponenty, datove struktury a uloziste\n- implementuj funkcni reseni end-to-end\n- udrz zmenu malou, citelnou a napojenou na zdrojovou sekci\n- pridej nebo uprav testy podle rizika zmeny\n- po implementaci over build, lint nebo relevantni testy\n- v zaveru popis zmenene soubory, ulozena data, zpusob overeni a zbyvajici rizika\n\nACCEPTANCE CRITERIA:\n- Create or update the source section without redesigning unrelated pages.\n- Persist a structured improvement proposal in INTEL / brainstorming.\n- Run Brainstorming Agent analysis and let the user select concrete points.\n- Generate a final prompt connected to the original item.\n- Expose prompt open and copy actions in the brainstorming listing.\n",
+  "createdByAgent": "BRAINSTORMING AGENT",
+  "createdAt": "2026-05-16T05:22:51.065Z",
+  "updatedAt": "2026-05-16T05:22:51.065Z",
+  "status": "ready"
+}

@@ -1,0 +1,56 @@
+{
+  "id": "improvement-1779245843637-054300c9",
+  "title": "Improve Sources",
+  "sourceSection": "Sources",
+  "route": "/sources",
+  "currentState": [
+    "Sources is reachable as a dashboard section and can now trigger a global improvement run.",
+    "System context has 53 dashboard page routes, 21 registered agent folders and 66 plan missions.",
+    "Latest plan update detected at 2026-05-20T02:55:45.624Z.",
+    "Captured UI snapshot: Sources Manager | Sources ManagerRSS feeds · artist tracking · priority pipeline Artist Database RefreshRSS Sources271174 activeArtists976915 trackedQueue Pending0awaiting scoutConverted0→ publishedRSS Sources271 total · 174 active Add Sour..."
+  ],
+  "detectedProblems": [
+    "Sources does not yet expose explicit success metrics, owner map and next-action checkpoints in one compact control surface.",
+    "Ideas can be created faster than they can be converted into validated implementation prompts.",
+    "Improvement decisions need a stable link between the source section, selected brainstorming points and final prompt artifact.",
+    "Audit context exists (7 recent files sampled), but section-level actions need clearer traceability back to CEO / Brainstorming."
+  ],
+  "improvementIdeas": [
+    "Add a compact Sources improvement brief with current state, weak points, dependencies and measurable expected impact.",
+    "Convert every good idea into selectable brainstorming points before implementation so the CEO keeps control over scope.",
+    "Generate a ready-to-run prompt from selected points and attach it directly to the source idea.",
+    "Track status from open to selected, in progress, done or archived so the improvement backlog stays operational.",
+    "Keep all artifacts in INTEL / brainstorming so agents, CEO and future tools share one source of truth."
+  ],
+  "expectedImpact": [
+    "Faster conversion from vague idea to executable prompt.",
+    "Clearer CEO control over what gets selected, built and archived.",
+    "Better traceability between UI section, data artifact, agent output and final implementation prompt."
+  ],
+  "requiredTools": [
+    "Next.js dashboard UI",
+    "INTEL file storage",
+    "CEO / Brainstorming listing",
+    "Global agent registry",
+    "Existing Plan, Audit and Agent context"
+  ],
+  "suggestedAgents": [
+    "IMPROOVMENT MANAGER",
+    "BRAINSTORMING AGENT",
+    "CEO",
+    "System Architect",
+    "Prompt Engineer",
+    "QA / Testing"
+  ],
+  "implementationSteps": [
+    "Create or update the source section without redesigning unrelated pages.",
+    "Persist a structured improvement proposal in INTEL / brainstorming.",
+    "Run Brainstorming Agent analysis and let the user select concrete points.",
+    "Generate a final prompt connected to the original item.",
+    "Expose prompt open and copy actions in the brainstorming listing."
+  ],
+  "priority": "P2",
+  "createdAt": "2026-05-20T02:57:23.627Z",
+  "updatedAt": "2026-05-20T02:57:23.627Z",
+  "status": "open"
+}

@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" height="1080" viewBox="0 0 1080 1080" role="img" aria-label="HotDroppZ share card">
+  <title>{{TITLE}} — {{ARTIST}}</title>
+
+  <defs>
+    <!-- Font stack: no external fonts, system sans fallback -->
+    <style>
+      .hdz-font { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    </style>
+
+    <!-- Clip for the cover image block (top region, square-ish) -->
+    <clipPath id="coverClip">
+      <rect x="0" y="0" width="1080" height="648"/>
+    </clipPath>
+
+    <!-- Fade from the cover image into the dark lower area -->
+    <linearGradient id="coverFade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#0A0A0B" stop-opacity="0"/>
+      <stop offset="55%" stop-color="#0A0A0B" stop-opacity="0"/>
+      <stop offset="82%" stop-color="#0A0A0B" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#0A0A0B" stop-opacity="1"/>
+    </linearGradient>
+
+    <!-- Top vignette so badge/category stay legible over bright covers -->
+    <linearGradient id="topScrim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0A0A0B" stop-opacity="0.55"/>
+      <stop offset="22%"  stop-color="#0A0A0B" stop-opacity="0.12"/>
+      <stop offset="40%"  stop-color="#0A0A0B" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Neon glow for the accent waveform -->
+    <filter id="neonGlow" x="-40%" y="-60%" width="180%" height="220%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Flame gradient (neon-green to violet hint) -->
+    <linearGradient id="flameGrad" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%"  stop-color="#B6FF3B"/>
+      <stop offset="70%" stop-color="#B6FF3B"/>
+      <stop offset="100%" stop-color="#E6FFB0"/>
+    </linearGradient>
+
+    <!-- Fallback fill if cover image is missing -->
+    <linearGradient id="coverFallback" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#15151A"/>
+      <stop offset="100%" stop-color="#0A0A0B"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base background -->
+  <rect x="0" y="0" width="1080" height="1080" fill="#0A0A0B"/>
+
+  <!-- ============ COVER BLOCK (top ~60%) ============ -->
+  <g clip-path="url(#coverClip)">
+    <rect x="0" y="0" width="1080" height="648" fill="url(#coverFallback)"/>
+    <image href="{{COVER_URL}}" xlink:href="{{COVER_URL}}"
+           x="0" y="0" width="1080" height="648"
+           preserveAspectRatio="xMidYMid slice"/>
+    <!-- top scrim for legibility -->
+    <rect x="0" y="0" width="1080" height="648" fill="url(#topScrim)"/>
+    <!-- fade into dark -->
+    <rect x="0" y="0" width="1080" height="648" fill="url(#coverFade)"/>
+  </g>
+
+  <!-- ============ TOP ROW: category + badge ============ -->
+  <!-- Category label, small uppercase, top-left -->
+  <text x="72" y="92" class="hdz-font" fill="#FAFAFA"
+        font-size="26" font-weight="700" letter-spacing="6" opacity="0.92">{{CATEGORY}}</text>
+
+  <!-- Badge pill, neon-green, top-right -->
+  <g transform="translate(1008,64)">
+    <rect x="-244" y="-26" width="244" height="52" rx="26" fill="#B6FF3B"/>
+    <text x="-122" y="9" class="hdz-font" text-anchor="middle"
+          fill="#0A0A0B" font-size="24" font-weight="800" letter-spacing="3">{{BADGE}}</text>
+  </g>
+
+  <!-- ============ WAVEFORM ACCENT (above the title) ============ -->
+  <g transform="translate(72,712)" fill="#B6FF3B" filter="url(#neonGlow)">
+    <rect x="0"   y="14" width="7" height="20" rx="3.5"/>
+    <rect x="14"  y="4"  width="7" height="40" rx="3.5"/>
+    <rect x="28"  y="-6" width="7" height="60" rx="3.5"/>
+    <rect x="42"  y="6"  width="7" height="36" rx="3.5"/>
+    <rect x="56"  y="-12" width="7" height="72" rx="3.5"/>
+    <rect x="70"  y="2"  width="7" height="44" rx="3.5"/>
+    <rect x="84"  y="16" width="7" height="16" rx="3.5"/>
+    <rect x="98"  y="-2" width="7" height="52" rx="3.5"/>
+    <rect x="112" y="8"  width="7" height="32" rx="3.5"/>
+    <rect x="126" y="-8" width="7" height="64" rx="3.5"/>
+    <rect x="140" y="12" width="7" height="24" rx="3.5"/>
+    <rect x="154" y="0"  width="7" height="48" rx="3.5"/>
+  </g>
+
+  <!-- ============ ARTIST (accent) ============ -->
+  <text x="72" y="804" class="hdz-font" fill="#B6FF3B"
+        font-size="34" font-weight="800" letter-spacing="2">{{ARTIST}}</text>
+
+  <!-- ============ TITLE (large bold, up to 3 lines) ============ -->
+  <!-- Each line is its own tspan; unused lines render empty (no height impact). -->
+  <text x="70" y="876" class="hdz-font" fill="#FAFAFA"
+        font-size="76" font-weight="900" letter-spacing="-1">
+    <tspan x="70" dy="0">{{TITLE_LINE_1}}</tspan>
+    <tspan x="70" dy="84">{{TITLE_LINE_2}}</tspan>
+    <tspan x="70" dy="84">{{TITLE_LINE_3}}</tspan>
+  </text>
+
+  <!-- ============ BOTTOM BAR: brand mark + flame ============ -->
+  <!-- thin neon rule -->
+  <rect x="72" y="988" width="120" height="4" rx="2" fill="#B6FF3B" opacity="0.85"/>
+
+  <!-- Wordmark, bottom-left -->
+  <text x="72" y="1032" class="hdz-font" font-size="40" font-weight="900" letter-spacing="-1">
+    <tspan fill="#FAFAFA">Hot</tspan><tspan fill="#B6FF3B">DroppZ</tspan>
+  </text>
+
+  <!-- Flame motif, bottom-right corner -->
+  <g transform="translate(958,968) scale(1.0)" filter="url(#neonGlow)">
+    <path d="M30 0
+             C 44 16, 22 24, 36 44
+             C 52 34, 48 18, 60 30
+             C 70 44, 64 70, 40 78
+             C 16 70, 6 50, 16 30
+             C 22 40, 26 38, 24 28
+             C 22 16, 30 12, 30 0 Z"
+          fill="url(#flameGrad)"/>
+    <path d="M34 36
+             C 42 44, 38 54, 30 60
+             C 22 54, 22 46, 28 42
+             C 30 46, 32 46, 32 42
+             C 32 39, 33 38, 34 36 Z"
+          fill="#0A0A0B" opacity="0.55"/>
+  </g>
+
+</svg>

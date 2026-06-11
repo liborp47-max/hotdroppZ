@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "HotDroppZ",
+    "slug": "hdua",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "hdua",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "backgroundColor": "#0A0A0B",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.hotdroppz.app"
+    },
+    "android": {
+      "package": "com.hotdroppz.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0A0A0B"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-av",
+        {
+          "microphonePermission": false
+        }
+      ],
+      "expo-asset",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

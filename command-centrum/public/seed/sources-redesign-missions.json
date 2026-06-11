@@ -1,0 +1,122 @@
+{
+  "source": "manual",
+  "actorAgent": "plan-manager",
+  "upsert": true,
+  "missions": [
+    {
+      "moduleId": "SRC_PR_S1_DB_MIGRATION",
+      "moduleName": "PR-S1 — Sources Registry DB Migration",
+      "modulePath": "command-centrum/supabase/20260517000001_sources_registry.sql · 20260517000002_sources_backfill.sql · 20260517000003_sources_views_backwards_compat.sql",
+      "purpose": "Vytvořit kanonickou sources registry tabulkovou strukturu jako základ pro Source Resolution Layer a všechny consumery.",
+      "currentState": "8 nekoordinovaných DB tabulek (scout_sources, artists, artist_links, artist_images, …), 3× duplikát Spotify ID, žádný audit log, žádný canonical platform identifier mapping.",
+      "goal": "Single polymorph sources table + source_handles + platform_identifiers + source_assignments + source_history; backwards-compat views zachovají legacy queries beze změny.",
+      "priority": "P0",
+      "phase": "Foundation",
+      "estimatedComplexity": "L",
+      "domains": ["DATABASE"],
+      "successCriteria": [
+        "Migration runs clean v shadow DB (zero errors)",
+        "Backfill counts match: SELECT count(*) FROM sources WHERE type='feed' == legacy scout_sources count",
+        "Backwards-compat: stará scout_sources view vrací identické řádky jako před migrací",
+        "Existing Scout actions (Scout HQ UI, sources/page.tsx) fungují bez code changes",
+        "CHANGELOG entry zapsán"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Vytvořit migrace 20260517000001_sources_registry.sql", "description": "Definovat tabulky sources, source_handles, platform_identifiers, source_assignments, source_history s indexy + RLS policies podle 03-registry-schema.md.", "owner": "db-engineer", "estimatedDuration": "M" },
+        { "id": "02", "name": "Backfill script 20260517000002_sources_backfill.sql", "description": "Konvertovat scout_sources → sources (type='feed') + source_handles; artists → sources (type='artist'); artist_links → source_handles + platform_identifiers. Zachovat UUID identitu.", "owner": "db-engineer", "estimatedDuration": "L" },
+        { "id": "03", "name": "Backwards-compat views 20260517000003_sources_views_backwards_compat.sql", "description": "RENAME scout_sources → _legacy_scout_sources; vytvořit VIEW scout_sources nad novou strukturou; v_artists_legacy view pro starý kód co čte artists table.", "owner": "db-engineer", "estimatedDuration": "S" },
+        { "id": "04", "name": "Triggers: updated_at + audit log + platform_identifiers sync", "description": "Auto-update updated_at sloupců; AFTER UPDATE triggery logující do source_history; sync triggery mezi platform_identifiers a source_handles.", "owner": "db-engineer", "estimatedDuration": "S" },
+        { "id": "05", "name": "Smoke test v shadow DB", "description": "Spot-check 20 random řádků každého typu; ověřit že Scout actions/sources/page.tsx queries vrací identická data před a po migraci.", "owner": "qa", "estimatedDuration": "S" },
+        { "id": "06", "name": "Rollback SQL skript", "description": "DROP TABLE sources/source_handles/...; RENAME _legacy_scout_sources → scout_sources. Otestovat na shadow DB.", "owner": "db-engineer", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "SRC_PR_S2_SRL_KERNEL",
+      "moduleName": "PR-S2 — Source Resolution Layer (SRL) kernel",
+      "modulePath": "command-centrum/lib/sources/srl/** · command-centrum/app/api/sources/resolve/**",
+      "purpose": "Postavit jediné API mezi Sources Registry a všemi consumery — workers, Writer, Curator, Enrichment, Creator, Intelligence, CEO, Distribution.",
+      "currentState": "Každý modul si píše vlastní SQL queries proti scout_sources/artists/artist_links. Žádný cache, žádný shared scoring, žádný N+1 protection. Writer stage je TODO blocker.",
+      "goal": "lib/sources/srl/ s 5 resolve methods + Redis cache (60s hot, 5m warm) + scoring (authority/freshness/health) + REST mirror pro Python AI. Reference integration v Spotify Artists Worker.",
+      "priority": "P0",
+      "phase": "Build",
+      "estimatedComplexity": "L",
+      "domains": ["BACKEND"],
+      "successCriteria": [
+        "srl.resolveForWorker('wkr-spotify-artists','tracked_artists') vrací validní SourceBundle",
+        "Cache hit p95 < 50ms (Upstash dev tier)",
+        "REST endpoints /api/sources/resolve/* vrací JSON matching SourceBundle shape",
+        "Spotify Artists Worker (mock) volá SRL místo direct DB query",
+        "Zero N+1 queries — všechny joins single SQL nebo batched"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Core types + interfaces v lib/sources/srl/types.ts", "description": "Definovat SourceBundle, ResolvedSource, ConsumerIntent, CrossPlatformProfile, PlatformLinks podle 04-srl-spec.md.", "owner": "backend-engineer", "estimatedDuration": "S" },
+        { "id": "02", "name": "Resolver kernel lib/sources/srl/resolver.ts", "description": "Implementovat 5 resolve methods: resolveForWorker, resolveForArtist, resolveCrossPlatformLinks, enrichClusterArtist, resolveTrackedEntities. Plus search() generic.", "owner": "backend-engineer", "estimatedDuration": "L" },
+        { "id": "03", "name": "Joins: artist-join + playlist-join + feed-join", "description": "Per-type SQL builders s JOIN přes source_handles + platform_identifiers; zero N+1; vrací unified shape.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "04", "name": "Scoring: authority + freshness + health", "description": "Algoritmy podle 04-srl-spec.md; čte source.authority_score, last_validated_at, worker_runs.error_rate; derives final scores.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "05", "name": "Redis bundle cache + invalidation", "description": "Upstash backed cache s TTL per pattern; event-driven invalidation on source UPDATE; in-memory LRU fallback při Redis outage.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "06", "name": "REST API mirror /api/sources/resolve/*", "description": "8 endpointů (worker, artist, cross-platform, tracked, campaign, search, health, cache/invalidate) auth přes Supabase session + service-role token pro AI workers.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "07", "name": "Spotify Artists Worker reference integration", "description": "Refactor wkr-spotify-artists volá srl.resolveForWorker() místo direct query. Proof that SRL works end-to-end.", "owner": "ai-pipeline", "estimatedDuration": "S" },
+        { "id": "08", "name": "Unit testy: joins + scoring + cache hit/miss", "description": "Min 70% coverage na resolver.ts, joins/, scoring/, cache/. Testuje cache invalidation events.", "owner": "qa", "estimatedDuration": "M" }
+      ]
+    },
+    {
+      "moduleId": "SRC_PR_S3_UI_REDESIGN",
+      "moduleName": "PR-S3 — Sources UI Redesign (central registry browser)",
+      "modulePath": "command-centrum/components/sources/** · command-centrum/app/(dashboard)/sources/**",
+      "purpose": "Předělat /sources jako central registry browser s 8 sekcemi, per-source detail s 5 taby, cross-link mezi consumery, audit timeline.",
+      "currentState": "4 fragmentované stránky (sources, sources/artists, sources/gallery, sources/media). Direct Supabase client bez API. Žádný cross-link mezi entitami. Žádný audit view.",
+      "goal": "Single cockpit s tabs Overview/Artists/Playlists/Feeds/Charts/Topics/Assets/Audit. Per-source detail s Used by drawer (cross-link), History timeline, bulk validate s live progress.",
+      "priority": "P1",
+      "phase": "Build",
+      "estimatedComplexity": "L",
+      "domains": ["FRONTEND"],
+      "successCriteria": [
+        "Všechny routes /sources/** vrací 200",
+        "Cross-link Used by drawer ukazuje consumer list per source",
+        "Per-source edit zapisuje do source_history s reason field",
+        "Bulk validate s live progress per row",
+        "Mobile responsive (test < 400px)",
+        "Lint + type-check clean"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Sidebar update: SOURCES jako clickable parent + 8 children", "description": "Stejný pattern jako Scout HQ (clickable Link + chevron toggle). Overview default landing. Auto-expand když user na /sources/*.", "owner": "frontend-engineer", "estimatedDuration": "S" },
+        { "id": "02", "name": "Overview client: KPI strip + category grid + recent activity + top consumers", "description": "/sources page.tsx s reusable WorkerHealthCard pattern. Fetch z /api/sources/resolve/tracked + /api/sources/audit/recent.", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Category client (shared shell): Artists/Playlists/Feeds/Charts/Topics/Assets", "description": "<SourcesCategoryClient type='artist'> reusable; toolbar (search/filter/sort/bulk); table s handles mini-icons + Used by badge.", "owner": "frontend-engineer", "estimatedDuration": "L" },
+        { "id": "04", "name": "Per-source detail s 5 taby (Overview/Handles/Used by/History/Settings)", "description": "/sources/[type]/[id] page; sticky header s authority badge; tab bar; reusable per type. Used by tab = drawer s consumer list + last fetch.", "owner": "frontend-engineer", "estimatedDuration": "L" },
+        { "id": "05", "name": "Global audit page /sources/audit", "description": "Cross-source timeline source_history events; filters actor/action/date/type; aggregations (kdo nejvíc edituje, broken sources rate).", "owner": "frontend-engineer", "estimatedDuration": "M" },
+        { "id": "06", "name": "Shared components: handle-pill, authority-badge, add-source-dialog, history-timeline", "description": "10 komponent v components/sources/. handle-pill = mini ikona + verified indicator; authority-badge = colored 95/100 pill.", "owner": "ui-ux-designer", "estimatedDuration": "M" },
+        { "id": "07", "name": "URL redirects v middleware (legacy /sources/gallery → /sources/assets)", "description": "next.config.ts nebo middleware.ts permanent redirects. Zachovat bookmark compat.", "owner": "frontend-engineer", "estimatedDuration": "S" },
+        { "id": "08", "name": "Visual tokens + per-type colors", "description": "artist #1ED760, playlist #1DB954, feed #FFB84D, chart #A78BFA, topic #7DD3FC, asset #E1306C. Sjednotit s Scout HQ tokens kde overlap.", "owner": "ui-ux-designer", "estimatedDuration": "S" }
+      ]
+    },
+    {
+      "moduleId": "SRC_PR_S4_CONSUMER_REWIRING",
+      "moduleName": "PR-S4 — Consumer rewiring + Writer stage live",
+      "modulePath": "command-centrum/lib/pipeline/writer.ts · enrichment.ts · lib/services/artist-service.ts · lib/scout/workers/**",
+      "purpose": "Přepnout všechny consumery (Scout Workers, Writer, Enrichment, Artist Service) z direct DB queries na SRL API. Odblokovat Writer stage TODO.",
+      "currentState": "Writer stage je TODO blocker (lib/pipeline/writer.ts vrací notImplemented). Enrichment, Artist Service mají vlastní ad-hoc joins. Žádný shared cache, duplikátní queries napříč pipeline.",
+      "goal": "Žádné direct from('sources') calls v app kódu — všechno přes SRL. Writer stage produkuje články s artist context. Backwards compat: legacy queries dál fungují přes view.",
+      "priority": "P1",
+      "phase": "Validate",
+      "estimatedComplexity": "M",
+      "domains": ["BACKEND", "PIPELINE"],
+      "successCriteria": [
+        "Existing Scout HQ UI vrací identická data (regression test)",
+        "Writer stage produkuje články s artist context (cluster.mainEntity → CrossPlatformProfile)",
+        "Žádné direct from('sources') v app code — grep clean",
+        "Performance: p95 endpointů se nezvýší o > 20% vs baseline",
+        "Smoke test: full pipeline Scout → Filter → Curator → Cluster → Enrichment → Writer prochází bez crashe"
+      ],
+      "subMissions": [
+        { "id": "01", "name": "Writer stage implementace s SRL", "description": "lib/pipeline/writer.ts (dnes notImplemented) volá srl.enrichClusterArtist(clusterId), buduje article s artist context. Replace TODO comment.", "owner": "ai-pipeline", "estimatedDuration": "L" },
+        { "id": "02", "name": "Refactor enrichment.ts:211 → srl.enrichClusterArtist", "description": "Nahradit ad-hoc story_clusters JOIN artist_links query za SRL call. Cache hit reduces duplicate fetches napříč clustery.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "03", "name": "Refactor artist-service.ts:69 → srl.resolveCrossPlatformLinks", "description": "findOrCreateArtist + resolve platform IDs přes SRL místo 7 sloupcových selectů. Zachovat API surface.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "04", "name": "Scout Workers (all 12) volají srl.resolveForWorker", "description": "Refactor wkr-spotify-playlists, wkr-spotify-artists, wkr-apple-music, wkr-deezer, wkr-youtube, wkr-rss, wkr-blogs, wkr-magazines, wkr-charts, wkr-trends. Spotify Artists už zerefactorovaný v PR-S2.", "owner": "ai-pipeline", "estimatedDuration": "L" },
+        { "id": "05", "name": "Refactor lib/actions/scout.ts → SRL pro CRUD", "description": "Zachovat API surface (Sources UI legacy nepostřehne), ale interně volat srl.search/resolveTrackedEntities místo přímo scout_sources select.", "owner": "backend-engineer", "estimatedDuration": "M" },
+        { "id": "06", "name": "Regression test suite: Scout HQ + Writer pipeline", "description": "Playwright E2E: Scout HQ vrací stejné KPI; Run Scout vrátí stejné counts; Writer produkuje validní článek s artist context.", "owner": "qa", "estimatedDuration": "M" },
+        { "id": "07", "name": "Performance benchmark: p95 latence per endpoint", "description": "Before/after měření klíčových endpointů (/api/scout-hq/workers, /api/sources/resolve/*); cíl: žádná regrese > 20%.", "owner": "performance", "estimatedDuration": "S" },
+        { "id": "08", "name": "Smoke test full pipeline + grep no-direct-queries", "description": "Pipeline Scout → Filter → Curator → Cluster → Enrichment → Writer end-to-end. grep -r \"from('scout_sources')\" lib/ src/ → musí být prázdné (mimo SRL kódu).", "owner": "qa", "estimatedDuration": "S" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,375 @@
+{
+  "version": "2026-05-23-feed-schema-consolidation",
+  "generatedAt": "2026-05-23T16:30:00Z",
+  "generatedBy": "backend-engineer (UM-FEED_SCHEMA_AND_EDITOR_DONE sub-01)",
+  "runId": "run-20260523-um-feed-schema-and-editor-done",
+  "previousRunId": "run-20260523-um-schema-manifest-consolidation",
+  "previousVersion": "2026-05-18-master-consolidation",
+  "masterSchema": {
+    "path": "supabase/MASTER_SCHEMA.sql",
+    "lineCount": 812,
+    "checksumNote": "computed at install via compute_schema_checksum() PL/pgSQL function"
+  },
+  "tables": [
+    {
+      "name": "profiles",
+      "definedIn": "MASTER_SCHEMA.sql",
+      "definedAtLine": 30,
+      "order": 1,
+      "fkDependencies": ["auth.users"],
+      "category": "system"
+    },
+    {
+      "name": "scout_sources",
+      "definedIn": "MASTER_SCHEMA.sql",
+      "definedAtLine": 304,
+      "order": 2,
+      "fkDependencies": [],
+      "category": "ingest"
+    },
+    {
+      "name": "scout_items",
+      "definedIn": "MASTER_SCHEMA.sql",
+      "definedAtLine": 57,
+      "order": 3,
+      "fkDependencies": [],
+      "category": "ingest"
+    },
+    {
+      "name": "scout_runs",
+      "definedIn": "MASTER_SCHEMA.sql",
+      "definedAtLine": 355,
+      "order": 4,
+      "fkDependencies": [],
+      "category": "ingest"
+    },
+    {
+      "name": "curated_items",
+      "definedIn": "MASTER_SCHEMA.sql",
+      "definedAtLine": 129,
+      "order": 5,
+      "fkDependencies": ["scout_items"],
+      "category": "pipeline"
+    },
+    {
+      "name": "story_clusters",
+      "definedIn": "MASTER_SCHEMA.sql",
+      "definedAtLine": 240,
+      "order": 6,
+      "fkDependencies": ["scout_items"],
+      "category": "pipeline"
+    },
+    {
+      "name": "story_cluster_sources",
+      "definedIn": "MASTER_SCHEMA.sql",
+      "definedAtLine": 288,
+      "order": 7,
+      "fkDependencies": ["story_clusters", "scout_items"],
+      "category": "pipeline"
+    },
+    {
+      "name": "posts",
+      "definedIn": "MASTER_SCHEMA.sql",
+      "definedAtLine": 147,
+      "order": 8,
+      "fkDependencies": [],
+      "category": "publish"
+    },
+    {
+      "name": "feed_posts",
+      "definedIn": "MASTER_SCHEMA.sql",
+      "definedAtLine": 205,
+      "order": 9,
+      "fkDependencies": ["scout_items", "story_clusters"],
+      "category": "publish"
+    },
+    {
+      "name": "post_analytics",
+      "definedIn": "MASTER_SCHEMA.sql",
+      "definedAtLine": 189,
+      "order": 10,
+      "fkDependencies": ["posts"],
+      "category": "publish"
+    },
+    {
+      "name": "scoring_weights",
+      "definedIn": "MASTER_SCHEMA.sql",
+      "definedAtLine": 374,
+      "order": 11,
+      "fkDependencies": [],
+      "category": "system"
+    },
+    {
+      "name": "ad_campaigns",
+      "definedIn": "MASTER_SCHEMA.sql",
+      "definedAtLine": 396,
+      "order": 12,
+      "fkDependencies": [],
+      "category": "monetize"
+    },
+    {
+      "name": "ad_slots",
+      "definedIn": "MASTER_SCHEMA.sql",
+      "definedAtLine": 408,
+      "order": 13,
+      "fkDependencies": ["ad_campaigns"],
+      "category": "monetize"
+    },
+    {
+      "name": "schema_version",
+      "definedIn": "MASTER_SCHEMA.sql",
+      "definedAtLine": 750,
+      "order": 14,
+      "fkDependencies": [],
+      "category": "system"
+    },
+    {
+      "name": "pipeline_runs",
+      "definedIn": "schema-pipeline-runs.sql",
+      "definedAtLine": 24,
+      "order": 15,
+      "fkDependencies": [],
+      "category": "pipeline"
+    },
+    {
+      "name": "worker_runs",
+      "definedIn": "schema-pipeline-runs.sql",
+      "definedAtLine": 49,
+      "order": 16,
+      "fkDependencies": [],
+      "category": "pipeline"
+    },
+    {
+      "name": "pipeline_stage_runs",
+      "definedIn": "PIPELINE_EXTENSIONS.sql",
+      "definedAtLine": 65,
+      "order": 17,
+      "fkDependencies": [],
+      "category": "pipeline"
+    },
+    {
+      "name": "post_monetization",
+      "definedIn": "schema-monetizer.sql",
+      "definedAtLine": 9,
+      "order": 18,
+      "fkDependencies": ["posts"],
+      "category": "monetize"
+    },
+    {
+      "name": "social_posts",
+      "definedIn": "PIPELINE_EXTENSIONS.sql",
+      "definedAtLine": 139,
+      "order": 19,
+      "fkDependencies": ["posts"],
+      "category": "publish"
+    }
+  ],
+  "files": [
+    {
+      "path": "supabase/MASTER_SCHEMA.sql",
+      "applyOrder": 1,
+      "phase": "core",
+      "description": "Canonical pipeline schema — 14 core tables (8 pipeline + profiles + post_analytics + scoring_weights + ad_campaigns + ad_slots + schema_version) + checksum helpers + schema_health view"
+    },
+    {
+      "path": "supabase/schema-pipeline-runs.sql",
+      "applyOrder": 2,
+      "phase": "extensions",
+      "description": "pipeline_runs + worker_runs tracking tables (PR-2.5) — observability vrstva pro run history"
+    },
+    {
+      "path": "supabase/schema-translation.sql",
+      "applyOrder": 3,
+      "phase": "extensions",
+      "description": "Idempotentní translation sloupce na scout_items (title_en, content_en, lang_detected) + status constraint refresh"
+    },
+    {
+      "path": "supabase/schema-multilang.sql",
+      "applyOrder": 4,
+      "phase": "extensions",
+      "description": "Multilang sloupce (english_master, localized_versions jsonb) na scout_items + feed_posts + posts"
+    },
+    {
+      "path": "supabase/schema-monetizer.sql",
+      "applyOrder": 5,
+      "phase": "extensions",
+      "description": "post_monetization tabulka — AI scoring monetizace per post (FK: posts)"
+    },
+    {
+      "path": "supabase/PIPELINE_EXTENSIONS.sql",
+      "applyOrder": 6,
+      "phase": "extensions",
+      "description": "pipeline_stage_runs + social_posts + post_monetization (kompatibilní s schema-monetizer) — analytika stage health"
+    },
+    {
+      "path": "supabase/schema-system-hotfixes-20260512.sql",
+      "applyOrder": 7,
+      "phase": "hotfixes",
+      "description": "Hotfix 2026-05-12 — chybějící sloupce a constraint úpravy na scout_items, story_clusters, feed_posts, posts"
+    },
+    {
+      "path": "supabase/schema-sources-fix.sql",
+      "applyOrder": 8,
+      "phase": "hotfixes",
+      "description": "Hotfix — refresh scout_sources_lang_check constraint (rozšíření jazykového setu)"
+    },
+    {
+      "path": "supabase/migrations/20260517000001_sources_registry.sql",
+      "applyOrder": 9,
+      "phase": "sources-registry",
+      "sha256": "589fa46fdf18b9702160d05761942addb82fa78223652da40bf3962a76cb1b58",
+      "description": "PR-S1 sub-01 — 5 registry tables (sources, source_handles, platform_identifiers, source_assignments, source_history) + indexes + RLS"
+    },
+    {
+      "path": "supabase/migrations/20260517000002_sources_backfill.sql",
+      "applyOrder": 10,
+      "phase": "sources-registry",
+      "sha256": "8739a0e203e9462226c42d01a93537aba6038d1ab9be21ef316307841f75b438",
+      "description": "PR-S1 sub-02 — backfill legacy scout_sources/artists/artist_links into canonical registry"
+    },
+    {
+      "path": "supabase/migrations/20260517000003_sources_views_backwards_compat.sql",
+      "applyOrder": 11,
+      "phase": "sources-registry",
+      "sha256": "8676173e49ae5a193afe37a521c911d8fbe718af1e0d06aecc4669df898487e1",
+      "description": "PR-S1 sub-03 — rename scout_sources -> _legacy_scout_sources + VIEWS for backwards compat (table -> view transition)"
+    },
+    {
+      "path": "supabase/migrations/20260517000004_sources_triggers.sql",
+      "applyOrder": 12,
+      "phase": "sources-registry",
+      "sha256": "0febd319c8ae08ed73c662992abf7c75ea38ac1631352179c34fe7fe4793ada6",
+      "description": "PR-S1 sub-04 — updated_at triggers + audit log on sources + platform_identifiers sync"
+    },
+    {
+      "path": "supabase/migrations/20260521000000_scout_runs_metrics.sql",
+      "applyOrder": 13,
+      "phase": "pipeline-extend",
+      "sha256": "0b160aeb8ad228d36a675dbbfdf22361b90b9c1e938769b3c268a4b3eef4f81c",
+      "description": "UM-SCOUT #05 — scout_runs add items_inserted + error_count (additive, idempotent)"
+    },
+    {
+      "path": "supabase/migrations/20260521000001_posts_variants.sql",
+      "applyOrder": 14,
+      "phase": "pipeline-extend",
+      "sha256": "4fd5b39be44ef66593333fba3b4badd53fb8b239bb58e94894918f2f468ed108",
+      "description": "UM-WRITER — posts add variants jsonb (full/news/social/thread)"
+    },
+    {
+      "path": "supabase/migrations/20260521000002_droppz_detector.sql",
+      "applyOrder": 15,
+      "phase": "pipeline-extend",
+      "sha256": "e007d1e51835649170ec4262b6f247e341a5105fef22b7865695d484af032f64",
+      "description": "UM-DROPPZ_DETECTOR #02+#05 — scout_items add droppz_ai_confidence + droppz_editor_rating + droppz_rated_at"
+    },
+    {
+      "path": "supabase/migrations/20260522000001_feed_editorial_columns.sql",
+      "applyOrder": 16,
+      "phase": "feed-editorial",
+      "sha256": "45ec538e88e2f380ca478a7f9fa6d870fb345246745b43dbeb268fdd958f3309",
+      "description": "UM-FEED_UI — feed_posts editorial workflow columns (schedule_data, scheduled_at, approval_notes, rejected_reason, priority, ...) — UNBLOCKS feed editor save persist"
+    },
+    {
+      "path": "supabase/migrations/20260522000002_pipeline_stage_runs_extend.sql",
+      "applyOrder": 17,
+      "phase": "feed-editorial",
+      "sha256": "7166b365c2bc5a664834b22c90e87c8765b4c1b6f12b82e16a26b140d39f7a4b",
+      "description": "UM-CC_DATA_CONSISTENCY SM5 — pipeline_stage_runs add run_id + error_code (parent-run tracking + error classification)"
+    },
+    {
+      "path": "supabase/migrations/20260522000003_creator_queue.sql",
+      "applyOrder": 18,
+      "phase": "feed-editorial",
+      "sha256": "e7ed7c44638d778cddbd86af3fa150d5ecc9caa8f045009d23986eec574b035b",
+      "description": "UM-CC_DATA_CONSISTENCY SM3 — creator_queue table + claim_creator_job() SKIP LOCKED + lease (replaces ai/scout_hq/creator_queue.json)"
+    },
+    {
+      "path": "supabase/schema-feed-posts-extension.sql",
+      "applyOrder": 19,
+      "phase": "feed-editorial",
+      "sha256": "40b3921d18c08220e343d28f63523f2e80bfab5bb4f80d84c78598edc37af247",
+      "description": "UM-FEED_SCHEMA_AND_EDITOR_DONE sub-01 — feed_posts add published_at + category + region + priority(TEXT P0..P3) + language + 4 indexes + category-based backfill (HDUA visibility + editorial sort)"
+    },
+    {
+      "path": "supabase/migrations/20260523000001_feed_scheduled_at.sql",
+      "applyOrder": 20,
+      "phase": "feed-editorial",
+      "sha256": "8bcbeedb0535678f78d90e50c531ad2d380aa510181c429b52591165083f9caf",
+      "description": "UM-FEED_SCHEMA_AND_EDITOR_DONE sub-01 — feed_posts add scheduled_at (auto-publish cron filter, lib/feed/calendar.ts deriveScheduledAt target). Idempotent."
+    }
+  ],
+  "verification": {
+    "ciGate": "select * from schema_health;",
+    "expectedTableCount": 24,
+    "expectedTableCountNote": "Base MASTER = 19 tables. PR-S1 sources_registry phase adds 5 tables (sources, source_handles, platform_identifiers, source_assignments, source_history). UM-CC_DATA_CONSISTENCY adds creator_queue. Net = 19 + 5 + 1 = 25; legacy scout_sources is renamed to _legacy_scout_sources after migration 20260517000003 (subtract 1 if schema_health counts only BASE TABLE, view does not count) = 24.",
+    "applyCommand": "node command-centrum/scripts/apply-sql.mjs command-centrum/supabase/<file>"
+  },
+  "fkGraph": {
+    "scout_items": [],
+    "scout_sources": [],
+    "scout_runs": [],
+    "profiles": ["auth.users"],
+    "curated_items": ["scout_items"],
+    "story_clusters": ["scout_items"],
+    "story_cluster_sources": ["story_clusters", "scout_items"],
+    "posts": [],
+    "feed_posts": ["scout_items", "story_clusters"],
+    "post_analytics": ["posts"],
+    "scoring_weights": [],
+    "ad_campaigns": [],
+    "ad_slots": ["ad_campaigns"],
+    "schema_version": [],
+    "pipeline_runs": [],
+    "worker_runs": [],
+    "pipeline_stage_runs": [],
+    "post_monetization": ["posts"],
+    "social_posts": ["posts"]
+  },
+  "notes": {
+    "supersededLegacyFiles": [
+      "schema.sql",
+      "schema-scout.sql",
+      "schema-cluster.sql",
+      "schema-pipeline.sql",
+      "schema-full-install.sql",
+      "migrations/20260425000000_pipeline_schema.sql",
+      "migrations/20260512000000_missing_tables.sql",
+      "seed_scout_sources.sql"
+    ],
+    "supersededReason": "Tyto soubory definují tabulky duplicitně (scout_items, scout_sources, scout_runs, story_clusters, story_cluster_sources, curated_items, posts, feed_posts, profiles) a jsou pokryty MASTER_SCHEMA.sql. Nikdy neaplikovat po MASTER — způsobí no-op kvůli IF NOT EXISTS, ale matou audit trail.",
+    "outOfScopeFiles": [
+      "ARTIST_INTELLIGENCE.sql",
+      "ARTIST_DATABASE_EXTENSION.sql",
+      "ARTIST_HISTORY.sql",
+      "ARTIST_BOOST_VIEWS.sql",
+      "ARTIST_TRACKING_ANALYTICS.sql",
+      "TRACKING_ENGINE.sql",
+      "SCOUT_INTEGRATION.sql",
+      "INTEGRATION.sql",
+      "IMAGE_MATCHING.sql",
+      "schema-ai-usage.sql",
+      "schema-apple-music.sql",
+      "schema-droppz.sql",
+      "schema-editorial.sql",
+      "schema-enrichment.sql",
+      "schema-distribution.sql",
+      "schema-graphics.sql",
+      "schema-graphic-config.sql",
+      "schema-pipeline-costs.sql",
+      "schema-pipeline-upgrade.sql",
+      "schema-processed-urls.sql",
+      "schema-python-scout-intake.sql",
+      "schema-scout-meta.sql",
+      "schema-sources-update.sql",
+      "schema-story-writer-pipeline.sql",
+      "schema-deprecate-curated-items.sql"
+    ],
+    "outOfScopeReason": "Mimo scope sub-mission #02. Pokryjí budoucí sub-missions (Artist Intelligence layer, Image matching, Editorial workflow, Distribution). Audit doporučuje konsolidaci do tematických MASTERů. UM-FEED_SCHEMA_AND_EDITOR_DONE sub-01 přesunul schema-feed-posts-extension.sql z této kategorie do files[] applyOrder 19.",
+    "dataSeedFiles": [
+      "insert-all-rss-sources.sql",
+      "add-negative-keywords.sql",
+      "seed_scout_sources.sql"
+    ],
+    "dataSeedReason": "Data seed (INSERT), ne schema. Aplikovat po všech schema souborech."
+  }
+}
