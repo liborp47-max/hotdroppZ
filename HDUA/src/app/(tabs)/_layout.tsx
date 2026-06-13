@@ -1,32 +1,37 @@
 import { Tabs } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { Image, Platform, StyleSheet, View } from 'react-native'
-import type { ViewStyle } from 'react-native'
+import type { ImageStyle, ViewStyle } from 'react-native'
 
 import { colors, layout, radius } from '@/styles/theme'
 
 /**
- * Bottom navigation (HDUA-03) — Home / Search / Create / Alerts / Profile.
- * HDCC "venom" language: pure-black bar, no hard borders. The center Create
- * button is the real HotDroppZ flame (logo-shaped, recolored to a venom
- * gradient) with a knockout plus and a soft shape-accurate blur behind it —
- * no box, no outline. Active icons turn venom with a gentle glow.
+ * Bottom navigation (HDUA-03) — Create / Search / HOME / Alerts / Profile.
+ * HDCC "venom" language: pure-black bar, no hard borders. The raised CENTER
+ * button is the HotDroppZ brand mark (flame + globe, recolored to a venom
+ * gradient) and routes to the home feed. A little glow + shadow, no box.
  */
 
-// Real brand flame (extracted from logoFIRE.ico) + a pre-blurred glow layer that
-// follows the flame's exact silhouette (so the glow is shaped, never a box).
-const FLAME = require('@/assets/brand/flame.png')
-const FLAME_GLOW = require('@/assets/brand/flame-glow.png')
-const FLAME_W = 34
-const FLAME_H = Math.round(FLAME_W / 0.834) // 368×441 aspect
-const GLOW_W = 46
-const GLOW_H = Math.round(GLOW_W * (581 / 508)) // 508×581 aspect
+// Brand home mark (flame + globe) + a pre-blurred glow layer that follows its
+// exact silhouette (shaped glow, never a box). Same venom gradient as the feed.
+const HOME = require('@/assets/brand/home-mark.png')
+const HOME_GLOW = require('@/assets/brand/home-glow.png')
+const HOME_W = 38
+const HOME_H = Math.round(HOME_W / 0.826) // 423×512 aspect
+const HGLOW_W = 54
+const HGLOW_H = Math.round(HGLOW_W * (652 / 563)) // padded-glow aspect
 
 type IoniconName = keyof typeof Ionicons.glyphMap
 
 // Web-only soft glow that follows the glyph's alpha (no box). No-op on native.
 const iconGlow: ViewStyle | null =
   Platform.OS === 'web' ? ({ filter: 'drop-shadow(0 0 6px rgba(0,236,136,0.65))' } as ViewStyle) : null
+
+// Glow + drop shadow for the brand mark (shape-accurate on web).
+const homeShadow: ImageStyle | null =
+  Platform.OS === 'web'
+    ? ({ filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.5)) drop-shadow(0 0 8px rgba(0,236,136,0.55))' } as ImageStyle)
+    : null
 
 /** Outline icon that turns venom with a gentle glow when focused. */
 function TabIcon({ name, focused }: { name: IoniconName; focused: boolean }) {
@@ -38,18 +43,12 @@ function TabIcon({ name, focused }: { name: IoniconName; focused: boolean }) {
   )
 }
 
-/** Center brand button — the flame logo itself, soft blur behind, plus in belly. */
-function CreateButton() {
+/** Raised center brand button — flame + globe logo, routes home. Glow + shadow. */
+function HomeButton() {
   return (
-    <View style={styles.create}>
-      <Image source={FLAME_GLOW} style={styles.flameGlow} />
-      <Image source={FLAME} style={styles.flame} resizeMode="contain" />
-      <View style={styles.plusWrap} pointerEvents="none">
-        <View style={styles.plusBox}>
-          <View style={[styles.plusBar, styles.plusH]} />
-          <View style={[styles.plusBar, styles.plusV]} />
-        </View>
-      </View>
+    <View style={styles.home}>
+      <Image source={HOME_GLOW} style={styles.homeGlow} />
+      <Image source={HOME} style={[styles.homeMark, homeShadow]} resizeMode="contain" />
     </View>
   )
 }
@@ -57,6 +56,7 @@ function CreateButton() {
 export default function TabsLayout() {
   return (
     <Tabs
+      initialRouteName="index"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
@@ -66,9 +66,9 @@ export default function TabsLayout() {
         tabBarItemStyle: styles.tabItem,
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: ({ focused }) => <TabIcon name="home" focused={focused} /> }} />
+      <Tabs.Screen name="create" options={{ title: 'Create', tabBarIcon: ({ focused }) => <TabIcon name="add-circle-outline" focused={focused} /> }} />
       <Tabs.Screen name="search" options={{ title: 'Search', tabBarIcon: ({ focused }) => <TabIcon name="search" focused={focused} /> }} />
-      <Tabs.Screen name="create" options={{ title: 'Create', tabBarIcon: () => <CreateButton /> }} />
+      <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: () => <HomeButton /> }} />
       <Tabs.Screen name="alerts" options={{ title: 'Alerts', tabBarIcon: ({ focused }) => <TabIcon name="notifications" focused={focused} /> }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: ({ focused }) => <TabIcon name="person" focused={focused} /> }} />
     </Tabs>
@@ -90,25 +90,16 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill, backgroundColor: colors.accent,
   },
 
-  // Center create button — flame logo, no box/border, soft shaped blur behind.
-  create: {
-    width: FLAME_W, height: FLAME_H, marginTop: -16,
+  // Center brand button — flame+globe logo, raised, soft shaped glow behind.
+  home: {
+    width: HOME_W, height: HOME_H, marginTop: -18,
     alignItems: 'center', justifyContent: 'center',
   },
-  flameGlow: {
+  homeGlow: {
     position: 'absolute',
-    width: GLOW_W, height: GLOW_H,
-    left: (FLAME_W - GLOW_W) / 2, top: (FLAME_H - GLOW_H) / 2,
-    opacity: 0.45,
+    width: HGLOW_W, height: HGLOW_H,
+    left: (HOME_W - HGLOW_W) / 2, top: (HOME_H - HGLOW_H) / 2,
+    opacity: 0.5,
   },
-  flame: { width: FLAME_W, height: FLAME_H },
-  // Plus sits in the solid lower belly of the flame.
-  plusWrap: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 7,
-  },
-  plusBox: { width: 12, height: 12 },
-  plusBar: { position: 'absolute', backgroundColor: '#04130C', borderRadius: 1 },
-  plusH: { top: 4.4, left: 0, width: 12, height: 3.2 },
-  plusV: { left: 4.4, top: 0, width: 3.2, height: 12 },
+  homeMark: { width: HOME_W, height: HOME_H },
 })

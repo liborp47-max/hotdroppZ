@@ -4,6 +4,7 @@
  * client is what authorizes calls to the Content API (HDUA-02).
  */
 import { createClient } from '@supabase/supabase-js'
+import { Platform } from 'react-native'
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL ?? ''
 const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? ''
@@ -17,6 +18,8 @@ export const supabase = createClient(url, anonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: false,
+    // Web OAuth redirects back with the session in the URL fragment — parse it
+    // there. Native uses its own deep-link flow, so keep it off (HDUA-14).
+    detectSessionInUrl: Platform.OS === 'web',
   },
 })

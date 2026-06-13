@@ -1,15 +1,17 @@
-import { memo, useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef } from 'react'
 import { Linking, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native'
 import Animated, { FadeInDown, FadeOutUp, LinearTransition } from 'react-native-reanimated'
 import { Image } from 'expo-image'
 import { Ionicons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
+import { useRouter } from 'expo-router'
 
-import { AudioPreview } from '@/components/media/AudioPreview'
 import { EmbedPlayer } from '@/components/media/Embed'
 import { trackView } from '@/lib/analytics'
 import { pickEmbed } from '@/lib/embeds'
+import { useAuth } from '@/stores/auth'
 import { useFeedExpand } from '@/stores/feedExpand'
+import { useInteractions } from '@/stores/userInteractions'
 import { useShareSheet } from '@/stores/shareSheet'
 import { colors, radius, spacing, typography } from '@/styles/theme'
 import { compact, timeAgo } from '@/utils/text'
@@ -21,6 +23,7 @@ const SOURCE_META: Record<SourcePlatform, { label: string; color: string; icon: 
   spotify: { label: 'Spotify', color: colors.spotify, icon: 'musical-notes' },
   apple_music: { label: 'Apple Music', color: colors.appleMusic, icon: 'musical-note' },
   youtube: { label: 'YouTube', color: colors.youtube, icon: 'logo-youtube' },
+  genius: { label: 'Genius', color: '#FFD000', icon: 'document-text' },
   web: { label: 'Source', color: colors.textMuted, icon: 'globe-outline' },
 }
 
@@ -48,10 +51,15 @@ function Action({
  */
 function FeedCardBase({ item }: { item: FeedItem }) {
   const { height } = useWindowDimensions()
+  const router = useRouter()
+  const authStatus = useAuth((s) => s.status)
   const expanded = useFeedExpand((s) => s.expandedId === item.id)
   const toggle = useFeedExpand((s) => s.toggle)
   const openShare = useShareSheet((s) => s.open)
-  const [liked, setLiked] = useState(false)
+  const liked = useInteractions((s) => s.liked.has(item.id))
+  const saved = useInteractions((s) => s.saved.has(item.id))
+  const toggleLike = useInteractions((s) => s.toggleLike)
+  const toggleSave = useInteractions((s) => s.toggleSave)
 
   const badge = TYPE_BADGE[item.type]
   const playable = item.type === 'release' || item.type === 'video' || item.type === 'playlist'
@@ -81,9 +89,17 @@ function FeedCardBase({ item }: { item: FeedItem }) {
     toggle(item.id)
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {})
   }
-  const toggleLike = () => {
-    setLiked((v) => !v)
+  // Like/Save persist to the signed-in user (HDUA-14). Guests are sent to the
+  // auth modal instead; the store handles optimistic update + rollback.
+  const onLike = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {})
+    if (authStatus !== 'authed') { router.push('/auth'); return }
+    toggleLike(item.id).catch(() => {})
+  }
+  const onSave = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {})
+    if (authStatus !== 'authed') { router.push('/auth'); return }
+    toggleSave(item.id).catch(() => {})
   }
 
   return (
@@ -153,10 +169,10 @@ function FeedCardBase({ item }: { item: FeedItem }) {
         ) : null}
 
         <View style={styles.actions}>
-          <Action icon={liked ? 'heart' : 'heart-outline'} label={compact((sig?.likes ?? 0) + (liked ? 1 : 0))} active={liked} onPress={toggleLike} />
+          <Action icon={liked ? 'heart' : 'heart-outline'} label={compact((sig?.likes ?? 0) + (liked ? 1 : 0))} active={liked} onPress={onLike} />
           <Action icon="chatbubble-outline" label={compact(sig?.comments ?? 0)} onPress={onToggle} />
+          <Action icon={saved ? 'bookmark' : 'bookmark-outline'} label="Uložit" active={saved} onPress={onSave} />
           <Action icon="share-social-outline" label="Sdílet" onPress={() => openShare(item)} />
-          <Action icon="flame" label="Boost" accent onPress={() => {}} />
         </View>
 
         {/* expand / collapse hint */}

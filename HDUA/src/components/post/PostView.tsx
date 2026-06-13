@@ -15,6 +15,7 @@ const SOURCE_META: Record<SourcePlatform, { label: string; color: string; icon: 
   spotify: { label: 'Spotify', color: colors.spotify, icon: 'musical-notes' },
   apple_music: { label: 'Apple Music', color: colors.appleMusic, icon: 'musical-note' },
   youtube: { label: 'YouTube', color: colors.youtube, icon: 'logo-youtube' },
+  genius: { label: 'Genius', color: '#FFD000', icon: 'document-text' },
   web: { label: 'Source', color: colors.textMuted, icon: 'open-outline' },
 }
 

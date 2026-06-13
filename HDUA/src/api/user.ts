@@ -79,6 +79,23 @@ export async function getSettings() {
   return data
 }
 
+/** GET /me/interactions — the current user's liked + saved post ids (one round-trip
+ *  pair), used to hydrate the feed action bar on sign-in. Empty when signed out. */
+export async function getMyInteractions(): Promise<{ liked: string[]; saved: string[] }> {
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user) return { liked: [], saved: [] }
+  const [likedRes, savedRes] = await Promise.all([
+    supabase.from('hdua_liked_posts').select('post_id').eq('user_id', auth.user.id),
+    supabase.from('hdua_saved_posts').select('post_id').eq('user_id', auth.user.id),
+  ])
+  if (likedRes.error) throw new Error(`getMyInteractions(liked): ${likedRes.error.message}`)
+  if (savedRes.error) throw new Error(`getMyInteractions(saved): ${savedRes.error.message}`)
+  return {
+    liked: (likedRes.data ?? []).map((r) => r.post_id),
+    saved: (savedRes.data ?? []).map((r) => r.post_id),
+  }
+}
+
 // ── Optimistic social actions (used by the feed action bar, HDUA-06) ──────────
 
 export async function toggleLike(postId: string, liked: boolean): Promise<void> {

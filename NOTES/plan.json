@@ -19952,6 +19952,12 @@
           "event": "MISSION_CREATED",
           "actor": "auditor",
           "note": "HDUA detailed audit 2026-06-11 (post UI overhaul)"
+        },
+        {
+          "ts": "2026-06-12T15:14:13.453Z",
+          "event": "NOTE",
+          "actor": "opus-4.8",
+          "note": "CEO chose FIX-CONTENT-FIRST over enrichment (2026-06-12). Enrichment (Spotify/YouTube/Genius media) REMAINS BLOCKED on missing API keys — sub01 still pending CEO-provided secrets. Separate content-quality fix shipped instead: classifier+sources+clean rebuild (see CC-CONTENT-QUALITY-2026-06-12). Feed went 17 junk → 55 real drops."
         }
       ],
       "sequenceIndex": 215,
@@ -20005,8 +20011,8 @@
       ]
     },
     {
-      "status": "todo",
-      "lifecycleStatus": "PLAN",
+      "status": "done",
+      "lifecycleStatus": "DONE",
       "coldCase": false,
       "isDeleted": false,
       "createdAt": "2026-06-11T16:00:00.000Z",
@@ -20020,6 +20026,12 @@
           "event": "MISSION_CREATED",
           "actor": "auditor",
           "note": "HDUA detailed audit 2026-06-11 (post UI overhaul)"
+        },
+        {
+          "ts": "2026-06-12T14:48:36.687Z",
+          "event": "MISSION_DONE",
+          "actor": "opus-4.8",
+          "note": "Auth gate built: auth store + AuthProvider + RequireAuth gate, /auth modal (email/pw + Google OAuth, venom), profile rebuilt with real data+logout, FeedCard like/save wired to RLS hdua_liked/saved via optimistic interactions store. tsc+eslint clean. Signup triggers verified healthy (hdua_handle_new_user seeds profiles+settings)."
         }
       ],
       "sequenceIndex": 214,
@@ -20049,7 +20061,7 @@
           "name": "Auth UI",
           "description": "Login/registrace obrazovka, venom styl, error stavy.",
           "why": "Vstupní bod pro uživatelská data.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
           "estimatedDuration": "M"
         },
@@ -20058,7 +20070,7 @@
           "name": "Session + gate",
           "description": "Session check, redirect, logout, ochrana user routes.",
           "why": "Bezpečnost a perzistence.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
           "estimatedDuration": "M"
         },
@@ -20067,7 +20079,7 @@
           "name": "Napojení akcí",
           "description": "Like/save/profile/settings na auth uživatele + RLS ověření.",
           "why": "Funkční personalizace.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
           "estimatedDuration": "M"
         }
@@ -20315,6 +20327,42 @@
           "owner": "devops",
           "estimatedDuration": "S"
         }
+      ]
+    },
+    {
+      "id": "CC-CONTENT-QUALITY-2026-06-12",
+      "name": "Content-quality fix — kill fake drops (classifier + sources + rebuild)",
+      "status": "done",
+      "lifecycleStatus": "DONE",
+      "priority": "P0",
+      "phase": "Build",
+      "moduleId": "HDCC",
+      "userMission": true,
+      "sequenceIndex": 221,
+      "inTimeline": true,
+      "createdAt": "2026-06-12T15:14:13.454Z",
+      "purpose": "HDUA feed was junk (news/self-promo misclassified as drops). Fix the pipeline root causes + rebuild a clean feed.",
+      "domains": [
+        "PIPELINE",
+        "BACKEND"
+      ],
+      "auditLog": [
+        {
+          "ts": "2026-06-12T15:14:13.454Z",
+          "event": "MISSION_DONE",
+          "actor": "opus-4.8",
+          "note": "Fix A droppz-detector: negative guard always applies + droppz/rap need real release signal or known artist (no blanket category trust); 17/17 fake drops -> 2/17 on real data; 21 tests pass. Fix C cluster.ts: matchKnownArtist vs artists DB, no junk main_entity fallback. Source hygiene: editorial mags moved out of droppz P0 lane, 3 Reddit self-promo firehoses deactivated, 50 firehose items discarded. Purged 123 junk clusters + 17 feed_posts. Rebuilt 55 clean feed_posts (real drops: Lizzo/J.Cole/Kodak Black/Skrillex/Interpol/UK drill), 28 with artist labels. tsc clean."
+        }
+      ],
+      "successCriteria": [
+        "No fake drops in feed",
+        "Classifier gated on content not source category",
+        "Clean rebuild materialized in hdua_feed_items"
+      ],
+      "knownGaps": [
+        "Cross-source dedup not in SQL rebuild (Interpol x4) — real Jaccard cluster stage handles it when pipeline runs with service key",
+        "Covers/Spotify still empty (enrichment key-blocked, HDUA-15)",
+        "~half feed cards have null artist (honest — no reliable match)"
       ]
     }
   ],

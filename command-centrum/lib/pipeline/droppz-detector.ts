@@ -127,7 +127,9 @@ export function detectRelease(item: DetectorItem): ReleaseDetection {
   const matched: string[] = []
 
   const isDroppzCategory = category === 'droppz' || category === 'droppz_news'
-  const hasNegativeGuard = NEGATIVE_GUARD.test(title)
+  // CONTENT-QUALITY FIX (2026-06-12): negative guard checked against title+body, not
+  // just title — editorial intros ("In this interview…") were slipping through.
+  const hasNegativeGuard = NEGATIVE_GUARD.test(title) || NEGATIVE_GUARD.test(body)
   const hasStrongAction = STRONG_ACTION.test(text)
 
   // Release type — precedence: video > album > mixtape > ep > single.
@@ -138,25 +140,34 @@ export function detectRelease(item: DetectorItem): ReleaseDetection {
   else if (EP_PATTERN.test(text)) { release_type = 'ep'; matched.push('ep') }
   else if (SINGLE_PATTERN.test(text)) { release_type = 'single'; matched.push('single') }
 
-  // is_release decision. Negative guard always wins (except explicit Droppz feed).
-  let is_release: boolean
-  if (isDroppzCategory) {
-    is_release = true
-  } else if (hasNegativeGuard) {
-    is_release = false
-  } else if (release_type !== null || hasStrongAction) {
-    is_release = true
-    if (hasStrongAction) matched.push('strong-action')
-  } else {
-    is_release = false
-  }
-
-  // Artist tier — substring match against the top-100 list.
+  // Artist tier — substring match against the top-100 list. Computed BEFORE the
+  // is_release decision so a recognizable artist can satisfy the release gate.
   let artist: string | null = null
   let artist_tier: ArtistTier = 'unknown'
   for (const candidate of TOP_ARTISTS) {
     if (text.includes(candidate)) { artist = candidate; artist_tier = 'top100'; break }
   }
+
+  const hasReleaseSignal = release_type !== null || hasStrongAction
+
+  // is_release decision (CONTENT-QUALITY FIX 2026-06-12).
+  // Previously `isDroppzCategory ⇒ is_release = true` blanket-trusted the source
+  // category, so editorial magazines + Reddit self-promo tagged `droppz`/`*_rap`
+  // turned every article (rankings, news, gossip) into a fake "drop". Now:
+  //   1. the negative guard ALWAYS vetoes (rankings/reviews/interviews/drama),
+  //   2. droppz/rap categories still need a real release signal OR a known artist
+  //      — the category alone is no longer sufficient.
+  let is_release: boolean
+  if (hasNegativeGuard) {
+    is_release = false
+  } else if (isDroppzCategory) {
+    is_release = hasReleaseSignal || artist_tier === 'top100'
+  } else if (hasReleaseSignal) {
+    is_release = true
+  } else {
+    is_release = false
+  }
+  if (is_release && hasStrongAction) matched.push('strong-action')
 
   // Priority. A confirmed release in any rap category is promoted to droppz/P0.
   let priority: DropPriority = PRIORITY_MAP[category] ?? 'P3'

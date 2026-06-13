@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 
+import { AuthProvider } from '@/components/auth/AuthProvider'
 import { ShareSheet } from '@/components/share/ShareSheet'
 import { GlobalScrollbar } from '@/components/shared/GlobalScrollbar'
 import { queryClient } from '@/lib/query-client'
@@ -21,19 +22,22 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <StatusBar style="light" />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.bg },
-              animation: 'slide_from_right',
-            }}
-          >
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="post/[id]" options={{ animation: 'fade' }} />
-          </Stack>
-          <ShareSheet />
-          <GlobalScrollbar />
+          <AuthProvider>
+            <StatusBar style="light" />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: colors.bg },
+                animation: 'slide_from_right',
+              }}
+            >
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="post/[id]" options={{ animation: 'fade' }} />
+              <Stack.Screen name="auth" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+            </Stack>
+            <ShareSheet />
+            <GlobalScrollbar />
+          </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

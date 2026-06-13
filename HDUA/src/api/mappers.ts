@@ -45,6 +45,7 @@ function sourceLinks(extra: Record<string, unknown> | null): SourceLink[] {
     ['spotify_url', 'spotify', 'Spotify'],
     ['apple_music_url', 'apple_music', 'Apple Music'],
     ['youtube_url', 'youtube', 'YouTube'],
+    ['genius_url', 'genius', 'Genius'],
   ]
   const out: SourceLink[] = []
   for (const [key, platform, label] of map) {

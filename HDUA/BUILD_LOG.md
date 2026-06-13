@@ -2,6 +2,39 @@
 
 Chronologický záznam reálně provedených změn (zdroj pravdy = `NOTES/plan.json` mise).
 
+## 2026-06-12
+
+### HDUA-14 — Auth gate (Supabase) ✅ MISSION_DONE
+- **Pre-check (hard-stop detekce):** ověřeny signup triggery na `auth.users`. Dva:
+  `hdua_handle_new_user` (→ `hdua_profiles` + `hdua_settings`, `on conflict do nothing`,
+  `search_path` set) i HDCC `handle_new_user` (→ `profiles`) jsou schématem v pořádku →
+  **žádný blocker**, signup vznik profilu funguje. Anon klíč + URL v `.env.local` nastaveny.
+- **Auth store** `stores/auth.ts` (Zustand): `status` (loading|authed|guest), `session`,
+  `user`; `init()` idempotentně seedne z perzistované session + odebírá `onAuthStateChange`.
+  Akce: `signInWithPassword`, `signUp` (vrací `needsConfirmation` když je zapnutý e-mail
+  confirm), `signInWithGoogle` (OAuth), `signOut`. `display_name` se posílá do
+  `raw_user_meta_data` (čte ho trigger).
+- **lib/supabase.ts:** `detectSessionInUrl` zapnuto jen na webu → OAuth callback se parsuje
+  z URL fragmentu (native má vlastní deep-link flow).
+- **AuthProvider** (root) bootne auth jednou + synchronizuje per-user interakční cache:
+  hydrate na přihlášení, reset na odhlášení. Feed zůstává veřejně čitelný i bez loginu.
+- **RequireAuth** gate komponenta (venom): loading spinner / sign-in prompt → `/auth` modal.
+- **Auth screen** `app/auth.tsx` (modal): segment Přihlásit/Registrovat, e-mail+heslo,
+  jméno (nepovinné), Google OAuth, error/notice stavy, venom styl. Po vzniku session se
+  modal sám zavře.
+- **Profil** přepsán: za `RequireAuth`, reálná data (`getProfile`/`getSettings`), staty
+  Líbí/Uloženo/Sleduji, řádky nastavení, **Odhlásit se**.
+- **Like/Save napojeno na DB:** nový `stores/userInteractions.ts` (optimistic + rollback)
+  zapisuje do RLS `hdua_liked_posts` / `hdua_saved_posts`; `FeedCard` čte stav z něj,
+  hosty posílá na `/auth`. Přidána akce „Uložit" (bookmark), odebrán placeholder „Boost".
+  Nová `api/user.getMyInteractions()` hydratuje liked+saved id naráz.
+- **Ověřeno:** `tsc --noEmit` čistý; `expo lint` 0 errors (4 warnings, pre-existing v cizích
+  souborech; unused `AudioPreview` import ve FeedCard odstraněn). Router typy přegenerovány
+  (typedRoutes) → `/auth` v `.expo/types/router.d.ts`.
+- **Pozn. pro CEO:** Google OAuth vyžaduje zapnutí Google providera v Supabase Auth
+  (Dashboard → Authentication → Providers) + redirect URL = origin webu; bez toho tlačítko
+  vrátí chybu. E-mail/heslo funguje hned.
+
 ## 2026-06-11
 
 ### HDUA-02 sub05 — HDCC ↔ HDUA propojení (enrichment + realtime bridge) ✅

@@ -23,7 +23,7 @@ export type FeedItemType =
   | 'ranking'
   | 'trend'
 
-export type SourcePlatform = 'spotify' | 'apple_music' | 'youtube' | 'web'
+export type SourcePlatform = 'spotify' | 'apple_music' | 'youtube' | 'genius' | 'web'
 
 /** Canonical feed item — the shape every `/feed*` endpoint returns. */
 export interface FeedItem {

@@ -125,11 +125,22 @@ test("detectRelease flags the named patterns: 'drops', 'out now', 'official vide
   assert.equal(detectRelease({ title: 'Kendrick Lamar releases official video' }).is_release, true)
 })
 
-test('detectRelease — Droppz category is always a release at P0', () => {
-  const det = detectRelease({ title: 'Generic headline', category: 'droppz' })
-  assert.equal(det.is_release, true)
-  assert.equal(det.priority, 'P0')
-  assert.equal(det.is_droppz, true)
+test('detectRelease — Droppz category still needs a real release signal (content-quality fix 2026-06-12)', () => {
+  // Category alone no longer fakes a drop — editorial/self-promo tagged `droppz`
+  // must carry an actual release signal or a known artist.
+  const generic = detectRelease({ title: 'Generic headline', category: 'droppz' })
+  assert.equal(generic.is_release, false, 'generic droppz headline is NOT a release')
+
+  const real = detectRelease({ title: "Surprise EP out now", category: 'droppz' })
+  assert.equal(real.is_release, true)
+  assert.equal(real.priority, 'P0')
+  assert.equal(real.is_droppz, true)
+})
+
+test('detectRelease — negative guard vetoes even in droppz category', () => {
+  // Rankings / reviews / interviews from a droppz-tagged magazine are not drops.
+  const ranking = detectRelease({ title: 'The 50 Best Albums of 2026, Ranked', category: 'droppz' })
+  assert.equal(ranking.is_release, false)
 })
 
 test('detectRelease — release in a rap category is promoted to P0 droppz', () => {

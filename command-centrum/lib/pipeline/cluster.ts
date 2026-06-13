@@ -271,6 +271,11 @@ function buildMergedContext(items: ClusterableItem[], maxItems = 10): string[] {
   return unique.slice(0, maxItems)
 }
 
+// CONTENT-QUALITY FIX (2026-06-12): the old fallback `items[0].title.split(' ').slice(0,3)`
+// fabricated junk entities ("Latest Release!!", "rock bands doing", "die musikszene")
+// which then surfaced as the feed's artist label. Now we return '' when no
+// meaningful proper-noun entity is found, and the caller resolves a real artist
+// against the artist DB (matchKnownArtist) before falling back to null.
 function pickMainEntity(items: ClusterableItem[]): string {
   const freq: Record<string, number> = {}
   for (const item of items) {
@@ -282,7 +287,33 @@ function pickMainEntity(items: ClusterableItem[]): string {
     }
   }
   const top = Object.entries(freq).sort((a, b) => b[1] - a[1])[0]
-  return top?.[0] ?? items[0].title.split(' ').slice(0, 3).join(' ')
+  return top?.[0] ?? ''
+}
+
+export interface KnownArtist {
+  id: string
+  name: string
+}
+
+/**
+ * Finds the most specific known artist mentioned in `text` (CONTENT-QUALITY FIX
+ * 2026-06-12). Word-boundary match, length-gated to ≥ 4 chars to avoid common-word
+ * false positives ("ego", "dame"), preferring the longest matching name when
+ * several artists appear. Returns null when no real artist is recognized — the
+ * caller then leaves artist_name NULL rather than inventing a label.
+ */
+export function matchKnownArtist(text: string, known: KnownArtist[]): KnownArtist | null {
+  const hay = text.toLowerCase()
+  let best: KnownArtist | null = null
+  for (const a of known) {
+    const name = a.name.toLowerCase().trim()
+    if (name.length < 4) continue
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    if (new RegExp(`\\b${escaped}\\b`, 'i').test(hay)) {
+      if (!best || name.length > best.name.length) best = a
+    }
+  }
+  return best
 }
 
 function computeConfidence(sourceCount: number, sharedRatio: number): number {
@@ -316,6 +347,17 @@ export async function runClusterPipeline(db: PipelineDbClient, options: Pipeline
    }
 
     const curatedItems = items as ClusterableItem[]
+
+    // CONTENT-QUALITY FIX (2026-06-12): load the known-artist registry once so each
+    // cluster can resolve a REAL artist label from its text (matchKnownArtist),
+    // instead of leaving artist_name NULL until enrichment (which needs API keys).
+    const { data: artistRows } = await db
+      .from('artists')
+      .select('id, name')
+      .not('name', 'is', null)
+    const knownArtists: KnownArtist[] = (artistRows ?? [])
+      .map((a) => ({ id: a.id as string, name: a.name as string }))
+      .filter((a) => Boolean(a.name))
 
     // Fetch existing pending clusters within the time window for cross-run dedup
     const existingWindowTs = new Date(Date.now() - TIME_WINDOW_MS).toISOString()
@@ -443,8 +485,22 @@ export async function runClusterPipeline(db: PipelineDbClient, options: Pipeline
           )
         : 0
 
+    // Resolve a real artist from the cluster's combined title + context. When one
+    // is found it becomes both the artist label and the canonical main_entity;
+    // otherwise main_entity falls back to the best proper-noun (or '' → null).
+    const clusterText = group.items
+      .map((i) => `${i.title_en ?? i.title} ${resolveEnText(i)}`)
+      .join(' ')
+    const matchedArtist = matchKnownArtist(clusterText, knownArtists)
+    // main_entity is NOT NULL (internal grouping key). Prefer a real artist, then
+    // the best proper-noun; fall back to category (never a junk title fragment).
+    // The user-facing label is artist_name, which stays NULL when unknown.
+    const entity = matchedArtist?.name || pickMainEntity(group.items) || (primary.category ?? 'unknown')
+
     return {
-      main_entity: pickMainEntity(group.items),
+      main_entity: entity,
+      artist_name: matchedArtist?.name ?? null,
+      artist_id: matchedArtist?.id ?? null,
       category: primary.category ?? 'culture',
       title: primary.title_en ?? primary.title,
       confidence: computeConfidence(group.items.length, sharedRatio),
