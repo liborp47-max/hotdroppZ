@@ -1,0 +1,74 @@
+name: HDUA Quality
+
+# HDUA-20 — quality gate for the native user app (Expo/React Native).
+#
+# Mirrors the command-centrum-quality.yml convention: path-filtered jobs that
+# run in parallel. The app had ZERO automated coverage before this; the gate is
+# intentionally minimal — typecheck (tsc), lint (expo lint), and the pure-unit
+# test suite (mappers / text / embeds). A full Expo web build is deliberately
+# out of scope (heavy, needs native toolchain) until there's a deploy target.
+#
+# Triggers: PR to main/master/develop AND pushes to those branches.
+
+on:
+  pull_request:
+    paths:
+      - 'SYSTEM/hotdroppz/HDUA/**'
+      - '.github/workflows/hdua-quality.yml'
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'SYSTEM/hotdroppz/HDUA/**'
+      - '.github/workflows/hdua-quality.yml'
+
+jobs:
+  typecheck:
+    name: Typecheck (tsc --noEmit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: SYSTEM/hotdroppz/HDUA/package-lock.json
+      - name: Install deps
+        working-directory: SYSTEM/hotdroppz/HDUA
+        run: npm ci
+      - name: Typecheck
+        working-directory: SYSTEM/hotdroppz/HDUA
+        run: npm run typecheck
+
+  lint:
+    name: Lint (expo lint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: SYSTEM/hotdroppz/HDUA/package-lock.json
+      - name: Install deps
+        working-directory: SYSTEM/hotdroppz/HDUA
+        run: npm ci
+      - name: Lint
+        working-directory: SYSTEM/hotdroppz/HDUA
+        run: npm run lint
+
+  tests:
+    name: Unit tests (tsx --test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: SYSTEM/hotdroppz/HDUA/package-lock.json
+      - name: Install deps
+        working-directory: SYSTEM/hotdroppz/HDUA
+        run: npm ci
+      - name: Test
+        working-directory: SYSTEM/hotdroppz/HDUA
+        run: npm test
