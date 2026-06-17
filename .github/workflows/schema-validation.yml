@@ -1,0 +1,166 @@
+name: Schema Validation
+
+# UM-CC_SCHEMA_MIGRATION / #05 — CI/CD gate na schema validation.
+# Enforces: apply MASTER_SCHEMA + transitional migrations to ephemeral postgres,
+# then runs scripts/schema-health-check.mjs. Drift in PR == failed check.
+
+on:
+  pull_request:
+    paths:
+      - 'command-centrum/supabase/**'
+      - 'command-centrum/scripts/apply-sql.mjs'
+      - 'command-centrum/scripts/install-schema.sh'
+      - 'command-centrum/scripts/install-schema.ps1'
+      - 'command-centrum/scripts/schema-health-check.mjs'
+      - 'command-centrum/package.json'
+      - 'command-centrum/package-lock.json'
+      - '.github/workflows/schema-validation.yml'
+  push:
+    branches: [main, master]
+    paths:
+      - 'command-centrum/supabase/**'
+      - 'command-centrum/scripts/apply-sql.mjs'
+      - 'command-centrum/scripts/install-schema.sh'
+      - 'command-centrum/scripts/install-schema.ps1'
+      - 'command-centrum/scripts/schema-health-check.mjs'
+      - 'command-centrum/package.json'
+      - 'command-centrum/package-lock.json'
+      - '.github/workflows/schema-validation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  schema-lint:
+    name: SQL syntax + manifest lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate MANIFEST.json structure
+        working-directory: command-centrum
+        run: |
+          node -e "
+            const m = JSON.parse(require('fs').readFileSync('supabase/MANIFEST.json','utf-8'));
+            if (!m.version || !Array.isArray(m.tables) || !Array.isArray(m.files)) {
+              console.error('MANIFEST.json missing required fields (version/tables/files)');
+              process.exit(1);
+            }
+            if (m.files.length === 0) {
+              console.error('MANIFEST.files[] is empty');
+              process.exit(1);
+            }
+            const orders = m.files.map(f => f.applyOrder).sort((a, b) => a - b);
+            for (let i = 0; i < orders.length; i++) {
+              if (orders[i] !== i + 1) {
+                console.error('MANIFEST.files[].applyOrder must be a strict 1..N sequence, got:', orders);
+                process.exit(1);
+              }
+            }
+            console.log('MANIFEST.json structure OK — version=' + m.version + ', files=' + m.files.length + ', tables=' + m.tables.length);
+          "
+
+      - name: Verify SQL files referenced in MANIFEST exist
+        working-directory: command-centrum
+        run: |
+          node -e "
+            const fs = require('fs');
+            const m = JSON.parse(fs.readFileSync('supabase/MANIFEST.json','utf-8'));
+            const missing = m.files.filter(f => !fs.existsSync(f.path));
+            if (missing.length) {
+              console.error('Missing SQL files referenced by MANIFEST:');
+              for (const f of missing) console.error('  - ' + f.path);
+              process.exit(1);
+            }
+            console.log('All ' + m.files.length + ' SQL files referenced by MANIFEST exist');
+          "
+
+      - name: Verify health-check + installer scripts are present
+        working-directory: command-centrum
+        run: |
+          set -e
+          test -f scripts/apply-sql.mjs           || (echo 'missing scripts/apply-sql.mjs' && exit 1)
+          test -f scripts/schema-health-check.mjs || (echo 'missing scripts/schema-health-check.mjs' && exit 1)
+          test -f scripts/install-schema.sh       || (echo 'missing scripts/install-schema.sh' && exit 1)
+          test -f scripts/install-schema.ps1      || (echo 'missing scripts/install-schema.ps1' && exit 1)
+          echo 'All schema tooling scripts present.'
+
+  schema-apply:
+    name: Apply schema to ephemeral PostgreSQL
+    runs-on: ubuntu-latest
+    needs: [schema-lint]
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: hotdroppz_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/hotdroppz_test
+      SUPABASE_DB_URL: postgresql://postgres:postgres@localhost:5432/hotdroppz_test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: command-centrum/package-lock.json
+
+      - name: Install dependencies
+        working-directory: command-centrum
+        run: npm ci
+
+      - name: Print MANIFEST summary
+        working-directory: command-centrum
+        run: |
+          node -e "
+            const m = JSON.parse(require('fs').readFileSync('supabase/MANIFEST.json','utf-8'));
+            console.log('Manifest version:', m.version);
+            console.log('Files in apply order:', m.files.length);
+            console.log('Tables tracked:', m.tables.length);
+          "
+
+      - name: Wait for PostgreSQL to accept connections
+        run: |
+          for i in {1..30}; do
+            if pg_isready -h localhost -p 5432 -U postgres; then
+              echo "PostgreSQL ready after ${i}s"
+              exit 0
+            fi
+            echo "Waiting for PostgreSQL... (${i}/30)"
+            sleep 1
+          done
+          echo "PostgreSQL did not become ready within 30s" >&2
+          exit 1
+
+      - name: Apply schema (install-schema.sh, skip-health)
+        working-directory: command-centrum
+        run: bash scripts/install-schema.sh --skip-health
+
+      - name: Run schema health check (drift gate)
+        working-directory: command-centrum
+        run: node scripts/schema-health-check.mjs
+
+      - name: Report success
+        if: success()
+        working-directory: command-centrum
+        run: |
+          echo "Schema validation passed — apply OK + health PASS, no drift."

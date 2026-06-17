@@ -1,0 +1,44 @@
+# Dependency audit gate — UM-CC_DEPENDENCY_HYGIENE #2.
+# npm audit (3 npm projects) + Python safety check. Build FAILS on high/critical.
+name: dependency-audit
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  npm-audit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [backend, command-centrum, frontend-web]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Resolve lockfile
+        working-directory: ${{ matrix.project }}
+        run: npm install --package-lock-only --ignore-scripts
+      - name: npm audit report (moderate+, informational)
+        working-directory: ${{ matrix.project }}
+        run: npm audit --audit-level=moderate || true
+      - name: npm audit gate (fail on high/critical)
+        working-directory: ${{ matrix.project }}
+        run: npm audit --audit-level=high
+
+  python-safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install safety
+        run: pip install safety
+      - name: safety check (fail on known vulnerabilities)
+        working-directory: ai
+        run: safety check -r requirements.txt

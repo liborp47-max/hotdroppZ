@@ -1,0 +1,44 @@
+# Weekly dependency vulnerability report -> Slack — UM-CC_DEPENDENCY_HYGIENE #4.
+# Runs npm audit --json across the 3 npm projects, sums high/critical, posts
+# a digest to Slack. Set the SLACK_WEBHOOK_URL repo secret to enable posting.
+name: dependency-weekly-report
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"   # every Monday 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: npm audit -> Slack digest
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          report="*Weekly Dependency Report — HotDroppZ*"
+          total_high=0
+          total_crit=0
+          for p in backend command-centrum frontend-web; do
+            ( cd "$p" && npm install --package-lock-only --ignore-scripts --silent >/dev/null 2>&1 || true )
+            audit=$(cd "$p" && npm audit --json 2>/dev/null || true)
+            counts=$(printf '%s' "$audit" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{let c=0,h=0;try{const v=(JSON.parse(s).metadata||{}).vulnerabilities||{};c=v.critical||0;h=v.high||0}catch(e){}console.log(c+" "+h)})')
+            crit=${counts%% *}
+            high=${counts##* }
+            total_crit=$((total_crit + crit))
+            total_high=$((total_high + high))
+            report="${report}\n- ${p}: ${crit} critical, ${high} high"
+          done
+          report="${report}\n- ai (pip): see dependency-audit workflow (safety check)"
+          report="${report}\nTotal: ${total_crit} critical, ${total_high} high"
+          printf '%b\n' "$report"
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            payload=$(printf '%b' "$report" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.stringify({text:s})))')
+            curl -s -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
+          else
+            echo "SLACK_WEBHOOK_URL not configured — skipping Slack post (digest printed above)."
+          fi

@@ -1,0 +1,61 @@
+name: Backend Quality
+
+# P1-001-CI / backend gate — NestJS API test + build on every PR.
+#
+# Purpose (mission P1-001-CI): no deploy without a green test + build. Mirrors
+# the existing command-centrum-quality.yml convention (unified .github,
+# SYSTEM/hotdroppz/<app> working-directory + path filters).
+#
+# Gate matrix (parallel):
+#   test   — jest (backend/src/**/*.spec.ts)
+#   build  — nest build, fail-fast on type errors
+#
+# "Block merges on failed checks" itself is a GitHub branch-protection setting
+# (Settings > Branches > Require status checks): add jobs "Test (jest)" and
+# "Build (nest)" as required. That step needs a remote + repo admin.
+
+on:
+  pull_request:
+    paths:
+      - 'SYSTEM/hotdroppz/backend/**'
+      - '.github/workflows/backend-quality.yml'
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'SYSTEM/hotdroppz/backend/**'
+      - '.github/workflows/backend-quality.yml'
+
+jobs:
+  test:
+    name: Test (jest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: SYSTEM/hotdroppz/backend/package-lock.json
+      - name: Install deps
+        working-directory: SYSTEM/hotdroppz/backend
+        run: npm ci
+      - name: Test
+        working-directory: SYSTEM/hotdroppz/backend
+        run: npm test
+
+  build:
+    name: Build (nest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: SYSTEM/hotdroppz/backend/package-lock.json
+      - name: Install deps
+        working-directory: SYSTEM/hotdroppz/backend
+        run: npm ci
+      - name: Build
+        working-directory: SYSTEM/hotdroppz/backend
+        run: npm run build

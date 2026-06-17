@@ -1,0 +1,135 @@
+name: Command Centrum Quality
+
+# UM-CC_BUILD_GATE_RECOVERY / #04 — CI gate for the internal dashboard.
+#
+# Mirrors AUD-20260523-01 + AUD-20260523-07 (BLOCKER / P1) findings: the
+# Command Centrum production build, lint, and feed-stage tests were all
+# unguarded by CI. Without this workflow, a broken build (route-export
+# violation, lint regression, schema-helper drift) merges silently.
+#
+# Gate matrix (run in parallel):
+#   build  — next build, fail-fast on type/route errors
+#   lint   — eslint . --max-warnings 246 (ratchet locked at sub-03 baseline)
+#   tests  — feed-stage unit tests (calendar / approval / archive /
+#            editor-save / auto-publish) + stage-registry + stage-run
+#
+# Triggers: PR to main/master/develop AND pushes to those branches.
+
+on:
+  pull_request:
+    paths:
+      - 'SYSTEM/hotdroppz/command-centrum/**'
+      - '.github/workflows/command-centrum-quality.yml'
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'SYSTEM/hotdroppz/command-centrum/**'
+      - '.github/workflows/command-centrum-quality.yml'
+
+jobs:
+  build:
+    name: Build (next)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: SYSTEM/hotdroppz/command-centrum/package-lock.json
+      - name: Install deps
+        working-directory: SYSTEM/hotdroppz/command-centrum
+        run: npm ci
+      - name: Build
+        working-directory: SYSTEM/hotdroppz/command-centrum
+        run: npm run build
+
+  typecheck:
+    # P1-CI-001 — block type drift (same bug class as the stale test type-errors
+    # fixed 2026-06-07). tsc --noEmit is currently clean (0 errors).
+    name: Typecheck (tsc --noEmit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: SYSTEM/hotdroppz/command-centrum/package-lock.json
+      - name: Install deps
+        working-directory: SYSTEM/hotdroppz/command-centrum
+        run: npm ci
+      - name: Typecheck
+        working-directory: SYSTEM/hotdroppz/command-centrum
+        run: npm run typecheck
+
+  lint:
+    name: Lint (ratchet at 246 warnings)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: SYSTEM/hotdroppz/command-centrum/package-lock.json
+      - name: Install deps
+        working-directory: SYSTEM/hotdroppz/command-centrum
+        run: npm ci
+      - name: Lint (ratchet — fails if warnings exceed 246)
+        working-directory: SYSTEM/hotdroppz/command-centrum
+        run: npm run lint:ci
+
+  tests:
+    name: Targeted tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: SYSTEM/hotdroppz/command-centrum/package-lock.json
+      - name: Install deps
+        working-directory: SYSTEM/hotdroppz/command-centrum
+        run: npm ci
+      - name: Feed stage tests
+        working-directory: SYSTEM/hotdroppz/command-centrum
+        run: |
+          npm run test:feed-calendar
+          npm run test:feed-approval
+          npm run test:feed-archive
+          npm run test:feed-editor-save
+          npm run test:feed-auto-publish
+      - name: Pipeline registry + stage-run tests
+        working-directory: SYSTEM/hotdroppz/command-centrum
+        run: |
+          npm run test:stage-registry
+          npm run test:stage-run
+      - name: Truth-gate regression tests (P1-CI-001)
+        working-directory: SYSTEM/hotdroppz/command-centrum
+        run: |
+          npm run test:missions
+          npm run test:evidence-contract
+          npm run test:refresh-truth
+          npm run test:local-runner
+          npm run test:evidence-summary
+          npm run test:agent-runner
+          npm run test:mission-lifecycle
+      - name: Previously-orphaned tests (now wired)
+        working-directory: SYSTEM/hotdroppz/command-centrum
+        run: |
+          npm run test:mission-filters
+          npm run test:audit-popup
+          npm run test:plans-logic
+          npm run test:process-store-contract
+          npm run test:translation-quality
+          npm run test:ssrf-guard
+          npm run test:plan-schema
+      - name: SRL + consumer-rewiring tests (PR-S4)
+        working-directory: SYSTEM/hotdroppz/command-centrum
+        run: |
+          npm run test:srl
+          npm run test:writer-artist-context
+          npm run test:enrichment-srl-links
+          npm run test:artist-service-srl-links

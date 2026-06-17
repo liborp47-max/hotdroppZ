@@ -1,0 +1,66 @@
+name: Frontend Web Quality
+
+# P1-001-CI / frontend gate — public PWA lint + build on every PR.
+#
+# Purpose (mission P1-001-CI): no deploy without a green lint + build. Mirrors
+# command-centrum-quality.yml (unified .github, SYSTEM/hotdroppz/<app>
+# working-directory + path filters).
+#
+# NOTE: frontend-web has its own nested .git and is NOT tracked by the
+# SYSTEM/hotdroppz repo. If it ships as its OWN GitHub repo, move this file to
+# frontend-web/.github/workflows/ and drop the SYSTEM/hotdroppz/frontend-web
+# prefix from paths + working-directory. As long as the GitHub repo root
+# contains SYSTEM/hotdroppz/frontend-web/, this layout is correct as-is.
+#
+# Gate matrix (parallel):
+#   lint   — eslint
+#   build  — next build, fail-fast on type/route errors
+#
+# "Block merges on failed checks" = GitHub branch protection (require status
+# checks "Lint (eslint)" + "Build (next)"). Needs a remote + repo admin.
+
+on:
+  pull_request:
+    paths:
+      - 'SYSTEM/hotdroppz/frontend-web/**'
+      - '.github/workflows/frontend-web-quality.yml'
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'SYSTEM/hotdroppz/frontend-web/**'
+      - '.github/workflows/frontend-web-quality.yml'
+
+jobs:
+  lint:
+    name: Lint (eslint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: SYSTEM/hotdroppz/frontend-web/package-lock.json
+      - name: Install deps
+        working-directory: SYSTEM/hotdroppz/frontend-web
+        run: npm ci
+      - name: Lint
+        working-directory: SYSTEM/hotdroppz/frontend-web
+        run: npm run lint
+
+  build:
+    name: Build (next)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: SYSTEM/hotdroppz/frontend-web/package-lock.json
+      - name: Install deps
+        working-directory: SYSTEM/hotdroppz/frontend-web
+        run: npm ci
+      - name: Build
+        working-directory: SYSTEM/hotdroppz/frontend-web
+        run: npm run build
