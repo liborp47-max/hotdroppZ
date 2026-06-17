@@ -19937,8 +19937,8 @@
    ]
   },
   {
-   "status": "in_progress",
-   "lifecycleStatus": "BUILD",
+   "status": "solved",
+   "lifecycleStatus": "MISSION_DONE",
    "coldCase": false,
    "isDeleted": false,
    "createdAt": "2026-06-11T16:00:00.000Z",
@@ -19947,6 +19947,12 @@
    "moduleId": "HDUA",
    "auditReports": [],
    "auditLog": [
+    {
+     "ts": "2026-06-17T00:00:00.000Z",
+     "event": "MISSION_DONE",
+     "actor": "backend-engineer",
+     "note": "HDUA-19 DONE (REAL). Premisa 'untracked + no remote' byla zastarala - repo uz byl trackovany. Dnes: commit PR-S4 (fa67727) + CI workflows (081e02d), first push master -> origin (remote byl prazdny), upstream set, remote URL pripnut na hotdroppZ. Reziduum (NEblokujici, hygiena): ~50 plan.json.bak v NOTES, ZALOHA/, nested SYSTEM/, 1 nesouvisejici modified migrace + tsconfig.tsbuildinfo zustavaji uncommitted v pracovnim stromu - vedome nevakuovano."
+    },
     {
      "ts": "2026-06-11T16:00:00.000Z",
      "event": "MISSION_CREATED",
@@ -19985,18 +19991,22 @@
      "name": ".gitignore + commit",
      "description": "Doplnit .gitignore, git add/commit HDUA a command-centrum.",
      "why": "Základní bezpečnost práce.",
-     "status": "todo",
+     "status": "done",
      "owner": "devops",
-     "estimatedDuration": "S"
+     "estimatedDuration": "S",
+     "completedAt": "2026-06-17T00:00:00.000Z",
+     "verifiedNote": "Repo SYSTEM/hotdroppz/.git sleduje cely strom (867+ souboru: command-centrum, HDUA, backend, ai, frontend-web, agents). .gitignore pokryva build artefakty (node_modules, .next, dist-desktop, electron/.server-dist - overeno 0 v git status). Dnes commitnuto: fa67727 (PR-S4 02/03/05), 081e02d (.github CI workflows - drive netrackovane)."
     },
     {
      "id": "02",
      "name": "Remote + push",
      "description": "Nastavit git remote (GitHub) a push; volitelně CI lint+typecheck.",
      "why": "Záloha mimo lokál + základ CI/CD.",
-     "status": "todo",
+     "status": "done",
      "owner": "devops",
-     "estimatedDuration": "M"
+     "estimatedDuration": "M",
+     "completedAt": "2026-06-17T00:00:00.000Z",
+     "verifiedNote": "git push -u origin master OK. origin/master = 081e02d = local HEAD (6 commitu, plna historie), upstream tracking nastaven, in sync. Remote pripnut na kanonicky https://github.com/liborp47-max/hotdroppZ.git (GitHub hlasil presun z hotdroppz)."
     }
    ]
   },
