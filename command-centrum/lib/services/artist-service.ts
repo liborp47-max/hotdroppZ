@@ -6,6 +6,7 @@ import { createClient, createAdminClient } from '../supabase/server'
 import { searchSpotify } from '../services/spotify'
 import { searchYouTube } from '../services/youtube'
 import { searchGenius } from '../services/genius'
+import { createSourceResolver, srlHandlesToUrls, type SrlDb, type PlatformLinks, type SourceResolver } from '../sources/srl'
 import type {
   Artist,
   ArtistCountry,
@@ -107,10 +108,35 @@ export async function findOrCreateArtist(
   return newArtist as Artist
 }
 
-// Enrich artist with external API data (Spotify/YouTube/Genius)
+/**
+ * PR-S4 #03 — compute platform-URL updates for an artist from an SRL lookup.
+ *
+ * Pure + additive: only fills a column the artist is MISSING, and only when SRL
+ * reports a confident match. A null / 0-confidence lookup yields no updates, so
+ * the legacy external-API path runs unchanged whenever the registry has no hit.
+ */
+export function srlArtistLinkUpdates(
+  artist: { spotify_url?: string | null; youtube_url?: string | null; genius_url?: string | null },
+  links: PlatformLinks | null,
+): { spotify_url?: string; youtube_url?: string; genius_url?: string } {
+  if (!links || links.confidence <= 0) return {}
+  const urls = srlHandlesToUrls(links.links)
+  const out: { spotify_url?: string; youtube_url?: string; genius_url?: string } = {}
+  if (!artist.spotify_url && urls.spotify_url) out.spotify_url = urls.spotify_url
+  if (!artist.youtube_url && urls.youtube_url) out.youtube_url = urls.youtube_url
+  if (!artist.genius_url && urls.genius_url) out.genius_url = urls.genius_url
+  return out
+}
+
+// Enrich artist with platform links. Resolution goes through the SRL first
+// (cached cross-platform lookup — PR-S4 #03), so a value already known to the
+// registry is reused instead of re-fetched; only genuine gaps fall through to
+// the external Spotify/Genius APIs. `resolver` is injectable for tests; callers
+// keep the same API surface (it defaults to a db-backed resolver).
 export async function enrichArtistProfile(
   artistId: string,
-  options: { fetchSpotify?: boolean; fetchYouTube?: boolean; fetchGenius?: boolean } = {}
+  options: { fetchSpotify?: boolean; fetchYouTube?: boolean; fetchGenius?: boolean } = {},
+  resolver?: SourceResolver,
 ): Promise<void> {
   const db = createAdminClient()
   if (!db) return
@@ -125,22 +151,29 @@ export async function enrichArtistProfile(
 
   const updates: Record<string, any> = { ai_fetched_at: new Date().toISOString() }
 
-  if (options.fetchSpotify && !artist.spotify_url) {
+  // ── 1. SRL consult — fill platform links from the registry (cache-backed) ──
+  try {
+    const srl = resolver ?? createSourceResolver(db as unknown as SrlDb)
+    const links = await srl.resolveCrossPlatformLinks(artist.name)
+    Object.assign(updates, srlArtistLinkUpdates(artist, links))
+  } catch (err) {
+    console.error('ARTIST: SRL link resolve failed', artist.name, err instanceof Error ? err.message : String(err))
+  }
+
+  // ── 2. External API fallback — only for links neither the artist nor SRL had ──
+  if (options.fetchSpotify && !artist.spotify_url && !updates.spotify_url) {
     const result = await searchSpotify(artist.name)
     if (result.artist_url) {
       updates.spotify_url = result.artist_url
     }
-    if (result.track_url && !artist.spotify_url) {
-      // Also could store latest track
-    }
   }
 
-  if (options.fetchYouTube && !artist.youtube_url) {
+  if (options.fetchYouTube && !artist.youtube_url && !updates.youtube_url) {
     // YouTube search for official artist channel
     // This would require a separate YouTube service call
   }
 
-  if (options.fetchGenius && !artist.genius_url) {
+  if (options.fetchGenius && !artist.genius_url && !updates.genius_url) {
     const result = await searchGenius(artist.name)
     if (result.song_url) {
       updates.genius_url = result.song_url

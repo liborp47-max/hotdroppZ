@@ -10,6 +10,7 @@
 
 export * from './types.ts'
 export { SrlResolver, createSourceResolver } from './resolver.ts'
+export { srlHandlesToUrls, type SrlPlatformUrls } from './links.ts'
 export {
   BundleCache,
   LruCacheAdapter,

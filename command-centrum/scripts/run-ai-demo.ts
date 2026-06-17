@@ -21,7 +21,7 @@ async function main() {
   // 1) Writer with real AI
   const { runWriterPipeline } = await import('@/lib/pipeline/writer')
   const w = await runWriterPipeline(sb as never)
-  console.log('WRITER:', JSON.stringify({ generated: (w as Record<string, unknown>).articlesGenerated, inserted: (w as Record<string, unknown>).articlesInserted, errors: ((w as Record<string, unknown>).errors as unknown[])?.length }))
+  console.log('WRITER:', JSON.stringify({ generated: (w as unknown as Record<string, unknown>).articlesGenerated, inserted: (w as unknown as Record<string, unknown>).articlesInserted, errors: ((w as unknown as Record<string, unknown>).errors as unknown[])?.length }))
 
   // 2) Reset the 17 feed cards so the engine re-localizes them with the AI key
   await sb.from('feed_posts').update({ template_id: null, media_hint: null, card_metadata: null }).not('cluster_id', 'is', null)
@@ -29,7 +29,7 @@ async function main() {
   const { runFeedEnginePipeline } = await import('@/lib/pipeline/feed-engine')
   await runFeedBuilderPipeline(sb as never)
   const fe = await runFeedEnginePipeline(sb as never)
-  console.log('FEED:', JSON.stringify({ processed: (fe as Record<string, unknown>).processed, localized: (fe as Record<string, unknown>).localized, pass: (fe as Record<string, unknown>).validatedPass }))
+  console.log('FEED:', JSON.stringify({ processed: (fe as unknown as Record<string, unknown>).processed, localized: (fe as unknown as Record<string, unknown>).localized, pass: (fe as unknown as Record<string, unknown>).validatedPass }))
 
   // 3) Sample a freshly written article
   const { data: posts } = await sb.from('posts').select('title, body, summary, created_at').order('created_at', { ascending: false }).limit(2)

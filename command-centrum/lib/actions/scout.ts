@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createSourceResolver, type SrlDb } from '@/lib/sources/srl'
 import type { SourceDefinition } from '@/lib/scout-sources'
 
 async function requireAuth() {
@@ -9,6 +10,26 @@ async function requireAuth() {
   const { data: { user }, error } = await supabase.auth.getUser()
   if (error || !user) throw new Error('Unauthorized')
   return { supabase, user }
+}
+
+/**
+ * PR-S4 #05 — keep the SRL cache coherent with source CRUD.
+ *
+ * The SourceResolver layer has no write surface, so these legacy server actions
+ * stay the CRUD authority (API surface unchanged — the Sources UI is unaffected).
+ * What they MUST do is invalidate SRL's cached resolutions for any source whose
+ * membership/identity changed, so consumers (workers, enrichment) never serve
+ * stale bundles. Effective against the shared Upstash cache in production; a
+ * harmless no-op against the per-process in-memory cache in dev. Best-effort —
+ * cache hygiene never blocks or fails the mutation.
+ */
+async function invalidateSrlCache(supabase: unknown, ...sourceIds: string[]): Promise<void> {
+  try {
+    const srl = createSourceResolver(supabase as SrlDb)
+    await Promise.all(sourceIds.map((id) => srl.invalidateCache(id)))
+  } catch {
+    // cache invalidation is non-critical — swallow
+  }
 }
 
 // ── Sources ──────────────────────────────────────────────────────────────────
@@ -20,6 +41,7 @@ export async function toggleSource(id: string, active: boolean) {
     .update({ active })
     .eq('id', id)
   if (error) throw new Error(error.message)
+  await invalidateSrlCache(supabase, id)
   revalidatePath('/scout')
   revalidatePath('/scout/sources')
 }
@@ -44,6 +66,7 @@ export async function updateSource(
   const { supabase } = await requireAuth()
   const { error } = await supabase.from('scout_sources').update(data).eq('id', id)
   if (error) throw new Error(error.message)
+  await invalidateSrlCache(supabase, id)
   revalidatePath('/scout/sources')
 }
 
@@ -51,6 +74,7 @@ export async function deleteSource(id: string) {
   const { supabase } = await requireAuth()
   const { error } = await supabase.from('scout_sources').delete().eq('id', id)
   if (error) throw new Error(error.message)
+  await invalidateSrlCache(supabase, id)
   revalidatePath('/scout/sources')
 }
 
@@ -61,6 +85,7 @@ export async function bulkToggleSources(ids: string[], active: boolean) {
     .update({ active })
     .in('id', ids)
   if (error) throw new Error(error.message)
+  await invalidateSrlCache(supabase, ...ids)
   revalidatePath('/scout/sources')
 }
 

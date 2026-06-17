@@ -7,6 +7,7 @@ import { findOrCreateArtist, trackArtistRelease } from '../services/artist-servi
 import { enrichImage, isArtistMusicContent, spotifyArtistMatches } from '../services/image'
 import { logStageStart, logStageComplete } from '../analytics/collector'
 import { logger } from '../logger'
+import { createSourceResolver, srlHandlesToUrls, type SrlDb, type PlatformLinks, type SourceResolver } from '../sources/srl'
 import { TEST_MODE_CONFIG, type PipelineOptions } from '@/config/testMode'
 
 type PipelineDbClient =
@@ -104,7 +105,7 @@ function detectEUCountry(text: string): string {
   return 'us'
 }
 
-type EnrichedFields = {
+export type EnrichedFields = {
   artist_name: string | null
   spotify_url: string | null
   youtube_url: string | null
@@ -114,7 +115,39 @@ type EnrichedFields = {
   artist_id: string | null   // NEW: linked artist record
 }
 
-async function enrichClusterData(cluster: ClusterForEnrichment): Promise<EnrichedFields> {
+/**
+ * PR-S4 #02 — map an SRL handle bag into platform URLs.
+ * Re-export of the shared SRL helper so the conversion lives in one place
+ * (the SRL module) yet stays importable from the enrichment test surface.
+ */
+export const srlLinksToUrls = srlHandlesToUrls
+
+/**
+ * PR-S4 #02 — gap-fill enrichment fields from an SRL cross-platform lookup.
+ *
+ * Additive + never-overwrite: external API results always win; SRL only fills
+ * holes (artist_id, missing platform URLs, missing artist name). A null lookup
+ * or 0-confidence match returns the input untouched, so enrichment behaves
+ * exactly as before whenever the artist registry has no match (current schema).
+ */
+export function applySrlLinks(fields: EnrichedFields, links: PlatformLinks | null): EnrichedFields {
+  if (!links || links.confidence <= 0) return fields
+  const urls = srlLinksToUrls(links.links)
+  return {
+    ...fields,
+    artist_id:       fields.artist_id ?? links.artistId ?? null,
+    artist_name:     fields.artist_name ?? links.artistName ?? null,
+    spotify_url:     fields.spotify_url ?? urls.spotify_url ?? null,
+    youtube_url:     fields.youtube_url ?? urls.youtube_url ?? null,
+    genius_url:      fields.genius_url ?? urls.genius_url ?? null,
+    apple_music_url: fields.apple_music_url ?? urls.apple_music_url ?? null,
+  }
+}
+
+async function enrichClusterData(
+  cluster: ClusterForEnrichment,
+  srl?: SourceResolver,
+): Promise<EnrichedFields> {
   const artist = cluster.main_entity
   const track = extractTrackFromTitle(cluster.title, artist)
   const isMusic = MUSIC_CATEGORIES.has(cluster.category)
@@ -184,7 +217,7 @@ async function enrichClusterData(cluster: ClusterForEnrichment): Promise<Enriche
     })
   }
 
-  return {
+  const fields: EnrichedFields = {
     artist_name:     artistIsRelevant ? (spotify.artist_name ?? artist) : null,
     spotify_url:     artistIsRelevant ? (spotify.track_url ?? spotify.artist_url ?? null) : null,
     youtube_url:     youtube.video_url ?? null,
@@ -193,19 +226,38 @@ async function enrichClusterData(cluster: ClusterForEnrichment): Promise<Enriche
     image_url,
     artist_id:       artistId,
   }
+
+  // ── 4. SRL consult — route platform-link resolution through the Source
+  // Resolution Layer instead of ad-hoc joins (PR-S4 #02). Read-only + cached by
+  // artist name, so repeated clusters about the same artist share one lookup
+  // ("reduces duplicate fetches napříč clustery"). Best-effort gap-fill only.
+  if (srl && artist) {
+    try {
+      const links = await srl.resolveCrossPlatformLinks(artist)
+      return applySrlLinks(fields, links)
+    } catch (err) {
+      logger.warn('enrichment_srl_lookup_failed', {
+        artist,
+        error: err instanceof Error ? err.message : String(err),
+      })
+    }
+  }
+
+  return fields
 }
 
 async function processBatch(
   db: PipelineDbClient,
   clusters: ClusterForEnrichment[],
-  options: PipelineOptions = {}
+  options: PipelineOptions = {},
+  srl?: SourceResolver,
 ): Promise<number> {
   let enriched = 0
 
   await Promise.all(
     clusters.map(async (cluster) => {
       try {
-        const fields = await enrichClusterData(cluster)
+        const fields = await enrichClusterData(cluster, srl)
 
         const { error } = await db
           .from('story_clusters')
@@ -324,9 +376,13 @@ export async function runEnrichmentPipeline(db: PipelineDbClient, options: Pipel
     const clusterList = clusters as ClusterForEnrichment[]
     let totalEnriched = 0
 
+    // One resolver for the whole run so its name-keyed cache is shared across
+    // every batch — a cluster about an artist seen earlier resolves from cache.
+    const srl = createSourceResolver(db as SrlDb)
+
     for (let i = 0; i < clusterList.length; i += batchSize) {
       const batch = clusterList.slice(i, i + batchSize)
-      totalEnriched += await processBatch(db, batch, options)
+      totalEnriched += await processBatch(db, batch, options, srl)
     }
 
     logger.info('enrichment_complete', {
