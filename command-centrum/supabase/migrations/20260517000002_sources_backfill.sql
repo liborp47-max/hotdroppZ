@@ -74,39 +74,56 @@ where exists (select 1 from sources t where t.id = s.id and t.type = 'feed')
 on conflict do nothing;
 
 -- ──────────────────────────────────────────────────────────────────────────────
--- 2. artists -> sources (type='artist'); slug = normalized_name (already UNIQUE)
+-- 2. artists -> sources (type='artist')
+--    slug = normalized_name, but the slug namespace is shared with feeds (section 1
+--    runs first) and is not guaranteed unique across artists, so a collision-safe
+--    suffix (-<id8>) is applied when normalized_name is already taken — otherwise
+--    ON CONFLICT DO NOTHING would silently drop the colliding artist row.
 -- ──────────────────────────────────────────────────────────────────────────────
+with artist_ranked as (
+  select
+    a.*,
+    row_number() over (partition by a.normalized_name
+                       order by a.created_at nulls last, a.id) as rn
+  from artists a
+)
 insert into sources (
   id, type, name, slug, status, category, region, language,
   authority_score, health, last_validated_at, metadata, tags, created_at, updated_at
 )
 select
-  a.id,
+  ar.id,
   'artist',
-  a.name,
-  a.normalized_name,
-  case when a.is_active then 'active' else 'archived' end,
-  a.genre,
-  a.country,
+  ar.name,
+  case
+    when nullif(btrim(coalesce(ar.normalized_name, '')), '') is null then null
+    when ar.rn > 1
+         or exists (select 1 from sources s where s.slug = ar.normalized_name)
+      then ar.normalized_name || '-' || left(ar.id::text, 8)
+    else ar.normalized_name
+  end,
+  case when ar.is_active then 'active' else 'archived' end,
+  ar.genre,
+  ar.country,
   null,
-  least(100, greatest(0, round(coalesce(a.base_score, 50))::int)),
+  least(100, greatest(0, round(coalesce(ar.base_score, 50))::int)),
   'unknown',
-  a.ai_fetched_at,
+  ar.ai_fetched_at,
   jsonb_build_object(
-    'country',            a.country,
-    'genre',              a.genre,
-    'base_score',         a.base_score,
-    'priority_level',     a.priority_level,
-    'is_tracking_active', coalesce(a.tracking_enabled, a.is_active),
-    'ai_confidence',      a.ai_confidence,
-    'trending_boost',     a.trending_boost,
-    'boost_multiplier',   a.boost_multiplier,
+    'country',            ar.country,
+    'genre',              ar.genre,
+    'base_score',         ar.base_score,
+    'priority_level',     ar.priority_level,
+    'is_tracking_active', coalesce(ar.tracking_enabled, ar.is_active),
+    'ai_confidence',      ar.ai_confidence,
+    'trending_boost',     ar.trending_boost,
+    'boost_multiplier',   ar.boost_multiplier,
     'legacy_table',       'artists'
   ),
-  a.tags,
-  a.created_at,
-  a.updated_at
-from artists a
+  ar.tags,
+  ar.created_at,
+  ar.updated_at
+from artist_ranked ar
 on conflict do nothing;
 
 -- ──────────────────────────────────────────────────────────────────────────────
