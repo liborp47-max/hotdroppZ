@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: hotdroppz_db
+    restart: unless-stopped
+    environment:
+      # AUD-20260523-02 — env-driven; literal "password" replaced. Set
+      # POSTGRES_PASSWORD in .env / shell. Local dev fallback is non-trivial
+      # but still LOCAL-ONLY — never reuse in any shared environment.
+      POSTGRES_USER: ${POSTGRES_USER:-hotdroppz}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hotdroppz_local_dev_only}
+      POSTGRES_DB: ${POSTGRES_DB:-hotdroppz_dev}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hotdroppz -d hotdroppz_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: hotdroppz_redis
+    restart: unless-stopped
+    # P0-003-REDIS — env-driven password (read from container env, not baked into
+    # the parsed command). Set REDIS_PASSWORD in .env / shell. Dev fallback is
+    # LOCAL-ONLY — never reuse in any shared environment.
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-hotdroppz_local_dev_only}
+    # P0-003-REDIS — requirepass (auth, OWASP A07/A05) + appendonly (persistence).
+    command: ["sh", "-c", "redis-server --requirepass \"$$REDIS_PASSWORD\" --appendonly yes"]
+    # P0-003-REDIS — NOT published to the host; reachable only inside the compose
+    # network (service name `redis`). Removes the unauthenticated 6379 exposure.
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
+  redis_data:
