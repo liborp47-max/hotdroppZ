@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-06-18T01:26:50.922Z",
+  "updatedAt": "2026-06-18T18:29:18.378Z",
   "missions": [
     {
       "status": "solved",
@@ -20178,8 +20178,8 @@
       ]
     },
     {
-      "status": "todo",
-      "lifecycleStatus": "PLAN",
+      "status": "solved",
+      "lifecycleStatus": "MISSION_DONE",
       "coldCase": false,
       "isDeleted": false,
       "createdAt": "2026-06-11T16:00:00.000Z",
@@ -20193,6 +20193,12 @@
           "event": "MISSION_CREATED",
           "actor": "auditor",
           "note": "HDUA detailed audit 2026-06-11 (post UI overhaul)"
+        },
+        {
+          "ts": "2026-06-18T18:29:18.378Z",
+          "event": "MISSION_DONE",
+          "actor": "claude",
+          "note": "Venom consistency + cleanup complete. sub01 (surface pass): verified Home/Search/Create/Alerts/Profile + reader (PostView/FeedPage) all venom/sharp via theme tokens or shared scaffolds — create.tsx is an intentional placeholder delegating to ScreenScaffold/EmptyState. sub02 (brand assets): already done by prior partial commit — FlameMark.tsx deleted, share-card-template.svg + assets/README venom #00EC88, zero #B6FF3B anywhere outside the mission doc. sub03 (cleanup): dev-guarded the only console.* (supabase.ts missing-env warn behind __DEV__) so none ships in prod; fixed stale #00E085 accent comment in theme.ts -> #00EC88. NOTE: #FFD000 is the Genius platform brand color (intentional). EVIDENCE: tsc 0 errors; 17 HDUA tests green; commit 36d3219."
         }
       ],
       "sequenceIndex": 217,
@@ -20222,27 +20228,30 @@
           "name": "Surface pass",
           "description": "Projít a doladit všechny obrazovky + reader (venom/sharp/glow).",
           "why": "Konzistentní prémiový vzhled.",
-          "status": "todo",
+          "status": "done",
           "owner": "ui-ux-designer",
-          "estimatedDuration": "M"
+          "estimatedDuration": "M",
+          "completedAt": "2026-06-18T18:29:18.378Z"
         },
         {
           "id": "02",
           "name": "Brand assety",
           "description": "Share card SVG + README na venom; sjednotit odstín.",
           "why": "Sdílené obrázky musí být on-brand.",
-          "status": "todo",
+          "status": "done",
           "owner": "graphic-designer",
-          "estimatedDuration": "S"
+          "estimatedDuration": "S",
+          "completedAt": "2026-06-18T18:29:18.378Z"
         },
         {
           "id": "03",
           "name": "Úklid kódu",
           "description": "Smazat FlameMark, odstranit console, mrtvé importy.",
           "why": "Čistá údržba.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
-          "estimatedDuration": "S"
+          "estimatedDuration": "S",
+          "completedAt": "2026-06-18T18:29:18.378Z"
         }
       ]
     },
