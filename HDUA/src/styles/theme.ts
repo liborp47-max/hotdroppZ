@@ -1,6 +1,6 @@
 /**
  * HDUA design system — aligned to the HotDroppZ Command Centrum (HDCC) "venom"
- * language: pure-black surfaces, neon-emerald (#00E085) accent, glassy panels,
+ * language: pure-black surfaces, neon-emerald (#00EC88) accent, glassy panels,
  * sharp (near-square) edges, and tasteful venom glows. Single source of truth
  * for color, spacing, radius, typography, and glow tokens. Import `theme`
  * everywhere; never hardcode hex values in components.

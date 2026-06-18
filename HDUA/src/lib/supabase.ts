@@ -11,7 +11,10 @@ const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? ''
 
 if (!url || !anonKey) {
   // Non-fatal in dev so the app still boots before .env.local is filled in.
-  console.warn('[hdua] Missing EXPO_PUBLIC_SUPABASE_URL / _ANON_KEY — auth disabled until set.')
+  // Dev-only so no stray console output ships in production (HDUA-17).
+  if (__DEV__) {
+    console.warn('[hdua] Missing EXPO_PUBLIC_SUPABASE_URL / _ANON_KEY — auth disabled until set.')
+  }
 }
 
 export const supabase = createClient(url, anonKey, {
