@@ -23,6 +23,7 @@ import { ExpandableAuditCard } from './ExpandableAuditCard';
 import { PipelineModuleCard } from './PipelineModuleCard';
 import { RecentRunsList, buildRecentRunRows } from './RecentRunsList';
 import { QuickActionsBar } from './QuickActionsBar';
+import { useModalA11y } from '@/components/hooks/use-modal-a11y';
 
 interface AuditDashboardProps extends DashboardInputConfig {
   initialSelectedAuditId?: string;
@@ -253,6 +254,10 @@ export function AuditDashboard({
   const [selectedAuditId, setSelectedAuditId] = useState<string | undefined>(initialSelectedAuditId);
   const [selectedPipelineName, setSelectedPipelineName] = useState<string | undefined>();
   const [pipelineDrawerOpen, setPipelineDrawerOpen] = useState(false);
+  // AUD-UI-002: Esc/focus-trap/focus-restore/scroll-lock for the module-detail drawer.
+  const moduleDrawerRef = useModalA11y<HTMLDivElement>(pipelineDrawerOpen, () =>
+    setPipelineDrawerOpen(false),
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -491,7 +496,13 @@ export function AuditDashboard({
       </div>
 
       <div
-        className="fixed inset-y-0 right-0 z-40 w-full max-w-[420px] border-l border-[#1A1A1A] bg-[#000000] shadow-[-10px_0_40px_rgba(0,0,0,0.8)] transition-transform duration-200"
+        ref={moduleDrawerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Module detail"
+        aria-hidden={!pipelineDrawerOpen}
+        tabIndex={-1}
+        className="fixed inset-y-0 right-0 z-40 w-full max-w-[420px] border-l border-[#1A1A1A] bg-[#000000] shadow-[-10px_0_40px_rgba(0,0,0,0.8)] transition-transform duration-200 outline-none"
         style={{
           transform: pipelineDrawerOpen ? 'translateX(0)' : 'translateX(100%)',
           transitionTimingFunction: 'ease-in-out',

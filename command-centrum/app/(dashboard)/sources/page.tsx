@@ -9,6 +9,7 @@ import {
   Filter, CheckCircle2, XCircle,
 } from 'lucide-react'
 import { cn, timeAgo } from '@/lib/utils'
+import { useModalA11y } from '@/components/hooks/use-modal-a11y'
 import { SourcePerformancePanel } from './source-performance-panel'
 import {
   CATEGORY_LABELS, CATEGORY_COLORS, LANG_FLAG, PRIORITY_MAP, STYLE_RANKS,
@@ -261,6 +262,10 @@ export default function SourcesPage() {
   const [addArtistForm, setAddArtistForm] = useState({
     name: '', country: 'US', genre: 'rap', priority_score: 75, spotify_id: '', youtube_channel_id: '',
   })
+
+  // AUD-UI-002: Esc/focus-trap/focus-restore/scroll-lock for the add-source modals.
+  const addRssRef = useModalA11y<HTMLDivElement>(showAddRss, () => setShowAddRss(false))
+  const addArtistRef = useModalA11y<HTMLDivElement>(showAddArtist, () => setShowAddArtist(false))
 
   useEffect(() => { loadAll() }, [])
 
@@ -837,7 +842,15 @@ export default function SourcesPage() {
       {/* ─── ADD RSS MODAL ─────────────────────────────────────────────────── */}
       {showAddRss && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setShowAddRss(false)}>
-          <div className="rounded-xl border border-white/15 bg-white/[0.03] backdrop-blur-md p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+          <div
+            ref={addRssRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Add RSS source"
+            tabIndex={-1}
+            className="rounded-xl border border-white/15 bg-white/[0.03] backdrop-blur-md p-6 w-full max-w-md outline-none"
+            onClick={e => e.stopPropagation()}
+          >
             <h3 className="text-sm font-bold text-[#E8E8E8] mb-4">Add RSS Source</h3>
             <form onSubmit={addSource} className="space-y-3">
               <input
@@ -900,7 +913,15 @@ export default function SourcesPage() {
       {/* ─── ADD ARTIST MODAL ───────────────────────────────────────────────── */}
       {showAddArtist && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setShowAddArtist(false)}>
-          <div className="rounded-xl border border-white/15 bg-white/[0.03] backdrop-blur-md p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+          <div
+            ref={addArtistRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Quick-add artist"
+            tabIndex={-1}
+            className="rounded-xl border border-white/15 bg-white/[0.03] backdrop-blur-md p-6 w-full max-w-md outline-none"
+            onClick={e => e.stopPropagation()}
+          >
             <h3 className="text-sm font-bold text-[#E8E8E8] mb-4">Quick-Add Artist</h3>
             <p className="text-xs text-[#A8A8A8] mb-4">
               For full profile with platform links, use the{' '}

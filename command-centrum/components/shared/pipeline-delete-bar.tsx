@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Trash2, AlertTriangle, Bomb, ChevronDown, Loader2, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useModalA11y } from '@/components/hooks/use-modal-a11y'
 import {
   deleteScoutItems,
   deleteCuratedItems,
@@ -392,10 +393,18 @@ function FilterSelect({
 }
 
 function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+  // AUD-UI-002: Esc/focus-trap/focus-restore/scroll-lock. Modal is only mounted
+  // while open, so the hook's `open` arg is always true here.
+  const dialogRef = useModalA11y<HTMLDivElement>(true, onClose)
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="bg-white/[0.03] backdrop-blur-md border border-white/15 rounded-2xl p-5 w-full max-w-sm shadow-2xl"
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Dialog"
+        tabIndex={-1}
+        className="bg-white/[0.03] backdrop-blur-md border border-white/15 rounded-2xl p-5 w-full max-w-sm shadow-2xl outline-none"
         onClick={e => e.stopPropagation()}
       >
         {children}

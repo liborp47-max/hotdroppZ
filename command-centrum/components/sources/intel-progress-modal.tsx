@@ -2,6 +2,7 @@
 
 import { RefreshCw, X, CheckCircle2, Activity } from 'lucide-react'
 import type { ArtistIntelRunState } from '@/lib/services/artist-intel-progress'
+import { useModalA11y } from '@/components/hooks/use-modal-a11y'
 
 export function IntelProgressModal({
   open,
@@ -12,6 +13,9 @@ export function IntelProgressModal({
   run: ArtistIntelRunState | null
   onClose: () => void
 }) {
+  // AUD-UI-002: Esc/focus-trap/focus-restore/scroll-lock (called unconditionally).
+  const dialogRef = useModalA11y<HTMLDivElement>(open && !!run, onClose)
+
   if (!open || !run) return null
 
   const elapsedSeconds = Math.max(
@@ -25,7 +29,14 @@ export function IntelProgressModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4">
-      <div className="w-full max-w-xl rounded-2xl border border-white/15 bg-black shadow-2xl">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Get Intel progress"
+        tabIndex={-1}
+        className="w-full max-w-xl rounded-2xl border border-white/15 bg-black shadow-2xl outline-none"
+      >
         <div className="flex items-start justify-between gap-4 border-b border-white/10 p-5">
           <div>
             <div className="flex items-center gap-2 text-yellow-400">

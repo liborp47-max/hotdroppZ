@@ -16,6 +16,7 @@
 import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import type { IntelEvent } from '@/lib/intel'
+import { useModalA11y } from '@/components/hooks/use-modal-a11y'
 
 interface IntelDrillDownProps {
   event: IntelEvent | null
@@ -53,6 +54,9 @@ export function IntelDrillDown({ event, onClose, loadRelated }: IntelDrillDownPr
     }
   }, [event, loadRelated])
 
+  // AUD-UI-002: Esc/focus-trap/focus-restore/scroll-lock (called unconditionally).
+  const dialogRef = useModalA11y<HTMLElement>(!!event, onClose)
+
   if (!event) return null
 
   return (
@@ -63,7 +67,14 @@ export function IntelDrillDown({ event, onClose, loadRelated }: IntelDrillDownPr
         className="fixed inset-0 z-30 bg-black/40"
         onClick={onClose}
       />
-      <aside className="fixed inset-y-0 right-0 z-40 w-full max-w-[520px] overflow-y-auto border-l border-[#1A1A1A] bg-[#000000] shadow-[-10px_0_40px_rgba(0,0,0,0.8)]">
+      <aside
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Intel event ${event.id}`}
+        tabIndex={-1}
+        className="fixed inset-y-0 right-0 z-40 w-full max-w-[520px] overflow-y-auto border-l border-[#1A1A1A] bg-[#000000] shadow-[-10px_0_40px_rgba(0,0,0,0.8)] outline-none"
+      >
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#1A1A1A]">
           <div>
             <p className="text-[10px] uppercase tracking-widest font-semibold text-[#00E085] font-mono">

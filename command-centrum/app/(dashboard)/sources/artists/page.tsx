@@ -11,6 +11,7 @@ import {
 
 import { IntelProgressModal } from '@/components/sources/intel-progress-modal'
 import { cn, timeAgo } from '@/lib/utils'
+import { useModalA11y } from '@/components/hooks/use-modal-a11y'
 import { IntelResultModal, type IntelResultModalData } from '@/components/sources/intel-result-modal'
 import type { ArtistIntelRunState } from '@/lib/services/artist-intel-progress'
 import { OFFICIAL_SOURCE_GROUPS, OFFICIAL_SOURCE_URLS } from '@/lib/services/artist-intel-official-sources'
@@ -299,6 +300,9 @@ export default function ArtistDatabasePage() {
   const [agentConfig, setAgentConfig] = useState<AgentConfig>(DEFAULT_AGENT_CONFIG)
   const [showAddSourceModal, setShowAddSourceModal] = useState(false)
   const [sourceForm, setSourceForm] = useState({ country: '', url: '' })
+  // AUD-UI-002: Esc/focus-trap/focus-restore/scroll-lock for the add modals.
+  const addSourceModalRef = useModalA11y<HTMLDivElement>(showAddSourceModal, () => setShowAddSourceModal(false))
+  const addArtistModalRef = useModalA11y<HTMLDivElement>(showAdd, () => setShowAdd(false))
   const [configStatus, setConfigStatus] = useState<string | null>(null)
 
   function handleSort(col: SortBy) {
@@ -776,7 +780,15 @@ export default function ArtistDatabasePage() {
       <IntelResultModal open={!!intelModal} data={intelModal} onClose={() => setIntelModal(null)} />
       {showAddSourceModal && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onClick={() => setShowAddSourceModal(false)}>
-          <div className="w-full max-w-md border border-white/15 bg-white/[0.03] backdrop-blur-md p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
+          <div
+            ref={addSourceModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Add official source"
+            tabIndex={-1}
+            className="w-full max-w-md border border-white/15 bg-white/[0.03] backdrop-blur-md p-5 space-y-4 outline-none"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div>
               <h3 className="text-sm font-semibold text-[#E8E8E8]">Add Official Source</h3>
               <p className="text-xs text-[#A8A8A8] mt-1">Insert country and source URL. It will be listed under that country section.</p>
@@ -1147,7 +1159,14 @@ export default function ArtistDatabasePage() {
       {/* Add Artist Modal */}
       {showAdd && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="rounded-xl border border-white/15 bg-white/[0.03] backdrop-blur-md p-6 w-full max-w-lg">
+          <div
+            ref={addArtistModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Add artist to database"
+            tabIndex={-1}
+            className="rounded-xl border border-white/15 bg-white/[0.03] backdrop-blur-md p-6 w-full max-w-lg outline-none"
+          >
             <h3 className="text-sm font-bold text-[#E8E8E8] mb-1">Add Artist to Database</h3>
             <p className="text-xs text-[#A8A8A8] mb-4">After creating, open the profile to add platform links and media.</p>
             <form onSubmit={handleAdd} className="space-y-3">

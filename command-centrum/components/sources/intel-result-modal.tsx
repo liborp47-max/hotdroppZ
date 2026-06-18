@@ -1,6 +1,7 @@
 'use client'
 
 import { X, Sparkles } from 'lucide-react'
+import { useModalA11y } from '@/components/hooks/use-modal-a11y'
 
 export type IntelResultSection = {
   title: string
@@ -23,11 +24,21 @@ export function IntelResultModal({
   data: IntelResultModalData | null
   onClose: () => void
 }) {
+  // AUD-UI-002: Esc/focus-trap/focus-restore/scroll-lock (called unconditionally).
+  const dialogRef = useModalA11y<HTMLDivElement>(open && !!data, onClose)
+
   if (!open || !data) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4">
-      <div className="w-full max-w-2xl rounded-2xl border border-white/15 bg-black shadow-2xl">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Get Intel result"
+        tabIndex={-1}
+        className="w-full max-w-2xl rounded-2xl border border-white/15 bg-black shadow-2xl outline-none"
+      >
         <div className="flex items-start justify-between gap-4 border-b border-white/10 p-5">
           <div>
             <div className="flex items-center gap-2 text-yellow-400">

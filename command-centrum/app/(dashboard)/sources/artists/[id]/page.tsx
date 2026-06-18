@@ -14,6 +14,7 @@ import {
   Plus, X, Sparkles,
 } from 'lucide-react'
 import { cn, timeAgo } from '@/lib/utils'
+import { useModalA11y } from '@/components/hooks/use-modal-a11y'
 
 type Artist = {
   id: string
@@ -212,6 +213,8 @@ export default function ArtistProfilePage() {
   const [newNegKw, setNewNegKw] = useState('')
   const [newRelease, setNewRelease] = useState({ title:'', type:'track', release_date:'', url:'' })
   const [showAddRelease, setShowAddRelease] = useState(false)
+  // AUD-UI-002: Esc/focus-trap/focus-restore/scroll-lock for the add-release modal.
+  const addReleaseRef = useModalA11y<HTMLDivElement>(showAddRelease, () => setShowAddRelease(false))
 
   // Editable copies
   const [editArtist, setEditArtist] = useState<Partial<Artist>>({})
@@ -992,7 +995,14 @@ export default function ArtistProfilePage() {
 
           {showAddRelease && (
             <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-              <div className="rounded-xl border border-white/15 bg-white/[0.03] backdrop-blur-md p-6 w-full max-w-md">
+              <div
+                ref={addReleaseRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Add release"
+                tabIndex={-1}
+                className="rounded-xl border border-white/15 bg-white/[0.03] backdrop-blur-md p-6 w-full max-w-md outline-none"
+              >
                 <h3 className="text-sm font-bold text-[#E8E8E8] mb-4">Add Release</h3>
                 <form onSubmit={addRelease} className="space-y-3">
                   <input type="text" placeholder="Release title *" value={newRelease.title}

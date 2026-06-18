@@ -14,6 +14,7 @@ import { Activity, GitBranch, Layers } from 'lucide-react'
 import { missionLifecycleStatus, sortByUrgency } from '@/lib/hd-central/lifecycle'
 import { buildAuditPopupText, closeAuditPopup } from '@/lib/hd-central/audit-popup'
 import { usePlanStream } from '@/lib/hd-central/use-plan-stream'
+import { useModalA11y } from '@/components/hooks/use-modal-a11y'
 
 type CeoTabId = 'pipeline' | 'mission' | 'audit'
 
@@ -25,6 +26,10 @@ export function CeoMain() {
   const [isRunning, setIsRunning] = useState(false)
   const [lastReport, setLastReport] = useState<MissionReport | null>(null)
   const [popupAuditReport, setPopupAuditReport] = useState<MissionAuditReport | null>(null)
+  // AUD-UI-002: Esc/focus-trap/focus-restore/scroll-lock for the auditor-report popup.
+  const auditPopupRef = useModalA11y<HTMLDivElement>(!!popupAuditReport, () =>
+    setPopupAuditReport(closeAuditPopup()),
+  )
   const [speed, setSpeed] = useState<'slow' | 'normal' | 'fast'>('normal')
   const [syncingState, setSyncingState] = useState(false)
   const [stateSyncNote, setStateSyncNote] = useState<string | null>(null)
@@ -594,7 +599,14 @@ export function CeoMain() {
 
       {popupAuditReport && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px] flex items-center justify-center p-4">
-          <div className="w-full max-w-xl plastic-card border border-[#1F1F1F]">
+          <div
+            ref={auditPopupRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Auditor report"
+            tabIndex={-1}
+            className="w-full max-w-xl plastic-card border border-[#1F1F1F] outline-none"
+          >
             <header className="px-4 py-3 border-b border-[#1F1F1F] flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-[#00E085]" />
               <span className="section-title">AUDITOR REPORT</span>

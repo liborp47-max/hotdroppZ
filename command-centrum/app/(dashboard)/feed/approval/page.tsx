@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { AlertCircle, Loader2, ChevronLeft, ShieldCheck, CheckCircle2, X, ArrowRight, AlertTriangle, Clock, Globe, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { useModalA11y } from '@/components/hooks/use-modal-a11y'
 
 type FeedPost = {
   id: string
@@ -108,6 +109,8 @@ export default function FeedApprovalPage() {
   const [isApproving, setIsApproving] = useState(false)
   const [rejectionReason, setRejectionReason] = useState('')
   const [showRejectModal, setShowRejectModal] = useState(false)
+  // AUD-UI-002: Esc/focus-trap/focus-restore/scroll-lock for the rejection modal.
+  const rejectModalRef = useModalA11y<HTMLDivElement>(showRejectModal, () => setShowRejectModal(false))
 
   useEffect(() => {
     if (!postId) {
@@ -467,7 +470,14 @@ export default function FeedApprovalPage() {
       {/* Rejection modal */}
       {showRejectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="rounded-2xl border border-white/10 bg-black p-6 max-w-md w-full">
+          <div
+            ref={rejectModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Reject post"
+            tabIndex={-1}
+            className="rounded-2xl border border-white/10 bg-black p-6 max-w-md w-full outline-none"
+          >
             <h3 className="text-lg font-bold text-[#E8E8E8] mb-2">Reject post</h3>
             <p className="text-sm text-[#A8A8A8] mb-4">Provide a reason for rejection. The post will return to the editor.</p>
             <textarea

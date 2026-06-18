@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { PromptDialog } from './prompt-dialog'
+import { useModalA11y } from '@/components/hooks/use-modal-a11y'
 import type { Mission, Plan, SubMission, SubMissionStatus } from '@/lib/hd-central/types'
 import { getEvidenceSummary, type EvidenceSummary } from '@/lib/hd-central/evidence-summary'
 
@@ -70,6 +71,9 @@ export function MissionDetailDrawer({ mission, onClose, onPlanUpdate }: MissionD
   const [promptOwner, setPromptOwner] = useState<string | undefined>()
   const [promptAgents, setPromptAgents] = useState<string[] | undefined>()
   const [promptTools, setPromptTools] = useState<string[] | undefined>()
+
+  // AUD-UI-002: Esc/focus-trap/focus-restore/scroll-lock (called unconditionally).
+  const dialogRef = useModalA11y<HTMLElement>(!!mission, onClose)
 
   if (!mission) return null
 
@@ -142,9 +146,12 @@ export function MissionDetailDrawer({ mission, onClose, onPlanUpdate }: MissionD
     <>
       <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={onClose} aria-hidden />
       <aside
+        ref={dialogRef}
         role="dialog"
+        aria-modal="true"
         aria-label={`Detail mise ${mission.id}`}
-        className="fixed right-0 top-0 z-50 flex h-full w-full max-w-[480px] flex-col border-l border-white/10 bg-[#0B0B0C] shadow-2xl"
+        tabIndex={-1}
+        className="fixed right-0 top-0 z-50 flex h-full w-full max-w-[480px] flex-col border-l border-white/10 bg-[#0B0B0C] shadow-2xl outline-none"
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-3">

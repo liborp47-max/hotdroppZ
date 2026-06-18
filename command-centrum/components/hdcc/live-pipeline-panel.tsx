@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ProcessState } from '@/lib/stores/process-store'
+import { useModalA11y } from '@/components/hooks/use-modal-a11y'
 
 // ─── Types ──────────────────────────────────────────────────────────────────────
 
@@ -564,11 +565,20 @@ function StepStatusIcon({ status }: { status: StepStatus }) {
 function InfoModal({ step, onClose }: { step: MainStep; onClose: () => void }) {
   const d = step.infoDetails
   const Icon = step.icon
+  // AUD-UI-002: Esc/focus-trap/focus-restore/scroll-lock. Mounted only while open.
+  const dialogRef = useModalA11y<HTMLDivElement>(true, onClose)
 
   return (
     <div className="fixed inset-0 z-50 flex items-stretch justify-end">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-[320px] h-full bg-black border-l border-white/10 flex flex-col shadow-2xl">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${step.label} details`}
+        tabIndex={-1}
+        className="relative w-[320px] h-full bg-black border-l border-white/10 flex flex-col shadow-2xl outline-none"
+      >
 
         {/* Header */}
         <div className={cn('p-4 border-b border-white/10 shrink-0', step.accentColor)}>

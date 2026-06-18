@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { AuditActionItem, AuditFinding } from '../../lib/types/audit';
+import { useModalA11y } from '@/components/hooks/use-modal-a11y';
 
 interface PromptAgentPayload {
   auditId: string;
@@ -148,15 +149,9 @@ export function GetPromptModal({
 
   const missing = useMemo(() => missingFields(action, finding, auditId), [action, finding, auditId]);
 
-  useEffect(() => {
-    if (!open) return;
-
-    const onEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onEsc);
-    return () => window.removeEventListener('keydown', onEsc);
-  }, [open, onClose]);
+  // AUD-UI-002: Esc/focus-trap/focus-restore/scroll-lock via the shared hook
+  // (replaces a bare Escape listener). Called unconditionally (Rules of Hooks).
+  const dialogRef = useModalA11y<HTMLDivElement>(open, onClose);
 
   useEffect(() => {
     if (!open) return;
@@ -248,9 +243,6 @@ export function GetPromptModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-3 transition-opacity duration-100 sm:items-center sm:p-6"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Prompts for ${auditId}`}
     >
       <div
         className="absolute inset-0"
@@ -259,7 +251,12 @@ export function GetPromptModal({
       />
 
       <div
-        className="relative w-full max-w-[800px] p-4 sm:p-6"
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Prompts for ${auditId}`}
+        tabIndex={-1}
+        className="relative w-full max-w-[800px] p-4 sm:p-6 outline-none"
         style={{
           backgroundColor: '#000000',
           border: '2px solid rgba(0,224,133,0.25)',
