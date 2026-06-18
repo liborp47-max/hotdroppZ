@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-06-18T00:12:58.173Z",
+  "updatedAt": "2026-06-18T00:36:55.086Z",
   "missions": [
     {
       "status": "solved",
@@ -18696,8 +18696,8 @@
       "inTimeline": true,
       "userMission": false,
       "createdAt": "2026-06-08T19:30:10.755Z",
-      "status": "todo",
-      "lifecycleStatus": "PLAN",
+      "status": "solved",
+      "lifecycleStatus": "MISSION_DONE",
       "phase": "Build",
       "auditReports": [],
       "id": "AUD-DATA-001-PLUS-PLAN-CAS",
@@ -18739,6 +18739,12 @@
           "event": "MISSION_ACTIVATED",
           "actor": "system-auditor",
           "note": "Follow-up z AUD-DATA-001."
+        },
+        {
+          "ts": "2026-06-18T00:36:55.086Z",
+          "event": "MISSION_DONE",
+          "actor": "claude",
+          "note": "Shared lib/hd-central/plan-store.ts (readPlan/writePlanAtomic/mutatePlan: in-process mutex + atomic unique-tmp+rename + optimistic version CAS + createIfMissing). All 15 hd-central plan.json writers retrofitted onto it; zero routes define a local plan.json writer. EVIDENCE: tests/plan-store.test.ts proves no lost update under 25 concurrent async mutations + CAS rejection + chain recovery (criterion 3); tsc 0 errors; 68 plan/mission tests green; commits on master (plan-store + full retrofit). Criteria 1-3 all met."
         }
       ]
     },
