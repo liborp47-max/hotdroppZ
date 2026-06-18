@@ -128,6 +128,7 @@ jobs:
           npm run test:ssrf-guard
           npm run test:plan-schema
           npm run test:plan-store
+          npm run test:pipeline-monitor
       - name: SRL + consumer-rewiring tests (PR-S4)
         working-directory: SYSTEM/hotdroppz/command-centrum
         run: |

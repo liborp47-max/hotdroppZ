@@ -8,7 +8,7 @@ import {
   BookOpen, DollarSign, BarChart2, Calendar,
   ChevronDown, ChevronRight, Cpu, Bot, Newspaper,
   Music, Database, Eye, BarChart3, Settings, Archive, PenLine, ShieldCheck, Image as ImageIcon, Globe, Sparkles,
-  Zap, Trophy, LayoutTemplate, Inbox, Youtube,
+  Zap, Trophy, LayoutTemplate, Inbox, Youtube, Activity,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PROCESS_CORE_ELEMENTS, PROCESS_LEGACY_ELEMENTS } from '@/lib/navigation/process-config'
@@ -358,11 +358,12 @@ export function Sidebar() {
                 )}
               </div>
 
-              {/* AUDITOR / INTEL / ANALYTICS */}
+              {/* AUDITOR / MONITOR / INTEL / ANALYTICS */}
               {[
-                { label: 'Auditor',   href: '/hd-central/auditor',   icon: ShieldCheck, color: 'text-[#00E085]' },
-                { label: 'Intel',     href: '/hd-central/intel',     icon: Database,    color: 'text-[#1AEE99]' },
-                { label: 'Analytics', href: '/hd-central/analytics', icon: BarChart2,   color: 'text-[#1AEE99]'  },
+                { label: 'Auditor',          href: '/hd-central/auditor',   icon: ShieldCheck, color: 'text-[#00E085]' },
+                { label: 'Pipeline Monitor', href: '/hd-central/monitor',   icon: Activity,    color: 'text-[#1AEE99]' },
+                { label: 'Intel',            href: '/hd-central/intel',     icon: Database,    color: 'text-[#1AEE99]' },
+                { label: 'Analytics',        href: '/hd-central/analytics', icon: BarChart2,   color: 'text-[#1AEE99]'  },
               ].map((item) => {
                 const a = pathname === item.href || pathname.startsWith(item.href + '/')
                 return (
