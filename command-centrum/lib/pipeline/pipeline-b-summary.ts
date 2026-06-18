@@ -7,13 +7,14 @@
 
 import type { OpsAlert } from '@/lib/alerts/ops-alert'
 
-export type PipelineBStage = 'curator' | 'enrichment' | 'writer' | 'feed'
+export type PipelineBStage = 'curator' | 'enrichment' | 'writer' | 'publish' | 'feed'
 
 /** Fixed execution order of Pipeline B. */
 export const PIPELINE_B_STAGES: readonly PipelineBStage[] = [
   'curator',
   'enrichment',
   'writer',
+  'publish',
   'feed',
 ] as const
 

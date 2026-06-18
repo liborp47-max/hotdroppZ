@@ -20,6 +20,7 @@ import { runEnrichmentPipeline } from '@/lib/pipeline/enrichment'
 import { runWriterPipeline } from '@/lib/pipeline/writer'
 import { runFeedEnginePipeline } from '@/lib/pipeline/feed-engine'
 import { runFeedBuilderPipeline } from '@/lib/pipeline/feed-builder'
+import { runAutoPublishPipeline } from '@/lib/pipeline/auto-publish'
 import { getStageStatus } from '@/lib/config/stage-registry'
 import { logStageStart, logStageComplete } from '@/lib/analytics/collector'
 import {
@@ -118,6 +119,10 @@ export async function runPipelineB(
       }
     }),
   )
+
+  // Publish: promote high-quality writer drafts to published so the editorial
+  // branch of hdua_feed_items actually reaches HDUA (HDUA-16). Quality-gated.
+  outcomes.push(await runStage('publish', () => runAutoPublishPipeline(db)))
 
   // Feed: build cards from enriched clusters (the cluster→feed_posts bridge),
   // then run the engine to template/validate/localize them.

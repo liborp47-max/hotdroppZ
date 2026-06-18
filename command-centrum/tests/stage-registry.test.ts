@@ -44,7 +44,7 @@ test('Stage Registry: isStageDegraded identifies degraded stages correctly', () 
 test('Stage Registry: getActiveStages returns only active stages', () => {
   const activeStages = getActiveStages()
   assert.ok(Array.isArray(activeStages), 'Should return array')
-  assert.strictEqual(activeStages.length, 7, 'Should have 7 active stages (writer active since UM-WRITER)')
+  assert.strictEqual(activeStages.length, 8, 'Should have 8 active stages (publish active since HDUA-16)')
   assert.ok(activeStages.includes('scout'), 'Should include scout')
   assert.ok(activeStages.includes('filter'), 'Should include filter')
   assert.ok(activeStages.includes('curator'), 'Should include curator')
@@ -52,6 +52,7 @@ test('Stage Registry: getActiveStages returns only active stages', () => {
   assert.ok(activeStages.includes('enrichment'), 'Should include enrichment')
   assert.ok(activeStages.includes('feed'), 'Should include feed')
   assert.ok(activeStages.includes('writer'), 'Should include writer (active since UM-WRITER)')
+  assert.ok(activeStages.includes('publish'), 'Should include publish (active since HDUA-16)')
   assert.ok(!activeStages.includes('translator'), 'Should not include retired translator')
 })
 

@@ -101,6 +101,7 @@ jobs:
           npm run test:feed-archive
           npm run test:feed-editor-save
           npm run test:feed-auto-publish
+          npm run test:auto-publish
       - name: Pipeline registry + stage-run tests
         working-directory: SYSTEM/hotdroppz/command-centrum
         run: |

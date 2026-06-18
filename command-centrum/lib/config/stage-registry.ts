@@ -70,6 +70,13 @@ export const STAGE_REGISTRY: Readonly<Record<string, Readonly<StageInfo>>> = dee
     notes: 'Full Groq generation, 4 variants (full/news/social/thread), hallucination detection, tone enforcement, never-crash fallback. Persistence resilient to missing posts.variants column.',
   },
 
+  publish: {
+    status: 'active',
+    owner: 'Backend',
+    reason: 'Live since HDUA-16 2026-06-18',
+    notes: 'Quality auto-publish gate: promotes draft/approved posts (ai_score >= 70, real title + substantial body) to published so the editorial branch of hdua_feed_items reaches HDUA. Status-guarded, never-crash.',
+  },
+
   // Retired stages — no longer in use, return 410 Gone
   translator: {
     status: 'retired',

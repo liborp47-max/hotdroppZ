@@ -52,6 +52,7 @@
     "test:feed-archive": "tsx --test tests/feed-archive.test.ts",
     "test:feed-editor-save": "tsx --test tests/feed-editor-save.test.ts",
     "test:feed-auto-publish": "tsx --test tests/feed-auto-publish.test.ts",
+    "test:auto-publish": "tsx --test tests/auto-publish.test.ts",
     "test:evidence-contract": "tsx --test tests/evidence-contract.test.ts",
     "test:local-runner": "tsx --test tests/local-runner.test.ts",
     "test:agent-runner": "tsx --test tests/agent-runner.test.ts",

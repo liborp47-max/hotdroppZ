@@ -30,7 +30,7 @@ const skip = (stage: StageOutcome['stage'], reason = 'stage degraded'): StageOut
 })
 
 test('PIPELINE_B_STAGES is the fixed post-scout chain in order', () => {
-  assert.deepEqual([...PIPELINE_B_STAGES], ['curator', 'enrichment', 'writer', 'feed'])
+  assert.deepEqual([...PIPELINE_B_STAGES], ['curator', 'enrichment', 'writer', 'publish', 'feed'])
 })
 
 test('summarizePipelineB: all-ok run is ok with no failed/skipped', () => {
