@@ -1,23 +1,6 @@
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
-import type { Plan } from '@/lib/hd-central/types'
 import { deleteMission, normalizePlan } from '@/lib/hd-central/lifecycle'
-
-const PLAN_FILE = path.join(process.cwd(), '..', 'NOTES', 'plan.json')
-
-function readPlan(): Plan | null {
-  if (!fs.existsSync(PLAN_FILE)) return null
-  try {
-    return JSON.parse(fs.readFileSync(PLAN_FILE, 'utf-8')) as Plan
-  } catch {
-    return null
-  }
-}
-
-function writePlan(plan: Plan) {
-  fs.writeFileSync(PLAN_FILE, JSON.stringify(plan, null, 2), 'utf-8')
-}
+import { readPlan, mutatePlan, PlanMissingError } from '@/lib/hd-central/plan-store'
 
 export async function DELETE(
   _request: Request,
@@ -30,20 +13,17 @@ export async function DELETE(
       return NextResponse.json({ error: 'Plan not loaded' }, { status: 500 })
     }
 
-    const normalized = normalizePlan(plan)
-    if (!normalized.missions.some((mission) => mission.id === id && !mission.isDeleted)) {
+    if (!normalizePlan(plan).missions.some((mission) => mission.id === id && !mission.isDeleted)) {
       return NextResponse.json({ error: `Mission ${id} not found` }, { status: 404 })
     }
 
-    const next = deleteMission(normalized, id)
-    const planWithMeta: Plan = {
-      ...next,
-      updatedAt: new Date().toISOString(),
-    }
-
-    writePlan(planWithMeta)
-    return NextResponse.json(planWithMeta)
+    // Atomic, serialized delete (re-reads + re-applies inside the lock).
+    const updated = await mutatePlan((current) => deleteMission(normalizePlan(current), id))
+    return NextResponse.json(updated)
   } catch (error) {
+    if (error instanceof PlanMissingError) {
+      return NextResponse.json({ error: 'Plan not loaded' }, { status: 500 })
+    }
     console.error('[mission/delete] error:', error)
     return NextResponse.json({ error: 'Failed to delete mission' }, { status: 500 })
   }

@@ -1,23 +1,6 @@
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
-import type { Plan } from '@/lib/hd-central/types'
 import { verifyAndCompleteMission } from '@/lib/hd-central/lifecycle'
-
-const PLAN_FILE = path.join(process.cwd(), '..', 'NOTES', 'plan.json')
-
-function readPlan(): Plan | null {
-  if (!fs.existsSync(PLAN_FILE)) return null
-  try {
-    return JSON.parse(fs.readFileSync(PLAN_FILE, 'utf-8')) as Plan
-  } catch {
-    return null
-  }
-}
-
-function writePlan(plan: Plan) {
-  fs.writeFileSync(PLAN_FILE, JSON.stringify(plan, null, 2), 'utf-8')
-}
+import { readPlan, mutatePlan, PlanMissingError } from '@/lib/hd-central/plan-store'
 
 export async function POST(
   _request: Request,
@@ -28,14 +11,24 @@ export async function POST(
     const plan = readPlan()
     if (!plan) return NextResponse.json({ error: 'Plan not loaded' }, { status: 500 })
 
-    const result = verifyAndCompleteMission(plan, id)
-    if (result.outcome.kind === 'noop' && result.outcome.reason === 'not_found') {
+    // Pre-check for the 404 (don't write on a missing mission).
+    const preview = verifyAndCompleteMission(plan, id)
+    if (preview.outcome.kind === 'noop' && preview.outcome.reason === 'not_found') {
       return NextResponse.json({ error: `Mission ${id} not found` }, { status: 404 })
     }
 
-    writePlan(result.plan)
-    return NextResponse.json({ outcome: result.outcome, plan: result.plan })
+    // Re-run + persist atomically against a fresh in-lock read (AUD-DATA-001-PLUS).
+    let outcome = preview.outcome
+    const updated = await mutatePlan((current) => {
+      const r = verifyAndCompleteMission(current, id)
+      outcome = r.outcome
+      return r.plan
+    })
+    return NextResponse.json({ outcome, plan: updated })
   } catch (e) {
+    if (e instanceof PlanMissingError) {
+      return NextResponse.json({ error: 'Plan not loaded' }, { status: 500 })
+    }
     console.error('[mission/verify-done] error:', e)
     return NextResponse.json({ error: 'Failed to verify mission' }, { status: 500 })
   }

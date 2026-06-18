@@ -1,37 +1,15 @@
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 import { z } from 'zod'
 import { logger } from '@/lib/logger'
 import { requireAdmin } from '@/lib/hd-central/auth-guard'
-import type { Mission, Plan } from '@/lib/hd-central/types'
-
-const PLAN_FILE = path.join(process.cwd(), '..', 'NOTES', 'plan.json')
+import type { Mission } from '@/lib/hd-central/types'
+import { readPlan, mutatePlan, PlanMissingError } from '@/lib/hd-central/plan-store'
 
 const OFFSET_TAIL = 1000 // Missions not in the reorder body land beyond this index.
 
 const ReorderBodySchema = z.object({
   ids: z.array(z.string().min(1)).min(1),
 })
-
-function readPlan(): Plan | null {
-  if (!fs.existsSync(PLAN_FILE)) return null
-  try {
-    return JSON.parse(fs.readFileSync(PLAN_FILE, 'utf-8')) as Plan
-  } catch (e) {
-    logger.warn('[missions/reorder] plan parse failed', { error: (e as Error).message })
-    return null
-  }
-}
-
-// Atomic write: tmp file + rename — survives crash mid-write.
-function writePlanAtomic(plan: Plan) {
-  const dir = path.dirname(PLAN_FILE)
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-  const tmp = `${PLAN_FILE}.tmp`
-  fs.writeFileSync(tmp, JSON.stringify(plan, null, 2), 'utf-8')
-  fs.renameSync(tmp, PLAN_FILE)
-}
 
 async function triggerStateSync(request: Request): Promise<void> {
   try {
@@ -116,33 +94,28 @@ export async function PATCH(request: Request) {
   const idToIndex = new Map<string, number>()
   ids.forEach((id, idx) => idToIndex.set(id, idx))
 
-  let tailCursor = OFFSET_TAIL
-  const updatedMissions: Mission[] = plan.missions.map((m) => {
-    if (idToIndex.has(m.id)) {
-      return {
-        ...m,
-        sequenceIndex: idToIndex.get(m.id)!,
-        sequencedAt: now,
-        sequencedBy: actor,
-      }
-    }
-    // Preserve relative order of non-reordered missions but push them past the reordered set.
-    const existing = typeof m.sequenceIndex === 'number' ? m.sequenceIndex : tailCursor++
-    return {
-      ...m,
-      sequenceIndex: existing < OFFSET_TAIL ? existing + OFFSET_TAIL : existing,
-    }
-  })
-
-  const nextPlan: Plan = {
-    ...plan,
-    updatedAt: now,
-    missions: updatedMissions,
-  }
-
+  // Apply the ordering atomically against a fresh in-lock read so a concurrent
+  // edit can't be clobbered (AUD-DATA-001-PLUS).
+  let nextPlan
   try {
-    writePlanAtomic(nextPlan)
+    nextPlan = await mutatePlan((current) => {
+      let tailCursor = OFFSET_TAIL
+      current.missions = current.missions.map((m): Mission => {
+        if (idToIndex.has(m.id)) {
+          return { ...m, sequenceIndex: idToIndex.get(m.id)!, sequencedAt: now, sequencedBy: actor }
+        }
+        // Preserve relative order of non-reordered missions but push them past the reordered set.
+        const existing = typeof m.sequenceIndex === 'number' ? m.sequenceIndex : tailCursor++
+        return { ...m, sequenceIndex: existing < OFFSET_TAIL ? existing + OFFSET_TAIL : existing }
+      })
+    })
   } catch (e) {
+    if (e instanceof PlanMissingError) {
+      return NextResponse.json(
+        { error: { code: 'plan_unavailable', message: 'plan.json not loaded' } },
+        { status: 500 }
+      )
+    }
     logger.error('[missions/reorder] write failed', e)
     return NextResponse.json(
       { error: { code: 'write_failed', message: 'Failed to persist plan' } },
@@ -156,7 +129,7 @@ export async function PATCH(request: Request) {
   logger.info('hd_central_missions_reordered', {
     actor,
     updated: ids.length,
-    total: updatedMissions.length,
+    total: nextPlan.missions.length,
   })
 
   return NextResponse.json({

@@ -75,7 +75,8 @@
     "db:migrate:core": "node scripts/apply-sql.mjs supabase/schema.sql supabase/schema-scout.sql",
     "db:migrate:pipeline": "node scripts/apply-sql.mjs supabase/schema.sql supabase/schema-scout.sql supabase/schema-pipeline.sql",
     "smoke:routes": "node scripts/smoke-route-check.mjs",
-    "test:plan-schema": "tsx --test tests/plan-schema.test.ts"
+    "test:plan-schema": "tsx --test tests/plan-schema.test.ts",
+    "test:plan-store": "tsx --test tests/plan-store.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",

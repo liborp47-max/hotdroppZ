@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
-import type { Mission, Plan } from '@/lib/hd-central/types'
+import type { Mission } from '@/lib/hd-central/types'
 import { normalizePlan } from '@/lib/hd-central/lifecycle'
-
-const PLAN_FILE = path.join(process.cwd(), '..', 'NOTES', 'plan.json')
+import { mutatePlan, PlanMissingError } from '@/lib/hd-central/plan-store'
 
 export interface BulkCleanupRequest {
   delete?: string[]                          // mark isDeleted=true (removed from view)
@@ -32,32 +29,13 @@ export interface BulkCleanupResult {
   afterMissionCount: number
 }
 
-function readPlan(): Plan | null {
-  if (!fs.existsSync(PLAN_FILE)) return null
-  try {
-    return JSON.parse(fs.readFileSync(PLAN_FILE, 'utf-8')) as Plan
-  } catch {
-    return null
-  }
-}
-
-function writePlan(plan: Plan) {
-  fs.writeFileSync(PLAN_FILE, JSON.stringify(plan, null, 2), 'utf-8')
-}
-
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as BulkCleanupRequest
-    const plan = readPlan()
-    if (!plan) return NextResponse.json({ error: 'Plan not loaded' }, { status: 500 })
 
     const now = new Date().toISOString()
     const actor = body.actorAgent ?? 'system-auditor'
     const reason = body.reason ?? 'Bulk cleanup from MISSION_RELEVANCE_AUDIT'
-    const before = plan.missions.length
-
-    const idsExist = new Set(plan.missions.map((m) => m.id))
-    const notFound: string[] = []
 
     const deleteIds = new Set(body.delete ?? [])
     const archiveIds = new Set(body.archive ?? [])
@@ -67,23 +45,24 @@ export async function POST(request: Request) {
       for (const drop of m.drop) mergeDropIds.set(drop, m.keep)
     }
 
-    // Validate IDs exist
-    const allIds = [
-      ...deleteIds,
-      ...archiveIds,
-      ...pauseMap.keys(),
-      ...mergeDropIds.keys(),
-    ]
-    for (const id of allIds) {
-      if (!idsExist.has(id)) notFound.push(id)
-    }
-
+    const notFound: string[] = []
+    let before = 0
+    let afterMissionCount = 0
     let deletedCount = 0
     let archivedCount = 0
     let pausedCount = 0
     let mergedCount = 0
 
-    const nextMissions: Mission[] = plan.missions.map((m) => {
+    // Atomic, serialized read-modify-write (AUD-DATA-001-PLUS).
+    await mutatePlan((plan) => {
+      before = plan.missions.length
+      const idsExist = new Set(plan.missions.map((m) => m.id))
+      const allIds = [...deleteIds, ...archiveIds, ...pauseMap.keys(), ...mergeDropIds.keys()]
+      for (const id of allIds) {
+        if (!idsExist.has(id)) notFound.push(id)
+      }
+
+      const nextMissions: Mission[] = plan.missions.map((m) => {
       // DELETE — set isDeleted + audit event
       if (deleteIds.has(m.id)) {
         deletedCount++
@@ -153,14 +132,17 @@ export async function POST(request: Request) {
       }
 
       return m
-    })
+      })
 
-    const normalized = normalizePlan({
-      ...plan,
-      missions: nextMissions,
-      updatedAt: now,
+      const normalized = normalizePlan({
+        ...plan,
+        missions: nextMissions,
+        updatedAt: now,
+      })
+      const next = { ...normalized, tasks: plan.tasks ?? [], lastPlanRun: plan.lastPlanRun }
+      afterMissionCount = next.missions.filter((m) => !m.isDeleted).length
+      return next
     })
-    writePlan({ ...normalized, tasks: plan.tasks ?? [], lastPlanRun: plan.lastPlanRun })
 
     const result: BulkCleanupResult = {
       ok: true,
@@ -176,11 +158,14 @@ export async function POST(request: Request) {
       },
       notFound,
       beforeMissionCount: before,
-      afterMissionCount: normalized.missions.filter((m) => !m.isDeleted).length,
+      afterMissionCount,
     }
 
     return NextResponse.json(result)
   } catch (e) {
+    if (e instanceof PlanMissingError) {
+      return NextResponse.json({ error: 'Plan not loaded' }, { status: 500 })
+    }
     console.error('[missions/bulk-cleanup] error:', e)
     return NextResponse.json({ error: 'Failed to apply bulk cleanup' }, { status: 500 })
   }
