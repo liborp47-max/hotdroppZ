@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-06-18T18:29:18.378Z",
+  "updatedAt": "2026-06-18T18:53:49.196Z",
   "missions": [
     {
       "status": "solved",
@@ -534,14 +534,14 @@
       "importantInfo": "URL dedup cache v Redisu bude ztráceno po restartě bez appendonly. Heslo musí být v .env.",
       "phase": "Foundation",
       "priority": "P0",
-      "status": "in_progress",
+      "status": "solved",
       "domains": [
         "INFRASTRUCTURE",
         "DATABASE"
       ],
       "createdAt": "2026-05-14T08:00:00.000Z",
       "urgencyScore": 88,
-      "lifecycleStatus": "SIMULATED_ONLY",
+      "lifecycleStatus": "MISSION_DONE",
       "coldCase": false,
       "isDeleted": false,
       "owners": [
@@ -601,6 +601,12 @@
           "event": "MISSION_SIMULATED_ONLY",
           "actor": "system-auditor",
           "note": "Evidence reconcile: INFERRED_DELIVERABLE_ABSENT. No deliverable proven on disk; demoted to SIMULATED_ONLY (not PLAN — work may exist but is unverified)."
+        },
+        {
+          "ts": "2026-06-18T18:53:49.196Z",
+          "event": "MISSION_DONE",
+          "actor": "claude",
+          "note": "Truth-gate reconcile 2026-06-18: deliverable VERIFIED + now version-controlled. docker-compose.yml (commit 8d7e32e) has redis --requirepass + --appendonly yes, env-driven REDIS_PASSWORD (LOCAL-ONLY dev fallback), and redis is `expose`-only (no host 6379). Satisfies requirepass+persistence and removes the unauthenticated exposure. Prior SIMULATED_ONLY was because the file was untracked."
         }
       ],
       "sequenceIndex": 10,
@@ -1396,6 +1402,12 @@
           "event": "MISSION_SIMULATED_ONLY",
           "actor": "system-auditor",
           "note": "Evidence reconcile: INFERRED_DELIVERABLE_ABSENT. No deliverable proven on disk; demoted to SIMULATED_ONLY (not PLAN — work may exist but is unverified)."
+        },
+        {
+          "ts": "2026-06-18T18:53:49.196Z",
+          "event": "EVIDENCE_RECONCILE",
+          "actor": "claude",
+          "note": "Truth-gate reconcile 2026-06-18: VERIFIED NOT DONE: no POST /api/feed/[id]/interact endpoint + no like/view/share counters anywhere (HDUA has client-side ShareSheet only, not the counter API). SIMULATED_ONLY is correct. Real backlog if still wanted."
         }
       ],
       "sequenceIndex": 107,
@@ -1504,6 +1516,12 @@
           "event": "MISSION_SIMULATED_ONLY",
           "actor": "system-auditor",
           "note": "Evidence reconcile: INFERRED_DELIVERABLE_ABSENT. No deliverable proven on disk; demoted to SIMULATED_ONLY (not PLAN — work may exist but is unverified)."
+        },
+        {
+          "ts": "2026-06-18T18:53:49.196Z",
+          "event": "EVIDENCE_RECONCILE",
+          "actor": "claude",
+          "note": "Truth-gate reconcile 2026-06-18: VERIFIED NOT DONE: no onboarding flow anywhere (command-centrum/HDUA/backend). SIMULATED_ONLY correct."
         }
       ],
       "sequenceIndex": 108,
@@ -1741,6 +1759,12 @@
           "event": "MISSION_SIMULATED_ONLY",
           "actor": "system-auditor",
           "note": "Evidence reconcile: INFERRED_DELIVERABLE_ABSENT. No deliverable proven on disk; demoted to SIMULATED_ONLY (not PLAN — work may exist but is unverified)."
+        },
+        {
+          "ts": "2026-06-18T18:53:49.196Z",
+          "event": "EVIDENCE_RECONCILE",
+          "actor": "claude",
+          "note": "Truth-gate reconcile 2026-06-18: NOT VERIFIABLE IN CODE: deliverable is external PostHog saved queries + Slack alerts; no in-repo artifact found. SIMULATED_ONLY correct — needs PostHog-side proof, not code."
         }
       ],
       "sequenceIndex": 110,
@@ -7673,6 +7697,12 @@
           "event": "MISSION_SIMULATED_ONLY",
           "actor": "system-auditor",
           "note": "Audit verdict: UI shell exists (sources/gallery/page.tsx) but S3 asset storage + upload workflow + auto-tag NOT proven on disk. Partial; needs storage backend before DONE."
+        },
+        {
+          "ts": "2026-06-18T18:53:49.196Z",
+          "event": "EVIDENCE_RECONCILE",
+          "actor": "claude",
+          "note": "Truth-gate reconcile 2026-06-18: PARTIAL: sources/gallery/page.tsx + /api/editorial/media-assets exist, but S3 asset storage + upload workflow + auto-tag NOT proven. SIMULATED_ONLY correct (UI shell only)."
         }
       ],
       "sequenceIndex": 59,
@@ -7774,6 +7804,12 @@
           "event": "MISSION_SIMULATED_ONLY",
           "actor": "system-auditor",
           "note": "Audit verdict: fun-facts + quotes modules exist (media/fun-facts, media/quotes pages); Spotify/YouTube embed providers NOT proven. Partial (2/4 subs)."
+        },
+        {
+          "ts": "2026-06-18T18:53:49.196Z",
+          "event": "EVIDENCE_RECONCILE",
+          "actor": "claude",
+          "note": "Truth-gate reconcile 2026-06-18: PARTIAL: media/fun-facts + media/quotes pages exist, but Spotify/YouTube embed PROVIDERS not integrated. SIMULATED_ONLY correct."
         }
       ],
       "sequenceIndex": 60,
@@ -8810,6 +8846,12 @@
           "event": "MISSION_SIMULATED_ONLY",
           "actor": "system-auditor",
           "note": "Evidence reconcile: NO_DELIVERABLE_ON_DISK. No deliverable proven on disk; demoted to SIMULATED_ONLY (not PLAN — work may exist but is unverified)."
+        },
+        {
+          "ts": "2026-06-18T18:53:49.196Z",
+          "event": "EVIDENCE_RECONCILE",
+          "actor": "claude",
+          "note": "Truth-gate reconcile 2026-06-18: VERIFIED NOT DONE: no command-centrum/lib/cleanup or backend/src/jobs retention/cron deliverable on disk. SIMULATED_ONLY correct."
         }
       ],
       "sequenceIndex": 100,
