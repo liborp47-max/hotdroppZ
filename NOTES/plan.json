@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-06-18T00:36:55.086Z",
+  "updatedAt": "2026-06-18T01:03:59.531Z",
   "missions": [
     {
       "status": "solved",
@@ -18754,8 +18754,8 @@
       "inTimeline": true,
       "userMission": false,
       "createdAt": "2026-06-08T20:00:53.663Z",
-      "status": "todo",
-      "lifecycleStatus": "PLAN",
+      "status": "solved",
+      "lifecycleStatus": "MISSION_DONE",
       "phase": "Build",
       "auditReports": [],
       "id": "AUD-UI-002-PLUS-MODAL-A11Y-ROLLOUT",
@@ -18790,6 +18790,12 @@
           "event": "MISSION_ACTIVATED",
           "actor": "system-auditor",
           "note": "Follow-up z AUD-UI-002."
+        },
+        {
+          "ts": "2026-06-18T01:03:59.531Z",
+          "event": "MISSION_DONE",
+          "actor": "claude",
+          "note": "Rolled out useModalA11y (Esc/focus-trap/focus-restore/scroll-lock/role/aria-modal) to ALL hand-rolled modals: 7 audit-listed (AuditDashboard drawer, GetPromptModal, IntelDrillDown, live-pipeline InfoModal, mission-detail-drawer, ceo-main auditor popup, pipeline-delete-bar) + intel-progress/result modals + inline add-source/rss/artist/release/reject page modals. EVIDENCE: scan for fixed-inset overlays finds ZERO hand-rolled modals without the hook (Radix ui/dialog+sheet excluded, already accessible); tsc 0 errors; no new lint errors. Both success criteria met. Commit 7cbcdc6."
         }
       ]
     },
