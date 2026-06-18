@@ -85,6 +85,8 @@ export interface MutatePlanOptions {
   expectedVersion?: number
   /** Skip the automatic version + updatedAt bump (caller manages them). */
   noBump?: boolean
+  /** Bootstrap an empty plan instead of throwing PlanMissingError when absent. */
+  createIfMissing?: boolean
 }
 
 /**
@@ -103,7 +105,7 @@ export function mutatePlan(
   opts: MutatePlanOptions = {},
 ): Promise<Plan> {
   const run = async (): Promise<Plan> => {
-    const current = readPlan()
+    const current = readPlan() ?? (opts.createIfMissing ? emptyPlan() : null)
     if (!current) throw new PlanMissingError()
     if (opts.expectedVersion != null && (current.version ?? 0) !== opts.expectedVersion) {
       throw new PlanConflictError(opts.expectedVersion, current.version ?? 0)

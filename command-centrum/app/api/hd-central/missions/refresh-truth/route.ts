@@ -1,20 +1,12 @@
 import { NextResponse } from 'next/server'
 import fs from 'fs'
-import path from 'path'
-import type { Plan } from '@/lib/hd-central/types'
+import type { RefreshTruthSummary } from '@/lib/hd-central/refresh-truth'
 import { requireAdmin } from '@/lib/hd-central/auth-guard'
 import { refreshPlanTruth } from '@/lib/hd-central/refresh-truth'
+import { mutatePlan, PLAN_FILE, PlanMissingError } from '@/lib/hd-central/plan-store'
 
-const PLAN_FILE = path.join(process.cwd(), '..', 'NOTES', 'plan.json')
-
-function readPlan(): Plan | null {
-  if (!fs.existsSync(PLAN_FILE)) return null
-  try {
-    return JSON.parse(fs.readFileSync(PLAN_FILE, 'utf-8')) as Plan
-  } catch {
-    return null
-  }
-}
+/** Internal sentinel: refresh found nothing to correct — skip the write (idempotent). */
+class NoTruthChange extends Error {}
 
 /**
  * POST /api/hd-central/missions/refresh-truth
@@ -26,17 +18,27 @@ export async function POST(request: Request) {
   if (auth instanceof NextResponse) return auth
 
   try {
-    const plan = readPlan()
-    if (!plan) return NextResponse.json({ error: 'Plan not loaded' }, { status: 500 })
+    let summary: RefreshTruthSummary | undefined
 
-    const { plan: nextPlan, summary } = refreshPlanTruth(plan)
-
-    // Only write (and back up) when something actually changed — idempotent.
-    if (summary.changes.length > 0) {
-      const stamp = new Date().toISOString().replace(/[:.]/g, '-')
-      fs.writeFileSync(`${PLAN_FILE}.bak-pre-truth-refresh-${stamp}`, JSON.stringify(plan, null, 2), 'utf-8')
-      fs.writeFileSync(PLAN_FILE, JSON.stringify(nextPlan, null, 2), 'utf-8')
+    // Compute + write atomically against a fresh in-lock read; only writes (and
+    // backs up) when something actually changed — idempotent (AUD-DATA-001-PLUS).
+    try {
+      await mutatePlan((current) => {
+        const result = refreshPlanTruth(current)
+        summary = result.summary
+        if (result.summary.changes.length === 0) throw new NoTruthChange()
+        const stamp = new Date().toISOString().replace(/[:.]/g, '-')
+        fs.writeFileSync(`${PLAN_FILE}.bak-pre-truth-refresh-${stamp}`, JSON.stringify(current, null, 2), 'utf-8')
+        return result.plan
+      })
+    } catch (e) {
+      if (e instanceof PlanMissingError) {
+        return NextResponse.json({ error: 'Plan not loaded' }, { status: 500 })
+      }
+      if (!(e instanceof NoTruthChange)) throw e
     }
+
+    if (!summary) return NextResponse.json({ error: 'Plan not loaded' }, { status: 500 })
 
     return NextResponse.json({
       ok: true,

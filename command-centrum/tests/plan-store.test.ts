@@ -92,6 +92,15 @@ test('mutatePlan: throws PlanMissingError when file is absent', async () => {
   await assert.rejects(() => mutatePlan((p) => p), (err: unknown) => err instanceof PlanMissingError)
 })
 
+test('mutatePlan: createIfMissing bootstraps an empty plan instead of throwing', async () => {
+  fs.rmSync(tmpFile, { force: true })
+  const out = await mutatePlan((p) => {
+    ;(p.missions as unknown[]).push({ id: 'bootstrapped' })
+  }, { createIfMissing: true })
+  assert.equal(out.missions.length, 1)
+  assert.equal(readPlan()!.missions.length, 1)
+})
+
 test('writePlanAtomic: leaves no .tmp file behind and writes valid JSON', () => {
   seed({ version: 7 })
   const leftovers = fs.readdirSync(tmpDir).filter((f) => f.includes('.tmp'))

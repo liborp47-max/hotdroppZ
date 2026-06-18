@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 import type { Mission, Phase, Plan, Priority, SubMission } from '@/lib/hd-central/types'
 import { normalizePlan } from '@/lib/hd-central/lifecycle'
-
-const PLAN_FILE = path.join(process.cwd(), '..', 'NOTES', 'plan.json')
+import { mutatePlan, PlanMissingError } from '@/lib/hd-central/plan-store'
 
 type SeedSubMission = {
   id?: string
@@ -37,24 +34,6 @@ type SeedBody = {
   /** When true, overwrite existing user missions for the same moduleId. Default true. */
   upsert?: boolean
   actorAgent?: string
-}
-
-function readPlan(): Plan {
-  if (!fs.existsSync(PLAN_FILE)) {
-    return { version: 1, updatedAt: new Date().toISOString(), missions: [], tasks: [] }
-  }
-  try {
-    const parsed = JSON.parse(fs.readFileSync(PLAN_FILE, 'utf-8')) as Plan
-    return { ...parsed, tasks: Array.isArray(parsed.tasks) ? parsed.tasks : [] }
-  } catch {
-    return { version: 1, updatedAt: new Date().toISOString(), missions: [], tasks: [] }
-  }
-}
-
-function writePlan(plan: Plan) {
-  const dir = path.dirname(PLAN_FILE)
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-  fs.writeFileSync(PLAN_FILE, JSON.stringify(plan, null, 2), 'utf-8')
 }
 
 function priorityToUrgency(p?: Priority): number {
@@ -110,61 +89,58 @@ export async function POST(request: Request) {
     }
 
     const upsert = body.upsert !== false
-    const plan = readPlan()
     const seedMissions = body.missions.map((m) => buildMission(m, body.source))
 
-    let nextMissions = plan.missions
     let createdCount = 0
     let updatedCount = 0
 
-    for (const seeded of seedMissions) {
-      const existingIdx = nextMissions.findIndex((m) => m.id === seeded.id)
-      if (existingIdx >= 0) {
-        if (!upsert) continue
-        // Preserve lifecycle state and audit log on upsert; only refresh content.
-        const existing = nextMissions[existingIdx]
-        nextMissions = nextMissions.map((m, i) =>
-          i === existingIdx
-            ? {
-                ...existing,
-                name: seeded.name,
-                purpose: seeded.purpose,
-                description: seeded.description,
-                importantInfo: seeded.importantInfo,
-                phase: seeded.phase,
-                priority: seeded.priority,
-                domains: seeded.domains,
-                subMissions: seeded.subMissions,
-                urgencyScore: seeded.urgencyScore,
-                rationale: seeded.rationale,
-                successCriteria: seeded.successCriteria,
-                moduleId: seeded.moduleId,
-                modulePath: seeded.modulePath,
-                userMission: true,
-                estimatedComplexity: seeded.estimatedComplexity,
-              }
-            : m,
-        )
-        updatedCount++
-      } else {
-        nextMissions = [...nextMissions, seeded]
-        createdCount++
+    // Atomic, serialized upsert against a fresh in-lock plan (AUD-DATA-001-PLUS).
+    const merged = await mutatePlan((plan) => {
+      let nextMissions = plan.missions
+
+      for (const seeded of seedMissions) {
+        const existingIdx = nextMissions.findIndex((m) => m.id === seeded.id)
+        if (existingIdx >= 0) {
+          if (!upsert) continue
+          // Preserve lifecycle state and audit log on upsert; only refresh content.
+          const existing = nextMissions[existingIdx]
+          nextMissions = nextMissions.map((m, i) =>
+            i === existingIdx
+              ? {
+                  ...existing,
+                  name: seeded.name,
+                  purpose: seeded.purpose,
+                  description: seeded.description,
+                  importantInfo: seeded.importantInfo,
+                  phase: seeded.phase,
+                  priority: seeded.priority,
+                  domains: seeded.domains,
+                  subMissions: seeded.subMissions,
+                  urgencyScore: seeded.urgencyScore,
+                  rationale: seeded.rationale,
+                  successCriteria: seeded.successCriteria,
+                  moduleId: seeded.moduleId,
+                  modulePath: seeded.modulePath,
+                  userMission: true,
+                  estimatedComplexity: seeded.estimatedComplexity,
+                }
+              : m,
+          )
+          updatedCount++
+        } else {
+          nextMissions = [...nextMissions, seeded]
+          createdCount++
+        }
       }
-    }
 
-    const normalized = normalizePlan({
-      version: plan.version || 1,
-      updatedAt: new Date().toISOString(),
-      missions: nextMissions,
-    })
+      const normalized = normalizePlan({
+        version: plan.version || 1,
+        updatedAt: new Date().toISOString(),
+        missions: nextMissions,
+      })
+      return { ...normalized, tasks: plan.tasks ?? [], lastPlanRun: plan.lastPlanRun }
+    }, { createIfMissing: true })
 
-    const merged: Plan = {
-      ...normalized,
-      tasks: plan.tasks ?? [],
-      lastPlanRun: plan.lastPlanRun,
-    }
-
-    writePlan(merged)
     return NextResponse.json({
       plan: merged,
       createdCount,
@@ -172,6 +148,9 @@ export async function POST(request: Request) {
       source: body.source,
     })
   } catch (e) {
+    if (e instanceof PlanMissingError) {
+      return NextResponse.json({ error: 'Plan not loaded' }, { status: 500 })
+    }
     console.error('[missions/seed] POST error:', e)
     return NextResponse.json({ error: 'Failed to seed missions' }, { status: 500 })
   }

@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 import { logger } from '@/lib/logger'
 import { requireAdmin } from '@/lib/hd-central/auth-guard'
 import type { Mission, MissionAuditLogEvent, Plan } from '@/lib/hd-central/types'
@@ -8,29 +6,7 @@ import { normalizePlan } from '@/lib/hd-central/lifecycle'
 import { pushAllToTimeline, pullMissionFromTimeline, setMissionsOnTimeline } from '@/lib/hd-central/sequencer'
 import { transitionTimelineState } from '@/lib/hd-central/mission-state-machine'
 import { appendTimelineAudit } from '@/lib/hd-central/mission-audit-trail'
-
-const PLAN_FILE = path.join(process.cwd(), '..', 'NOTES', 'plan.json')
-
-function readPlan(): Plan {
-  if (!fs.existsSync(PLAN_FILE)) {
-    return { version: 1, updatedAt: new Date().toISOString(), missions: [], tasks: [] }
-  }
-  try {
-    const parsed = JSON.parse(fs.readFileSync(PLAN_FILE, 'utf-8')) as Plan
-    return parsed
-  } catch {
-    return { version: 1, updatedAt: new Date().toISOString(), missions: [], tasks: [] }
-  }
-}
-
-// Atomic write: tmp file + rename — survives crash mid-write, prevents partial plan.json.
-function writePlanAtomic(plan: Plan) {
-  const dir = path.dirname(PLAN_FILE)
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-  const tmp = `${PLAN_FILE}.tmp`
-  fs.writeFileSync(tmp, JSON.stringify(plan, null, 2), 'utf-8')
-  fs.renameSync(tmp, PLAN_FILE)
-}
+import { mutatePlan } from '@/lib/hd-central/plan-store'
 
 type PushBody = {
   mode: 'one' | 'selected' | 'all' | 'pull'
@@ -149,86 +125,77 @@ export async function POST(request: Request) {
       )
     }
 
-    const plan = readPlan()
     const actor = body.actorAgent ?? user.email ?? user.id ?? 'plan-manager'
+    const mode = body.mode
 
-    let nextMissions = plan.missions
-
-    if (body.mode === 'all') {
-      nextMissions = pushAllToTimeline(plan.missions, actor)
-    } else if (body.mode === 'selected' || body.mode === 'one') {
-      const ids = Array.isArray(body.missionIds) ? body.missionIds : []
-      if (ids.length === 0) {
-        return NextResponse.json(
-          { error: { code: 'no_ids', message: 'No missionIds provided' } },
-          { status: 400 },
-        )
-      }
-      nextMissions = setMissionsOnTimeline(plan.missions, ids, actor)
-    } else if (body.mode === 'pull') {
-      const ids = Array.isArray(body.missionIds) ? body.missionIds : []
-      if (ids.length === 0) {
-        return NextResponse.json(
-          { error: { code: 'no_ids', message: 'No missionIds provided' } },
-          { status: 400 },
-        )
-      }
-      nextMissions = plan.missions
-      for (const id of ids) {
-        nextMissions = pullMissionFromTimeline(nextMissions, id)
-      }
-    } else {
+    // Body-only validation up front (doesn't need the plan).
+    const ids = Array.isArray(body.missionIds) ? body.missionIds : []
+    if ((mode === 'selected' || mode === 'one' || mode === 'pull') && ids.length === 0) {
       return NextResponse.json(
-        { error: { code: 'invalid_mode', message: `Unknown mode: ${body.mode}` } },
+        { error: { code: 'no_ids', message: 'No missionIds provided' } },
+        { status: 400 },
+      )
+    }
+    if (mode !== 'all' && mode !== 'selected' && mode !== 'one' && mode !== 'pull') {
+      return NextResponse.json(
+        { error: { code: 'invalid_mode', message: `Unknown mode: ${mode}` } },
         { status: 400 },
       )
     }
 
-    // Audit log: record the inbox → timeline activation for every newly-pushed
-    // mission. Skipped for `pull` and for missions already on the timeline.
     let pushed = 0
-    if (body.mode !== 'pull') {
-      const activation = appendActivationLog(
-        plan.missions,
-        nextMissions,
-        `[push-to-timeline] mode=${body.mode} · actor=${actor}`,
-      )
-      nextMissions = activation.missions
-      pushed = activation.pushed
-    }
+    let transitions = 0
 
-    // Mission Timeline state machine: stamp draft → queued (push) or
-    // queued → draft (pull) and persist each transition to the audit trail.
-    const timeline = applyTimelineTransitions(
-      plan.missions,
-      nextMissions,
-      actor,
-      body.scheduledFor,
-      body.mode,
-    )
-    nextMissions = timeline.missions
+    // Atomic, serialized read-modify-write against a fresh in-lock plan (AUD-DATA-001-PLUS).
+    const merged = await mutatePlan((plan) => {
+      let nextMissions = plan.missions
 
-    // Orchestrator trigger: normalizePlan re-runs the sequencer + promoteNextActiveMission,
-    // which auto-promotes the lowest-sequenceIndex PLAN mission to ACTIVE when no
-    // ACTIVE mission exists on the timeline.
-    const nextPlan: Plan = normalizePlan({
-      version: plan.version || 1,
-      updatedAt: new Date().toISOString(),
-      missions: nextMissions,
+      if (mode === 'all') {
+        nextMissions = pushAllToTimeline(plan.missions, actor)
+      } else if (mode === 'selected' || mode === 'one') {
+        nextMissions = setMissionsOnTimeline(plan.missions, ids, actor)
+      } else {
+        // pull
+        nextMissions = plan.missions
+        for (const id of ids) {
+          nextMissions = pullMissionFromTimeline(nextMissions, id)
+        }
+      }
+
+      // Audit log: record the inbox → timeline activation for every newly-pushed
+      // mission. Skipped for `pull` and for missions already on the timeline.
+      if (mode !== 'pull') {
+        const activation = appendActivationLog(
+          plan.missions,
+          nextMissions,
+          `[push-to-timeline] mode=${mode} · actor=${actor}`,
+        )
+        nextMissions = activation.missions
+        pushed = activation.pushed
+      }
+
+      // Mission Timeline state machine: stamp draft → queued (push) or
+      // queued → draft (pull) and persist each transition to the audit trail.
+      const timeline = applyTimelineTransitions(plan.missions, nextMissions, actor, body.scheduledFor, mode)
+      nextMissions = timeline.missions
+      transitions = timeline.transitions
+
+      // Orchestrator trigger: normalizePlan re-runs the sequencer + promoteNextActiveMission,
+      // which auto-promotes the lowest-sequenceIndex PLAN mission to ACTIVE when no
+      // ACTIVE mission exists on the timeline.
+      const nextPlan: Plan = normalizePlan({
+        version: plan.version || 1,
+        updatedAt: new Date().toISOString(),
+        missions: nextMissions,
+      })
+      return { ...nextPlan, tasks: plan.tasks ?? [], lastPlanRun: plan.lastPlanRun }
     })
-    const merged: Plan = {
-      ...nextPlan,
-      tasks: plan.tasks ?? [],
-      lastPlanRun: plan.lastPlanRun,
-    }
-
-    writePlanAtomic(merged)
 
     logger.info('hd_central_push_to_timeline', {
       actor,
-      mode: body.mode,
+      mode,
       pushed,
-      transitions: timeline.transitions,
+      transitions,
       total: merged.missions.length,
     })
 

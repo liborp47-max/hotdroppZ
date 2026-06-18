@@ -2,23 +2,10 @@ import { NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 import { randomUUID } from 'crypto'
-import type { Plan, RunStep, SubMission, SubMissionStatus } from '@/lib/hd-central/types'
+import type { RunStep, SubMissionStatus } from '@/lib/hd-central/types'
+import { readPlan, mutatePlan, PlanMissingError } from '@/lib/hd-central/plan-store'
 
-const PLAN_FILE = path.join(process.cwd(), '..', 'NOTES', 'plan.json')
 const REPORTS_DIR = path.join(process.cwd(), '..', '..', 'INFO', 'MISSIONS')
-
-function readPlan(): Plan | null {
-  if (!fs.existsSync(PLAN_FILE)) return null
-  try {
-    return JSON.parse(fs.readFileSync(PLAN_FILE, 'utf-8'))
-  } catch {
-    return null
-  }
-}
-
-function writePlan(plan: Plan) {
-  fs.writeFileSync(PLAN_FILE, JSON.stringify(plan, null, 2), 'utf-8')
-}
 
 function ensureDir(p: string) {
   if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true })
@@ -77,29 +64,32 @@ export async function POST(
 
     const finishedAt = steps[steps.length - 1].ts
 
-    // Persist: mark this sub-mission as done
+    // Persist: mark this sub-mission as done. Atomic + serialized against a fresh
+    // in-lock read so concurrent edits to other missions survive (AUD-DATA-001-PLUS).
     const now = new Date().toISOString()
-    const nextMissions = plan.missions.map((m) => {
-      if (m.id !== mission.id) return m
-      return {
-        ...m,
-        subMissions: (m.subMissions ?? []).map((s) =>
-          s.id === smId
-            ? { ...s, status: 'done' as SubMissionStatus, completedAt: now }
-            : s,
-        ),
-        auditLog: [
-          ...(m.auditLog ?? []),
-          {
-            ts: now,
-            event: 'MISSION_SOLVE_STEP_DONE' as const,
-            actor: 'CEO' as const,
-            note: `[sub-mission] #${sub.id} (${sub.name}) executed by @${owner} · runId=${runId}`,
-          },
-        ],
-      }
+    await mutatePlan((current) => {
+      const nextMissions = current.missions.map((m) => {
+        if (m.id !== mission.id) return m
+        return {
+          ...m,
+          subMissions: (m.subMissions ?? []).map((s) =>
+            s.id === smId
+              ? { ...s, status: 'done' as SubMissionStatus, completedAt: now }
+              : s,
+          ),
+          auditLog: [
+            ...(m.auditLog ?? []),
+            {
+              ts: now,
+              event: 'MISSION_SOLVE_STEP_DONE' as const,
+              actor: 'CEO' as const,
+              note: `[sub-mission] #${sub.id} (${sub.name}) executed by @${owner} · runId=${runId}`,
+            },
+          ],
+        }
+      })
+      return { ...current, missions: nextMissions, updatedAt: now }
     })
-    writePlan({ ...plan, missions: nextMissions, updatedAt: now })
 
     // Write artifact
     ensureDir(REPORTS_DIR)
@@ -153,6 +143,9 @@ _Focused sub-mission execution via CEO orchestrator. Real Claude agent invocatio
       speed,
     })
   } catch (e) {
+    if (e instanceof PlanMissingError) {
+      return NextResponse.json({ error: 'Plan not loaded' }, { status: 500 })
+    }
     console.error('[mission/submission/solve] error:', e)
     return NextResponse.json({ error: 'Failed to solve sub-mission' }, { status: 500 })
   }

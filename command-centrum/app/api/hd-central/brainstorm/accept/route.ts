@@ -1,37 +1,13 @@
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 import { requireAdmin } from '@/lib/hd-central/auth-guard'
 import { logger } from '@/lib/logger'
 import { normalizePlan } from '@/lib/hd-central/lifecycle'
 import { isValidSuggestion } from '@/lib/hd-central/brainstorm'
-import type { Mission, MissionAuditLogEvent, Phase, Plan, Priority } from '@/lib/hd-central/types'
-
-const PLAN_FILE = path.join(process.cwd(), '..', 'NOTES', 'plan.json')
+import type { Mission, MissionAuditLogEvent, Phase, Priority } from '@/lib/hd-central/types'
+import { mutatePlan } from '@/lib/hd-central/plan-store'
 
 const PRIORITY_URGENCY: Record<Priority, number> = { P0: 95, P1: 75, P2: 50, P3: 25 }
 const VALID_PHASES: Phase[] = ['Foundation', 'Build', 'Validate', 'Launch', 'Scale']
-
-function readPlan(): Plan {
-  if (!fs.existsSync(PLAN_FILE)) {
-    return { version: 1, updatedAt: new Date().toISOString(), missions: [], tasks: [] }
-  }
-  try {
-    const parsed = JSON.parse(fs.readFileSync(PLAN_FILE, 'utf-8')) as Plan
-    return { ...parsed, missions: Array.isArray(parsed.missions) ? parsed.missions : [] }
-  } catch {
-    return { version: 1, updatedAt: new Date().toISOString(), missions: [], tasks: [] }
-  }
-}
-
-// Atomic write: tmp file + rename — prevents a partial plan.json on crash.
-function writePlanAtomic(plan: Plan) {
-  const dir = path.dirname(PLAN_FILE)
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-  const tmp = `${PLAN_FILE}.tmp`
-  fs.writeFileSync(tmp, JSON.stringify(plan, null, 2), 'utf-8')
-  fs.renameSync(tmp, PLAN_FILE)
-}
 
 function coercePhase(phase: string): Phase {
   return VALID_PHASES.includes(phase as Phase) ? (phase as Phase) : 'Build'
@@ -54,7 +30,6 @@ export async function POST(request: Request) {
     }
 
     const s = body.suggestion
-    const plan = readPlan()
     const now = new Date().toISOString()
     const missionId = `BRAIN-${Date.now().toString(36).toUpperCase()}`
     const actor = user.email ?? user.id ?? 'brainstorm'
@@ -86,12 +61,15 @@ export async function POST(request: Request) {
       auditLog: [auditEntry],
     }
 
-    const normalized = normalizePlan({
-      version: plan.version || 1,
-      updatedAt: now,
-      missions: [...plan.missions, mission],
+    // Atomic, serialized append against a fresh in-lock plan (AUD-DATA-001-PLUS).
+    await mutatePlan((plan) => {
+      const normalized = normalizePlan({
+        version: plan.version || 1,
+        updatedAt: now,
+        missions: [...plan.missions, mission],
+      })
+      return { ...normalized, tasks: plan.tasks ?? [], lastPlanRun: plan.lastPlanRun }
     })
-    writePlanAtomic({ ...normalized, tasks: plan.tasks ?? [], lastPlanRun: plan.lastPlanRun })
 
     logger.info('hd_central_brainstorm_accept', { missionId, actor, priority: s.suggestedPriority })
 

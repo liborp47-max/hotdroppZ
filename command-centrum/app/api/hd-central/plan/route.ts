@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server'
 import fs from 'fs'
-import path from 'path'
 import type { Plan } from '@/lib/hd-central/types'
+// path no longer needed — PLAN_FILE comes from the shared store.
 import { normalizePlan } from '@/lib/hd-central/lifecycle'
 import { validatePlanPayload } from '@/lib/hd-central/plan-schema'
-
-const PLAN_FILE = path.join(process.cwd(), '..', 'NOTES', 'plan.json')
+import { PLAN_FILE, mutatePlan } from '@/lib/hd-central/plan-store'
 
 // SSE keep-alive interval — comment frames stop idle proxies dropping the stream.
 const HEARTBEAT_MS = 25_000
@@ -34,17 +33,6 @@ function readPlan(): Plan {
   } catch {
     return emptyPlan()
   }
-}
-
-function writePlan(plan: Plan) {
-  const dir = path.dirname(PLAN_FILE)
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-  // AUD-DATA-001: atomic write via unique temp + rename. Prevents partial reads
-  // (a concurrent reader never sees a half-written file) and the shared-.tmp
-  // collision between concurrent writers.
-  const tmp = `${PLAN_FILE}.tmp-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-  fs.writeFileSync(tmp, JSON.stringify(plan, null, 2), 'utf-8')
-  fs.renameSync(tmp, PLAN_FILE)
 }
 
 // Live plan stream (BRAIN-MPX87CRF). Pushes the normalized plan on first
@@ -166,17 +154,24 @@ export async function PUT(request: Request) {
       )
     }
     const body = raw as Plan // structure validated; use original to preserve all fields
-    const next = normalizePlan({
-      version: body.version || 1,
-      updatedAt: new Date().toISOString(),
-      missions: body.missions,
-    })
-    const merged: Plan = {
-      ...next,
-      tasks: Array.isArray(body.tasks) ? body.tasks : (readPlan().tasks ?? []),
-      lastPlanRun: body.lastPlanRun ?? next.lastPlanRun,
-    }
-    writePlan(merged)
+    // Serialized + atomic write via the shared store. noBump: this PUT carries its
+    // own version (client-managed full-plan save), and createIfMissing preserves
+    // the original first-save-bootstraps-the-file behavior.
+    const merged = await mutatePlan(
+      (current) => {
+        const next = normalizePlan({
+          version: body.version || 1,
+          updatedAt: new Date().toISOString(),
+          missions: body.missions,
+        })
+        return {
+          ...next,
+          tasks: Array.isArray(body.tasks) ? body.tasks : (current.tasks ?? []),
+          lastPlanRun: body.lastPlanRun ?? next.lastPlanRun,
+        }
+      },
+      { noBump: true, createIfMissing: true },
+    )
     return NextResponse.json(merged)
   } catch (e) {
     console.error('[plan] PUT error:', e)

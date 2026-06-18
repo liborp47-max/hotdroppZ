@@ -8,22 +8,12 @@ import { evaluateEvidence, type MissionEvidence } from '@/lib/hd-central/evidenc
 import { runMissionLocally } from '@/lib/hd-central/local-runner'
 import { runAgentForMission, auditorSignOff, buildEvidenceFromAgentRun } from '@/lib/hd-central/agent-runner'
 import { createClient } from '@/lib/supabase/server'
+import { readPlan, mutatePlan } from '@/lib/hd-central/plan-store'
 
-const PLAN_FILE = path.join(process.cwd(), '..', 'NOTES', 'plan.json')
 const REPORTS_DIR = path.join(process.cwd(), '..', '..', 'INFO', 'MISSIONS')
 
-function readPlan(): Plan | null {
-  if (!fs.existsSync(PLAN_FILE)) return null
-  try {
-    return JSON.parse(fs.readFileSync(PLAN_FILE, 'utf-8'))
-  } catch {
-    return null
-  }
-}
-
-function writePlan(plan: Plan) {
-  fs.writeFileSync(PLAN_FILE, JSON.stringify(plan, null, 2), 'utf-8')
-}
+/** Internal sentinel: the mission vanished between the initial read and the write lock. */
+class SolveNotFound extends Error {}
 
 function ensureReportsDir() {
   if (!fs.existsSync(REPORTS_DIR)) fs.mkdirSync(REPORTS_DIR, { recursive: true })
@@ -333,29 +323,43 @@ export async function POST(
     const reportPath = path.join(REPORTS_DIR, `${runId}.md`)
     fs.writeFileSync(reportPath, buildReportMarkdown(report, mission, agents, tools), 'utf-8')
 
-    const solved = completeMissionWithAudit(
-      {
-        ...plan,
-        missions: plan.missions.map((m) => (m.id === id ? enrichedMission : m)),
-      },
-      id,
-      runId,
-      report.summary,
-      verdict,
-      { stepIndex, totalSteps, solveAll, reportShown },
-    )
-
-    if (!solved) {
-      return NextResponse.json({ error: `Mission ${id} not found` }, { status: 404 })
+    // Apply the completion atomically against a FRESH in-lock read. The agent run
+    // above can take a while; re-reading here means concurrent edits to OTHER
+    // missions made during that window are preserved instead of clobbered
+    // (AUD-DATA-001-PLUS). Only mission `id` is replaced with enrichedMission.
+    type SolveResult = NonNullable<ReturnType<typeof completeMissionWithAudit>>
+    let solvedMission: SolveResult['mission'] | undefined
+    let solvedAuditReport: SolveResult['auditReport'] | undefined
+    try {
+      await mutatePlan((current) => {
+        const normalizedCurrent = normalizePlan(current)
+        const solved = completeMissionWithAudit(
+          {
+            ...normalizedCurrent,
+            missions: normalizedCurrent.missions.map((m) => (m.id === id ? enrichedMission : m)),
+          },
+          id,
+          runId,
+          report.summary,
+          verdict,
+          { stepIndex, totalSteps, solveAll, reportShown },
+        )
+        if (!solved) throw new SolveNotFound()
+        solvedMission = solved.mission
+        solvedAuditReport = solved.auditReport
+        return { ...solved.plan, updatedAt: now }
+      })
+    } catch (e) {
+      if (e instanceof SolveNotFound) {
+        return NextResponse.json({ error: `Mission ${id} not found` }, { status: 404 })
+      }
+      throw e
     }
-
-    const nextPlan: Plan = { ...solved.plan, updatedAt: now }
-    writePlan(nextPlan)
 
     return NextResponse.json({
       report,
-      mission: solved.mission,
-      auditReport: solved.auditReport,
+      mission: solvedMission,
+      auditReport: solvedAuditReport,
       verdict,
       evidenceReasons: evaluation.reasons,
       agentCount: agents.length,
