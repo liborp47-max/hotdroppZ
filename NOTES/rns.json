@@ -1,0 +1,84 @@
+{
+  "version": 2,
+  "updatedAt": "2026-06-18T18:50:35.095Z",
+  "items": [
+    {
+      "id": "RNS-creds-mqjuutw9",
+      "title": "[P0] CEO: acquire Supabase service key + Spotify creds",
+      "why": "#1 leverage per 2026-06-17 audit — SUPABASE_SERVICE_ROLE_KEY/DB_URL + SPOTIFY creds are EMPTY, blocking the real end-to-end pipeline run, media enrichment (HDUA-15) and HDUA-16 live verify. Code is ready; only credentials block the content goal.",
+      "agent": "ceo",
+      "confidence": 0.95,
+      "horizon": "today",
+      "createdAt": "2026-06-18T18:50:35.095Z"
+    },
+    {
+      "id": "RNS-P0-TRUTH-002-REAL-AGENT-BACKEND",
+      "title": "[P0] Real agent-execution backend for /solve (replace simulator)",
+      "why": "Replace the simulated buildSteps() orchestrator with real Claude agent invocation that produces a genuine evidence pack, so Solve can actually reach a verified MISSION_DONE.",
+      "agent": "ai-pipeline",
+      "missionRef": "P0-TRUTH-002-REAL-AGENT-BACKEND",
+      "confidence": 0.9,
+      "horizon": "today",
+      "createdAt": "2026-06-18T18:50:35.095Z"
+    },
+    {
+      "id": "RNS-HDUA-02-CONTENT-API",
+      "title": "[P0] Content API + HDCC→HDUA bridge",
+      "why": "Stabilní read-API, které nativní HDUA app konzumuje, plněné eventy z HDCC pipeline.",
+      "agent": "ai-pipeline",
+      "missionRef": "HDUA-02-CONTENT-API",
+      "confidence": 0.9,
+      "horizon": "today",
+      "createdAt": "2026-06-18T18:50:35.095Z"
+    },
+    {
+      "id": "RNS-HDUA-03-APP-SHELL-NAV",
+      "title": "[P0] App shell + spodní navigace",
+      "why": "Skelet aplikace s Expo Router a spodní navigací Home / Search / Create / Alerts / Profile.",
+      "agent": "frontend-engineer",
+      "missionRef": "HDUA-03-APP-SHELL-NAV",
+      "confidence": 0.9,
+      "horizon": "today",
+      "createdAt": "2026-06-18T18:50:35.095Z"
+    },
+    {
+      "id": "RNS-HDUA-15-ENRICHMENT-ACTIVATION",
+      "title": "[P0] Aktivace enrichmentu — feed s reálnými médii",
+      "why": "Naplnit feed reálnými daty (artist, cover, Spotify/YouTube) — teď je vizuálně prázdný.",
+      "agent": "ai-pipeline",
+      "missionRef": "HDUA-15-ENRICHMENT-ACTIVATION",
+      "confidence": 0.9,
+      "horizon": "today",
+      "createdAt": "2026-06-18T18:50:35.095Z"
+    },
+    {
+      "id": "RNS-UM-SRC_PR_S4_CONSUMER_REWIRING",
+      "title": "[P1] PR-S4 — Consumer rewiring + Writer stage live — audit mise",
+      "why": "Žádné direct from('sources') calls v app kódu — všechno přes SRL. Writer stage produkuje články s artist context. Backwards compat: legacy queries dál fungují přes view.",
+      "agent": "ai-pipeline",
+      "missionRef": "UM-SRC_PR_S4_CONSUMER_REWIRING",
+      "confidence": 0.75,
+      "horizon": "week",
+      "createdAt": "2026-06-18T18:50:35.095Z"
+    },
+    {
+      "id": "RNS-AUD-SEC-001-PLUS-RBAC-PROVISION",
+      "title": "[P1] Provisionovat role + zpristrhnout createAdminClient (RBAC enforcement)",
+      "why": "Navazuje na AUD-SEC-001. Auth je vynucena, ale RBAC je fail-open: ucty nemaji role claims, takze requireAdmin({role}) nic nevynuti. Navic createAdminClient (RLS bypass) se pouziva plosne.",
+      "agent": "security",
+      "missionRef": "AUD-SEC-001-PLUS-RBAC-PROVISION",
+      "confidence": 0.75,
+      "horizon": "week",
+      "createdAt": "2026-06-18T18:50:35.095Z"
+    },
+    {
+      "id": "RNS-reconcile-sim",
+      "title": "[P1] Reconcile 7 SIMULATED_ONLY missions (truth gate)",
+      "why": "7 missions are fake-done (no evidence pack). Verify each against real evidence and promote or honestly re-park — do NOT blind-flip.",
+      "agent": "system-auditor",
+      "confidence": 0.7,
+      "horizon": "week",
+      "createdAt": "2026-06-18T18:50:35.095Z"
+    }
+  ]
+}
