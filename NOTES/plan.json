@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-06-18T01:03:59.531Z",
+  "updatedAt": "2026-06-18T01:26:50.922Z",
   "missions": [
     {
       "status": "solved",
@@ -19686,8 +19686,8 @@
       "completedAt": "2026-06-10T17:46:29.767Z"
     },
     {
-      "status": "todo",
-      "lifecycleStatus": "PLAN",
+      "status": "solved",
+      "lifecycleStatus": "MISSION_DONE",
       "coldCase": false,
       "isDeleted": false,
       "createdAt": "2026-06-10T06:20:00.000Z",
@@ -19701,6 +19701,12 @@
           "event": "MISSION_CREATED",
           "actor": "plan-manager",
           "note": "HDUA seed — native Expo user app, plan from CEO master prompt"
+        },
+        {
+          "ts": "2026-06-18T01:26:50.922Z",
+          "event": "MISSION_DONE",
+          "actor": "claude",
+          "note": "HDCC Live Pipeline Monitor at /hd-central/monitor (sidebar link added). Reuses existing pipeline-state endpoints: lib/hd-central/pipeline-monitor.ts merges /aggregate + /live-metrics into per-stage cards (status/health, latency p95, queue depth, processed today+week, errors, derived warnings, last-run status+duration, 7-day sparkline). Client polls both every 8s with no reload (criterion 2) + pause/refresh; colored ok/warn/error states + sparkline history (criterion 3). Criterion 1 (metrics per stage) met. SCOPE NOTE: renders the 11 REAL pipeline stages (STAGE_TABLE), not the spec brief 12 idealized ones (Parser/Normalizer/etc. do not exist) — no fabricated panels. EVIDENCE: tests/pipeline-monitor.test.ts (6, merge/queue-map/level/warnings/rollup) green + CI-wired; tsc 0 errors; lint clean. Live click-through not run (needs Supabase service key — same standing blocker). Commit on master."
         }
       ],
       "sequenceIndex": 210,
