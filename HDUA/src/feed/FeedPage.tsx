@@ -165,6 +165,20 @@ function FeedPageBase({
     }
   })
 
+  // Marquee swipe glow — a venom frame that's brightest when the card is centred
+  // and fades out as it swipes away. Opacity-only → smooth on every platform.
+  const glowStyle = useAnimatedStyle(() => {
+    const d = Math.abs(scrollY.value - index * pageH)
+    return { opacity: interpolate(d, [0, pageH * 0.55], [1, 0], Extrapolation.CLAMP) }
+  })
+
+  // Neighbour dim — adjacent cards recede so the active one reads as the focus
+  // (premium card-deck depth). Zero on the centred card, so it's never dimmed.
+  const dimStyle = useAnimatedStyle(() => {
+    const d = Math.abs(scrollY.value - index * pageH)
+    return { opacity: interpolate(d, [0, pageH], [0, 0.45], Extrapolation.CLAMP) }
+  })
+
   return (
     <View style={[styles.page, { height: pageH }]}>
       {/* Hero */}
@@ -184,6 +198,9 @@ function FeedPageBase({
         )}
       </Animated.View>
 
+      {/* Neighbour dim — recedes the card as it leaves centre. */}
+      <Animated.View style={[StyleSheet.absoluteFill, styles.dim, dimStyle]} pointerEvents="none" />
+
       {/* Glossy diagonal sheen — gives the hero a shiny, lit-glass read. */}
       <LinearGradient
         colors={['rgba(255,255,255,0.12)', 'rgba(255,255,255,0)', 'rgba(255,255,255,0)']}
@@ -197,6 +214,9 @@ function FeedPageBase({
       <View style={styles.scrimTop} pointerEvents="none" />
       <View style={styles.scrimMid} pointerEvents="none" />
       <View style={styles.scrimBottom} pointerEvents="none" />
+
+      {/* Marquee venom glow frame — brightest on the active card, fades on swipe. */}
+      <Animated.View style={[styles.glowFrame, glowStyle]} pointerEvents="none" />
 
       {/* Tap target opens the reader */}
       <Pressable style={StyleSheet.absoluteFill} onPress={onToggle} />
@@ -393,6 +413,13 @@ export const FeedPage = memo(FeedPageBase)
 
 const styles = StyleSheet.create({
   page: { width: '100%', overflow: 'hidden', backgroundColor: colors.bg },
+  dim: { backgroundColor: '#000' },
+  // Inset venom frame with an outward glow — reads as a lit "card" edge on the
+  // active page. glows.strong handles web boxShadow + native shadow/elevation.
+  glowFrame: {
+    position: 'absolute', top: 3, left: 3, right: 3, bottom: 3,
+    borderRadius: radius.lg, borderWidth: 1.5, borderColor: colors.accent, ...glows.strong,
+  },
   scrimTop: { position: 'absolute', top: 0, left: 0, right: 0, height: 140, backgroundColor: 'rgba(10,10,11,0.35)' },
   scrimMid: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%', backgroundColor: 'rgba(10,10,11,0.45)' },
   scrimBottom: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '32%', backgroundColor: 'rgba(10,10,11,0.85)' },
