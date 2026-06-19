@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-06-19T18:12:05.026Z",
+  "updatedAt": "2026-06-19T18:31:23.735Z",
   "missions": [
     {
       "status": "solved",
@@ -20372,8 +20372,8 @@
       ]
     },
     {
-      "status": "todo",
-      "lifecycleStatus": "PLAN",
+      "status": "in_progress",
+      "lifecycleStatus": "BUILD",
       "coldCase": false,
       "isDeleted": false,
       "createdAt": "2026-06-11T16:00:00.000Z",
@@ -20387,6 +20387,12 @@
           "event": "MISSION_CREATED",
           "actor": "auditor",
           "note": "HDUA detailed audit 2026-06-11 (post UI overhaul)"
+        },
+        {
+          "ts": "2026-06-19T18:31:23.735Z",
+          "event": "PROGRESS",
+          "actor": "claude",
+          "note": "Reader→scrollbar wiring shipped additively (commit 09b806f), zero feed regression (FeedPager/GlobalScrollbar untouched). sub01 DONE: post/[id] FlashList drives sbProgress/sbThumbFraction + draggable thumb scrolls it via new useScrollbarSurface hook; getScroller/resetScrollbar added; focus saves+restores the feed scroller so its bar survives return. sub02 PARTIAL: reader-blur ownership/reset done, but static-tab-while-feed-mounted neutralization deferred (needs a GlobalScrollbar ownership/opacity signal). tsc 0 errors; 17 HDUA tests green. NOT visually verified — runtime/focus behavior needs the Expo app (no headless harness). Left in_progress, not solved."
         }
       ],
       "sequenceIndex": 218,
@@ -20414,16 +20420,17 @@
           "name": "Reader scroll → sb",
           "description": "Napojit FeedPage inner ScrollView + post/[id] na sdílené hodnoty.",
           "why": "Pravdivý posuvník v detailu.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
-          "estimatedDuration": "S"
+          "estimatedDuration": "S",
+          "completedAt": "2026-06-19T18:31:23.735Z"
         },
         {
           "id": "02",
           "name": "Reset/ownership",
           "description": "Předávání „active scroller\" mezi surfacy + reset.",
           "why": "Žádná stale pozice.",
-          "status": "todo",
+          "status": "in_progress",
           "owner": "frontend-engineer",
           "estimatedDuration": "S"
         }
