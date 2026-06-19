@@ -112,9 +112,14 @@ export function FeedPager({
         <AnimatedScrollView
           ref={scrollRef as never}
           style={styles.fill}
-          pagingEnabled
-          showsVerticalScrollIndicator={false}
+          // Deliberate one-card-per-swipe snap (snap weight): snapToInterval +
+          // disableIntervalMomentum means a fling settles on the NEXT card, never
+          // skips, and lands crisply. Replaces pagingEnabled for finer control.
+          snapToInterval={pageH}
+          snapToAlignment="start"
+          disableIntervalMomentum
           decelerationRate="fast"
+          showsVerticalScrollIndicator={false}
           scrollEventThrottle={16}
           onScroll={scrollHandler}
           // Lock background paging while a post is open — the reader drives nav.

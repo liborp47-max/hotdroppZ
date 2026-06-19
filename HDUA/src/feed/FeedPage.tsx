@@ -18,6 +18,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSequence,
+  withSpring,
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated'
@@ -32,7 +33,7 @@ import { pickEmbed } from '@/lib/embeds'
 import { trackView } from '@/lib/analytics'
 import { useShareSheet } from '@/stores/shareSheet'
 import { colors, glows, radius, spacing, typography } from '@/styles/theme'
-import { compact, timeAgo } from '@/utils/text'
+import { timeAgo } from '@/utils/text'
 import type { FeedItem, SourcePlatform } from '@/types'
 
 const BLURHASH = 'L4A_=2~q00009F-;_3IU00of?bof'
@@ -45,15 +46,20 @@ const SOURCE_META: Record<SourcePlatform, { label: string; color: string; icon: 
   web: { label: 'Source', color: colors.textMuted, icon: 'globe-outline' },
 }
 
+// Violet "DROP POST" badge label per type.
 const TYPE_BADGE: Partial<Record<FeedItem['type'], string>> = {
-  release: 'NEW DROP', video: 'VIDEO', event: 'EVENT', interview: 'INTERVIEW',
-  ranking: 'RANKING', drama: 'DRAMA',
+  release: 'DROP POST', video: 'VIDEO', event: 'EVENT', interview: 'INTERVIEW',
+  ranking: 'RANKING', drama: 'DRAMA', playlist: 'PLAYLIST', festival: 'FESTIVAL',
+}
+
+// Fallback label for the disc pill when the item has no explicit subcategory.
+const PILL_TYPE: Partial<Record<FeedItem['type'], string>> = {
+  release: 'Release', video: 'Video', playlist: 'Playlist', event: 'Event',
+  festival: 'Festival', interview: 'Interview', ranking: 'Ranking',
 }
 
 // Brand flame — the no-cover fallback watermark.
 const FLAME = require('@/assets/brand/flame.png')
-// Brand "heart" flame — the Boost button.
-const BOOST = require('@/assets/brand/boost-mark.png')
 
 // Deterministic dark, on-brand gradients for posts without a cover image, so
 // each hero looks distinct (not the same blurhash) until enrichment lands one.
@@ -83,35 +89,13 @@ function FallbackHero({ id }: { id: string }) {
   )
 }
 
-function RailButton({
-  icon, image, label, active, accent, onPress,
-}: {
-  icon?: keyof typeof Ionicons.glyphMap
-  image?: number
-  label?: string
-  active?: boolean
-  accent?: boolean
-  onPress?: () => void
-}) {
-  const tint = active ? colors.accent : accent ? colors.accent : colors.text
-  return (
-    <Pressable style={styles.railBtn} onPress={onPress} hitSlop={8}>
-      <View style={[styles.railIcon, image ? styles.railFlameWrap : null, image && active ? styles.railFlameActive : null]}>
-        {image ? (
-          <Image source={image} style={styles.railFlame} contentFit="contain" />
-        ) : (
-          <Ionicons name={icon ?? 'ellipse-outline'} size={27} color={tint} />
-        )}
-      </View>
-      {label ? <Text style={[styles.railLabel, image && active ? styles.railLabelBoosted : null]}>{label}</Text> : null}
-    </Pressable>
-  )
-}
+type Pill = { icon: keyof typeof Ionicons.glyphMap; label: string }
 
 /**
- * Full-screen feed post (HDUA-06, TikTok-style pager). Each page fills the
- * viewport; the hero parallaxes against the scroll position for depth as pages
- * snap past one another. Tapping opens the continuous reader overlay.
+ * Feed post (HDUA-06). Editorial card layout: a parallaxing hero fills the top
+ * of the page, the content sits below on pure black — violet DROP POST badge +
+ * outline-flame boost, a bold title, icon pill chips, a rule, then a faded body
+ * preview. One card per page in a snap pager; tap (or "read") opens the reader.
  */
 function FeedPageBase({
   item, index, pageH, scrollY, active, loadMedia, expanded, onToggle, onNext, insetTop, insetBottom,
@@ -128,175 +112,154 @@ function FeedPageBase({
   insetTop: number
   insetBottom: number
 }) {
-  const openShare = useShareSheet((s) => s.open)
   const [boosted, setBoosted] = useState(false)
 
   const badge = TYPE_BADGE[item.type]
   const playable = item.type === 'release' || item.type === 'video' || item.type === 'playlist'
-  const sig = item.signals
+  const heroH = Math.round(pageH * 0.54)
 
-  // Gentle pulse when the post docks (becomes active) — multiplied into the
-  // hero scale so it reads as a soft "breath" on anchor.
+  const pills: Pill[] = [
+    item.artist ? { icon: 'person-outline' as const, label: item.artist } : null,
+    item.country ? { icon: 'globe-outline' as const, label: item.country } : null,
+    item.category ? { icon: 'musical-notes' as const, label: item.category } : null,
+    item.subcategory || PILL_TYPE[item.type]
+      ? { icon: 'disc-outline' as const, label: (item.subcategory ?? PILL_TYPE[item.type]) as string }
+      : null,
+  ].filter(Boolean) as Pill[]
+
+  // Springy settle when the post docks (becomes active) — adds "snap weight".
   const pulse = useSharedValue(1)
   useEffect(() => {
     if (active) {
-      pulse.value = withSequence(withTiming(1.035, { duration: 150 }), withTiming(1, { duration: 300 }))
+      pulse.value = withSequence(withTiming(1.04, { duration: 140 }), withSpring(1, { damping: 12, stiffness: 170 }))
     }
   }, [active, pulse])
 
   // Hero parallax — drifts slower than the page + slight zoom on neighbours.
   const heroStyle = useAnimatedStyle(() => {
     const p = scrollY.value - index * pageH
-    const parScale = interpolate(p, [-pageH, 0, pageH], [1.12, 1, 1.12], Extrapolation.CLAMP)
+    const parScale = interpolate(p, [-pageH, 0, pageH], [1.14, 1, 1.14], Extrapolation.CLAMP)
     return {
       transform: [
-        { translateY: interpolate(p, [-pageH, 0, pageH], [-pageH * 0.16, 0, pageH * 0.16], Extrapolation.CLAMP) },
+        { translateY: interpolate(p, [-pageH, 0, pageH], [-heroH * 0.18, 0, heroH * 0.18], Extrapolation.CLAMP) },
         { scale: parScale * pulse.value },
       ],
     }
   })
 
-  // Overlay content rises + fades as the page leaves centre (buttery hand-off).
+  // Content gently rises + fades as the page leaves centre (buttery hand-off).
   const contentStyle = useAnimatedStyle(() => {
     const p = scrollY.value - index * pageH
     return {
-      opacity: interpolate(Math.abs(p), [0, pageH * 0.75], [1, 0], Extrapolation.CLAMP),
-      transform: [{ translateY: interpolate(p, [-pageH, 0, pageH], [48, 0, -48], Extrapolation.CLAMP) }],
+      opacity: interpolate(Math.abs(p), [0, pageH * 0.7], [1, 0.1], Extrapolation.CLAMP),
+      transform: [{ translateY: interpolate(p, [-pageH, 0, pageH], [26, 0, -26], Extrapolation.CLAMP) }],
     }
   })
 
-  // Marquee swipe glow — a venom frame that's brightest when the card is centred
-  // and fades out as it swipes away. Opacity-only → smooth on every platform.
-  const glowStyle = useAnimatedStyle(() => {
-    const d = Math.abs(scrollY.value - index * pageH)
-    return { opacity: interpolate(d, [0, pageH * 0.55], [1, 0], Extrapolation.CLAMP) }
-  })
-
-  // Neighbour dim — adjacent cards recede so the active one reads as the focus
-  // (premium card-deck depth). Zero on the centred card, so it's never dimmed.
+  // Neighbour dim — adjacent cards recede so the active one is the clear focus.
   const dimStyle = useAnimatedStyle(() => {
     const d = Math.abs(scrollY.value - index * pageH)
-    return { opacity: interpolate(d, [0, pageH], [0, 0.45], Extrapolation.CLAMP) }
+    return { opacity: interpolate(d, [0, pageH], [0, 0.5], Extrapolation.CLAMP) }
   })
 
   return (
     <View style={[styles.page, { height: pageH }]}>
-      {/* Hero */}
-      <Animated.View style={[StyleSheet.absoluteFill, heroStyle]}>
-        {item.coverImage && loadMedia ? (
-          <Image
-            source={{ uri: item.coverImage }}
-            placeholder={BLURHASH}
-            style={StyleSheet.absoluteFill}
-            contentFit="cover"
-            transition={220}
-            priority={active ? 'high' : 'normal'}
-            recyclingKey={item.id}
-          />
-        ) : (
-          <FallbackHero id={item.id} />
-        )}
-      </Animated.View>
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      <View style={[styles.hero, { height: heroH }]}>
+        <Animated.View style={[StyleSheet.absoluteFill, heroStyle]}>
+          {item.coverImage && loadMedia ? (
+            <Image
+              source={{ uri: item.coverImage }}
+              placeholder={BLURHASH}
+              style={StyleSheet.absoluteFill}
+              contentFit="cover"
+              transition={220}
+              priority={active ? 'high' : 'normal'}
+              recyclingKey={item.id}
+            />
+          ) : (
+            <FallbackHero id={item.id} />
+          )}
+        </Animated.View>
 
-      {/* Neighbour dim — recedes the card as it leaves centre. */}
-      <Animated.View style={[StyleSheet.absoluteFill, styles.dim, dimStyle]} pointerEvents="none" />
-
-      {/* Glossy diagonal sheen — gives the hero a shiny, lit-glass read. */}
-      <LinearGradient
-        colors={['rgba(255,255,255,0.12)', 'rgba(255,255,255,0)', 'rgba(255,255,255,0)']}
-        locations={[0, 0.45, 1]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0.85, y: 1 }}
-        style={StyleSheet.absoluteFill}
-        pointerEvents="none"
-      />
-
-      <View style={styles.scrimTop} pointerEvents="none" />
-      <View style={styles.scrimMid} pointerEvents="none" />
-      <View style={styles.scrimBottom} pointerEvents="none" />
-
-      {/* Marquee venom glow frame — brightest on the active card, fades on swipe. */}
-      <Animated.View style={[styles.glowFrame, glowStyle]} pointerEvents="none" />
-
-      {/* Tap target opens the reader */}
-      <Pressable style={StyleSheet.absoluteFill} onPress={onToggle} />
-
-      {badge ? (
-        <View style={[styles.badge, { top: insetTop + spacing.md }]} pointerEvents="none">
-          <Text style={styles.badgeText}>{badge}</Text>
-        </View>
-      ) : null}
-
-      {playable ? (
-        <View style={styles.play} pointerEvents="none">
-          <Ionicons name="play" size={30} color={colors.bg} />
-        </View>
-      ) : null}
-
-      {/* Right action rail */}
-      <View style={[styles.rail, { bottom: insetBottom + 96 }]}>
-        <RailButton
-          image={BOOST}
-          label={compact((sig?.likes ?? 0) + (boosted ? 1 : 0))}
-          active={boosted}
-          onPress={() => {
-            setBoosted((v) => !v)
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {})
-          }}
+        {/* Glossy diagonal sheen */}
+        <LinearGradient
+          colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0)', 'rgba(255,255,255,0)']}
+          locations={[0, 0.5, 1]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0.85, y: 1 }}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
         />
-        <RailButton icon="chatbubble-ellipses-outline" label={compact(sig?.comments ?? 0)} onPress={onToggle} />
-        <RailButton icon="arrow-redo-outline" label="Sdílet" onPress={() => openShare(item)} />
+        {/* Blend the hero's bottom edge into the black content area */}
+        <LinearGradient
+          colors={['transparent', 'transparent', colors.bg]}
+          locations={[0, 0.65, 1]}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
+        {/* Neighbour dim over the hero while swiping */}
+        <Animated.View style={[StyleSheet.absoluteFill, styles.dim, dimStyle]} pointerEvents="none" />
+
+        {playable ? (
+          <View style={styles.play} pointerEvents="none">
+            <Ionicons name="play" size={30} color={colors.bg} />
+          </View>
+        ) : null}
+
+        {/* Tap the hero to open the reader */}
+        <Pressable style={StyleSheet.absoluteFill} onPress={onToggle} />
       </View>
 
-      {/* Bottom content overlay */}
-      <Animated.View style={[styles.overlay, { paddingBottom: insetBottom + spacing.lg }, contentStyle]} pointerEvents="box-none">
-        <View style={styles.metaRow}>
-          {item.artist ? <Text style={styles.artist} numberOfLines={1}>{item.artist}</Text> : null}
-          {item.category ? <Text style={styles.category}>{item.category.toUpperCase()}</Text> : null}
-          <Text style={styles.time}>{timeAgo(item.publishedAt ?? item.createdAt)}</Text>
+      {/* ── Content (on black) ───────────────────────────────────────────── */}
+      <Animated.View style={[styles.content, { paddingBottom: insetBottom + spacing.lg }, contentStyle]}>
+        <View style={styles.topRow}>
+          {badge ? (
+            <View style={styles.badge}><Text style={styles.badgeText}>{badge}</Text></View>
+          ) : (
+            <View />
+          )}
+          <Pressable
+            style={styles.boostBtn}
+            hitSlop={10}
+            onPress={() => {
+              setBoosted((v) => !v)
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {})
+            }}
+          >
+            <Ionicons name={boosted ? 'flame' : 'flame-outline'} size={30} color={boosted ? colors.accent : colors.text} />
+          </Pressable>
         </View>
 
         <Pressable onPress={onToggle}>
           <Text style={styles.title} numberOfLines={3}>{item.title}</Text>
-          {item.content ? <Text style={styles.preview} numberOfLines={2}>{item.content}</Text> : null}
         </Pressable>
 
-        {(item.tags ?? []).length > 0 ? (
-          <View style={styles.tags}>
-            {(item.tags ?? []).slice(0, 4).map((t) => <Text key={t} style={styles.tag}>#{t}</Text>)}
+        {pills.length > 0 ? (
+          <View style={styles.pillRow}>
+            {pills.map((p) => (
+              <View key={p.label} style={styles.pill}>
+                <Ionicons name={p.icon} size={15} color={colors.textMuted} />
+                <Text style={styles.pillText} numberOfLines={1}>{p.label}</Text>
+              </View>
+            ))}
           </View>
         ) : null}
 
-        {sig && (sig.trendDeltaPct != null || sig.trendingRank != null || sig.listeningNow != null) ? (
-          <View style={styles.signals}>
-            {sig.trendDeltaPct != null ? <View style={styles.signal}><Ionicons name="flame-outline" size={14} color={colors.accent} /><Text style={styles.signalStrong}>+{sig.trendDeltaPct}%</Text></View> : null}
-            {sig.trendingRank != null ? <View style={styles.signal}><Ionicons name="trending-up" size={14} color={colors.text} /><Text style={styles.signalStrong}>#{sig.trendingRank}</Text></View> : null}
-            {sig.listeningNow != null ? <View style={styles.signal}><Ionicons name="people-outline" size={14} color={colors.text} /><Text style={styles.signalStrong}>{compact(sig.listeningNow)}</Text></View> : null}
+        <View style={styles.divider} />
+
+        {item.content ? (
+          <View style={styles.previewWrap}>
+            <Pressable onPress={onToggle}>
+              <Text style={styles.preview} numberOfLines={4}>{item.content}</Text>
+            </Pressable>
+            <LinearGradient
+              colors={['transparent', colors.bg]}
+              style={styles.previewFade}
+              pointerEvents="none"
+            />
           </View>
         ) : null}
-
-        {(item.sources ?? []).length > 0 ? (
-          <View style={styles.cardSources}>
-            {(item.sources ?? []).map((src) => {
-              const meta = SOURCE_META[src.platform]
-              return (
-                <Pressable
-                  key={src.platform + src.url}
-                  style={[styles.cardSourceChip, { borderColor: meta.color }]}
-                  onPress={() => Linking.openURL(src.url).catch(() => {})}
-                  hitSlop={6}
-                >
-                  <Ionicons name={meta.icon} size={15} color={meta.color} />
-                </Pressable>
-              )
-            })}
-          </View>
-        ) : null}
-
-        <Pressable style={styles.readMore} onPress={onToggle} hitSlop={8}>
-          <Text style={styles.readMoreText}>Číst víc</Text>
-          <Ionicons name="chevron-up" size={16} color={colors.bg} />
-        </Pressable>
       </Animated.View>
 
       {/* Continuous reader overlay */}
@@ -413,56 +376,51 @@ export const FeedPage = memo(FeedPageBase)
 
 const styles = StyleSheet.create({
   page: { width: '100%', overflow: 'hidden', backgroundColor: colors.bg },
+
+  // Hero (top)
+  hero: { width: '100%', overflow: 'hidden', backgroundColor: colors.bgElevated },
   dim: { backgroundColor: '#000' },
-  // Inset venom frame with an outward glow — reads as a lit "card" edge on the
-  // active page. glows.strong handles web boxShadow + native shadow/elevation.
-  glowFrame: {
-    position: 'absolute', top: 3, left: 3, right: 3, bottom: 3,
-    borderRadius: radius.lg, borderWidth: 1.5, borderColor: colors.accent, ...glows.strong,
+  fallbackFlame: { position: 'absolute', top: '24%', alignSelf: 'center', width: 170, height: 204, opacity: 0.06 },
+  play: {
+    position: 'absolute', top: '38%', alignSelf: 'center', width: 62, height: 62, borderRadius: 31,
+    backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.25)', ...glows.strong,
   },
-  scrimTop: { position: 'absolute', top: 0, left: 0, right: 0, height: 140, backgroundColor: 'rgba(10,10,11,0.35)' },
-  scrimMid: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%', backgroundColor: 'rgba(10,10,11,0.45)' },
-  scrimBottom: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '32%', backgroundColor: 'rgba(10,10,11,0.85)' },
 
-  badge: { position: 'absolute', left: spacing.lg, backgroundColor: colors.accent, borderRadius: radius.sm, paddingHorizontal: spacing.sm, paddingVertical: 4 },
-  badgeText: { color: colors.bg, fontSize: typography.caption, fontWeight: '800', letterSpacing: 0.5 },
-  play: { position: 'absolute', top: '40%', alignSelf: 'center', width: 62, height: 62, borderRadius: 31, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.25)', ...glows.strong },
+  // Content (below, on black)
+  content: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: spacing.md, gap: spacing.md },
+  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  badge: { backgroundColor: colors.violet, borderRadius: radius.pill, paddingHorizontal: spacing.md, paddingVertical: 6 },
+  badgeText: { color: '#FFFFFF', fontSize: typography.label, fontWeight: '800', letterSpacing: 0.5 },
+  boostBtn: { padding: 2 },
 
-  // right offset clears the app-wide scrollbar's hit area (right edge, ~22px).
-  rail: { position: 'absolute', right: 30, alignItems: 'center', gap: spacing.lg },
-  railBtn: { alignItems: 'center', gap: 3 },
-  railIcon: { alignItems: 'center', justifyContent: 'center', width: 27, height: 27 },
-  railFlameWrap: { width: 30, height: 30 },
-  railFlame: { width: 25, height: 30 },
-  fallbackFlame: { position: 'absolute', top: '28%', alignSelf: 'center', width: 170, height: 204, opacity: 0.06 },
-  railFlameActive: { ...glows.cta },
-  railLabel: { color: colors.text, fontSize: typography.caption, fontWeight: '700' },
-  railLabelBoosted: { color: colors.accent },
+  title: { color: colors.text, fontSize: 27, fontWeight: '800', lineHeight: 33, letterSpacing: -0.3 },
 
-  overlay: { position: 'absolute', left: 0, right: 64, bottom: 0, paddingHorizontal: spacing.lg, gap: spacing.sm },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flexWrap: 'wrap' },
-  artist: { color: colors.accent, fontSize: typography.label, fontWeight: '700', flexShrink: 1 },
-  category: { color: colors.text, fontSize: typography.caption, fontWeight: '700', letterSpacing: 0.5, opacity: 0.85 },
-  time: { color: colors.textFaint, fontSize: typography.caption, marginLeft: 'auto' },
-  title: { color: colors.text, fontSize: typography.title, fontWeight: '800', lineHeight: 28 },
-  preview: { color: colors.textMuted, fontSize: typography.label, lineHeight: 20, marginTop: spacing.xs },
-  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  tag: { color: colors.accent, fontSize: typography.label, fontWeight: '600' },
-  cardSources: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs },
-  cardSourceChip: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderRadius: radius.sm, backgroundColor: 'rgba(255,255,255,0.06)' },
-  signals: { flexDirection: 'row', gap: spacing.lg, marginTop: spacing.xs },
-  signal: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  signalStrong: { color: colors.text, fontSize: typography.label, fontWeight: '700' },
-  readMore: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 4, marginTop: spacing.sm, backgroundColor: colors.accent, borderRadius: radius.sm, paddingHorizontal: spacing.lg, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)', ...glows.cta },
-  readMoreText: { color: colors.bg, fontSize: typography.label, fontWeight: '800', letterSpacing: 0.3 },
+  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  pill: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: radius.pill,
+    paddingHorizontal: spacing.md, paddingVertical: 9,
+  },
+  pillText: { color: colors.text, fontSize: typography.label, fontWeight: '600', flexShrink: 1 },
 
-  // Reader overlay
+  divider: { height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: spacing.xs },
+
+  previewWrap: { position: 'relative' },
+  preview: { color: colors.textMuted, fontSize: typography.body, lineHeight: 25 },
+  previewFade: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 40 },
+
+  // Reader overlay (opened post)
   fill: { flex: 1 },
   reader: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.bg },
   readerScrim: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.bg },
   readerContent: { paddingBottom: 220 },
   readerHero: { width: '100%', aspectRatio: 1.6, backgroundColor: colors.bgElevated },
   readerBody: { padding: spacing.lg, gap: spacing.md },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flexWrap: 'wrap' },
+  artist: { color: colors.accent, fontSize: typography.label, fontWeight: '700', flexShrink: 1 },
+  category: { color: colors.text, fontSize: typography.caption, fontWeight: '700', letterSpacing: 0.5, opacity: 0.85 },
+  time: { color: colors.textFaint, fontSize: typography.caption, marginLeft: 'auto' },
   readerTitle: { color: colors.text, fontSize: typography.title, fontWeight: '800', lineHeight: 30 },
   shareBtn: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 6, backgroundColor: colors.accent, borderRadius: radius.pill, paddingHorizontal: spacing.lg, paddingVertical: 9 },
   shareText: { color: colors.bg, fontSize: typography.label, fontWeight: '700' },
