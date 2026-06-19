@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-06-18T18:53:49.196Z",
+  "updatedAt": "2026-06-19T18:12:05.026Z",
   "missions": [
     {
       "status": "solved",
@@ -19929,8 +19929,8 @@
       ]
     },
     {
-      "status": "todo",
-      "lifecycleStatus": "PLAN",
+      "status": "solved",
+      "lifecycleStatus": "MISSION_DONE",
       "coldCase": false,
       "isDeleted": false,
       "createdAt": "2026-06-10T06:20:00.000Z",
@@ -19944,6 +19944,12 @@
           "event": "MISSION_CREATED",
           "actor": "plan-manager",
           "note": "HDUA seed — native Expo user app, plan from CEO master prompt"
+        },
+        {
+          "ts": "2026-06-19T18:12:05.026Z",
+          "event": "MISSION_DONE",
+          "actor": "claude",
+          "note": "6-doc living doc set under HDUA/docs/ (commit e98604d): README index + ARCHITECTURE/DATABASE/FEED_ENGINE/UI_SYSTEM/DEPLOYMENT, plus the pre-existing HDUA_API.md referenced + linked. Architecture diagram HDCC→hdua_feed_items view→Content API→HDUA included; DEPLOYMENT covers EAS build + store submit + OTA (notes eas.json still TODO). Linked from HDUA/README.md. Grounded in verified code facts (Expo SDK 52, expo-router 4, useInfiniteQuery, theme.ts tokens, app.json). All 4 success criteria met. Fully verifiable (docs-only, no runtime dependency)."
         }
       ],
       "sequenceIndex": 213,
@@ -19972,27 +19978,30 @@
           "name": "Architektura + DB + Feed",
           "description": "HDUA_ARCHITECTURE.md, HDUA_DATABASE.md, HDUA_FEED_ENGINE.md.",
           "why": "Pochopení systému pro nové vývojáře.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
-          "estimatedDuration": "M"
+          "estimatedDuration": "M",
+          "completedAt": "2026-06-19T18:12:05.026Z"
         },
         {
           "id": "02",
           "name": "API + UI systém",
           "description": "HDUA_API.md (kontrakt v1), HDUA_UI_SYSTEM.md (design tokeny, komponenty).",
           "why": "Stabilní kontrakt a konzistentní UI.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
-          "estimatedDuration": "M"
+          "estimatedDuration": "M",
+          "completedAt": "2026-06-19T18:12:05.026Z"
         },
         {
           "id": "03",
           "name": "Deployment",
           "description": "HDUA_DEPLOYMENT.md: EAS build, env, store submission, OTA updates.",
           "why": "Cesta od kódu k vydané appce.",
-          "status": "todo",
+          "status": "done",
           "owner": "devops",
-          "estimatedDuration": "M"
+          "estimatedDuration": "M",
+          "completedAt": "2026-06-19T18:12:05.026Z"
         }
       ]
     },
