@@ -1419,19 +1419,19 @@
     {
       "id": "P1-004-ONBOARDING",
       "name": "UX Foundation — Onboarding Flow",
-      "purpose": "Onboarding flow — D1 retention kriticky nízká bez guidance",
-      "description": "Implement 3-screen onboarding: Welcome → Category Selection → Notifications → Feed. Store preferences. Target D1 retention >40%.",
-      "importantInfo": "D1 retention bez onboarding: unknown/low. S onboardingem: target >40%. Měří se v Analytics.",
+      "purpose": "Onboarding flow chybí (ověřeno: žádný kód) — D1 retence nízká bez navádění; nově navázán na reálnou write vrstvu profilu.",
+      "description": "Implementovat onboarding stack onboarding/ (welcome -> genres -> artists -> countries -> notifications -> feed). Persistence = updateProfile({onboardingCompleted:true}) + updateSettings({followed_genres/artists/countries, language, push_enabled}). Gate: zobrazit jen když profil nemá onboarding_completed. Stavět na sdílených primitivech (SelectableChip/Segmented/PickerSheet).",
+      "importantInfo": "REVIVE 2026-06-19 (plan-manager): byla SIMULATED_ONLY, ověřeno NENÍ postaveno — vracím do PLAN/todo s reálným scope místo duplikace. DEPENDS: HDUA-21 (updateProfile/updateSettings + onboarding_completed sloupec) + HDUA-22 (SelectableChip/Segmented/PickerSheet). STAVÍ SE JAKO POSLEDNÍ (krok 8) — potřebuje hotovou write vrstvu i primitivy. FLAG: zdroj genres/artists/countries — static seed vs endpoint (rozhodnout s product-manager). Měří se v Analytics (D1 retence target >40%).",
       "phase": "Sprint",
       "priority": "P1",
-      "status": "in_progress",
+      "status": "todo",
       "domains": [
         "SOFTWARE",
         "PRODUCT"
       ],
       "createdAt": "2026-05-14T08:00:00.000Z",
       "urgencyScore": 75,
-      "lifecycleStatus": "SIMULATED_ONLY",
+      "lifecycleStatus": "PLAN",
       "coldCase": false,
       "isDeleted": false,
       "owners": [
@@ -1522,6 +1522,12 @@
           "event": "EVIDENCE_RECONCILE",
           "actor": "claude",
           "note": "Truth-gate reconcile 2026-06-18: VERIFIED NOT DONE: no onboarding flow anywhere (command-centrum/HDUA/backend). SIMULATED_ONLY correct."
+        },
+        {
+          "ts": "2026-06-19T19:00:00.000Z",
+          "event": "MISSION_CREATED",
+          "actor": "plan-manager",
+          "note": "REVIVE 2026-06-19: SIMULATED_ONLY -> PLAN/todo. Reálný scope navázán na HDUA-21 (write API + onboarding_completed) a HDUA-22 (primitivy). Bez duplikace (nová onboarding mise se NEvytváří)."
         }
       ],
       "sequenceIndex": 108,
@@ -20538,6 +20544,436 @@
         "Cross-source dedup not in SQL rebuild (Interpol x4) — real Jaccard cluster stage handles it when pipeline runs with service key",
         "Covers/Spotify still empty (enrichment key-blocked, HDUA-15)",
         "~half feed cards have null artist (honest — no reliable match)"
+      ]
+    },
+    {
+      "status": "todo",
+      "lifecycleStatus": "PLAN",
+      "coldCase": false,
+      "isDeleted": false,
+      "createdAt": "2026-06-19T19:00:00.000Z",
+      "inTimeline": false,
+      "userMission": true,
+      "moduleId": "HDUA",
+      "auditReports": [],
+      "auditLog": [
+        {
+          "ts": "2026-06-19T19:00:00.000Z",
+          "event": "MISSION_CREATED",
+          "actor": "plan-manager"
+        }
+      ],
+      "sequenceIndex": 222,
+      "id": "HDUA-21-PROFILE-DB-API",
+      "name": "Profil — DB rozšíření + write API (základ)",
+      "purpose": "Bez write API a sloupců bio/onboarding_completed nelze profil upravovat ani dokončit onboarding.",
+      "phase": "Foundation",
+      "priority": "P1",
+      "domains": [
+        "DATABASE",
+        "BACKEND"
+      ],
+      "estimatedComplexity": "M",
+      "modulePath": "SYSTEM/hotdroppz/HDUA/src/api/user.ts",
+      "description": "HDUA-14 dodal read-only profil. Tato mise přidává zapisovatelnou vrstvu: migrace HDUA/database/06_profile_avatar_extensions.sql (hdua_profiles.bio<=280, onboarding_completed bool, username case-insensitive unique + format CHECK, updated_at touch trigger; hdua_settings beze změn — preference mapují na stávající sloupce) + nový storage bucket hdua-avatars (public read, owner-only write do <uid>/ + RLS). Do src/api/user.ts doplnit updateProfile, updateSettings, uploadAvatar, getSaved, getLiked, follow/unfollowArtist/getFollowedArtists. Onboarding-persistence = updateProfile({onboardingCompleted}) + updateSettings({followed*, language}).",
+      "importantInfo": "ZÁKLAD CELÉHO ŘETĚZCE — blokuje HDUA-23/24/25/26 a P1-004-ONBOARDING. Migrace už NAPSÁNA jako draft (06_profile_avatar_extensions.sql), zatím design-only. BLOKER: sub03 (live apply + verify) je credential-blocked — SUPABASE_DB_URL/service-role key jsou PRÁZDNÉ; apply přes node command-centrum/scripts/apply-sql.mjs nebo Supabase MCP apply_migration až po dodání klíče CEem. Write API lze psát/typovat i bez live DB (anon client). getSaved/getLiked join post_id -> hdua_feed_items.id děláme client-side (.in). DEPENDS: HDUA-14 (done).",
+      "rationale": "Aby šel profil vůbec upravovat a aby měl onboarding kam ukládat preference.",
+      "successCriteria": [
+        "src/api/user.ts má updateProfile/updateSettings/uploadAvatar/getSaved/getLiked/follow/unfollow/getFollowedArtists, typováno, tsc 0 chyb",
+        "Migrace 06 zkontrolovaná a idempotentní (bio/onboarding_completed/username CI unique+CHECK/touch trigger/hdua-avatars bucket + RLS)",
+        "Live apply + verify proběhne po dodání service-role klíče (sub03 — credential-blocked)"
+      ],
+      "subMissions": [
+        {
+          "id": "01",
+          "name": "Write API v user.ts",
+          "description": "updateProfile/updateSettings/uploadAvatar/getSaved/getLiked/follow/unfollowArtist/getFollowedArtists.",
+          "why": "Edit/Settings/Collection/Onboarding bez něj nemají kam zapisovat.",
+          "status": "todo",
+          "owner": "backend-engineer",
+          "estimatedDuration": "M"
+        },
+        {
+          "id": "02",
+          "name": "Migrace review",
+          "description": "Zrevidovat 06_profile_avatar_extensions.sql (sloupce, CHECK, CI unique, triggery, hdua-avatars bucket + RLS).",
+          "why": "Schéma musí sednout na write API.",
+          "status": "todo",
+          "owner": "db-engineer",
+          "estimatedDuration": "S"
+        },
+        {
+          "id": "03",
+          "name": "Live apply + verify (BLOKED)",
+          "description": "Aplikovat migraci na živou DB a ověřit (apply-sql.mjs / MCP apply_migration), bucket + RLS.",
+          "why": "Bez live DB write API nic neuloží reálně.",
+          "status": "todo",
+          "owner": "db-engineer",
+          "estimatedDuration": "S"
+        }
+      ]
+    },
+    {
+      "status": "todo",
+      "lifecycleStatus": "PLAN",
+      "coldCase": false,
+      "isDeleted": false,
+      "createdAt": "2026-06-19T19:00:00.000Z",
+      "inTimeline": false,
+      "userMission": true,
+      "moduleId": "HDUA",
+      "auditReports": [],
+      "auditLog": [
+        {
+          "ts": "2026-06-19T19:00:00.000Z",
+          "event": "MISSION_CREATED",
+          "actor": "plan-manager"
+        }
+      ],
+      "sequenceIndex": 223,
+      "id": "HDUA-22-PROFILE-PRIMITIVES",
+      "name": "Profil — sdílené UI primitivy",
+      "purpose": "Všechny nové profilové obrazovky stojí na stejných komponentách; bez nich by se kód duplikoval.",
+      "phase": "Build",
+      "priority": "P1",
+      "domains": [
+        "FRONTEND"
+      ],
+      "estimatedComplexity": "M",
+      "modulePath": "SYSTEM/hotdroppz/HDUA/src/components/**",
+      "description": "Vyrobit sdílené primitivy pro profilovou sekci: Avatar, Field (extrahovat z auth.tsx), Segmented (extrahovat), SettingRow, PickerSheet, SelectableChip, ConfirmationNotice, ConfirmDialog, useModalA11y (web Esc/focus trap). Match Venom/sharp design (HDUA-17) a český voice stávajících obrazovek.",
+      "importantInfo": "DEPENDS: žádná DB závislost — lze stavět paralelně s HDUA-21. BLOKUJE: HDUA-23 (Settings), HDUA-24 (Edit), HDUA-25 (Tab), HDUA-26 (Collection), P1-004-ONBOARDING — všechny tyto obrazovky sdílí tyto komponenty. Field/Segmented extrahovat z existujícího auth.tsx (nepřepisovat auth chování).",
+      "rationale": "Jednotné komponenty napříč profilem; bez nich každá obrazovka řeší totéž znovu.",
+      "successCriteria": [
+        "Komponenty Avatar/Field/Segmented/SettingRow/PickerSheet/SelectableChip/ConfirmationNotice/ConfirmDialog + hook useModalA11y existují a jsou typované",
+        "auth.tsx používá extrahované Field/Segmented bez regrese chování",
+        "Web: modály mají Esc + focus trap (useModalA11y)"
+      ],
+      "subMissions": [
+        {
+          "id": "01",
+          "name": "Extrakce z auth",
+          "description": "Field + Segmented vytáhnout z auth.tsx do sdílených komponent.",
+          "why": "Znovupoužití bez duplikace; auth zůstává funkční.",
+          "status": "todo",
+          "owner": "frontend-engineer",
+          "estimatedDuration": "S"
+        },
+        {
+          "id": "02",
+          "name": "Nové komponenty",
+          "description": "Avatar, SettingRow, PickerSheet, SelectableChip, ConfirmationNotice, ConfirmDialog.",
+          "why": "Stavební kameny Settings/Edit/Collection/Onboarding.",
+          "status": "todo",
+          "owner": "ui-ux-designer",
+          "estimatedDuration": "M"
+        },
+        {
+          "id": "03",
+          "name": "useModalA11y",
+          "description": "Web Esc + focus trap hook pro modály/sheety.",
+          "why": "Přístupnost a UX na webu.",
+          "status": "todo",
+          "owner": "frontend-engineer",
+          "estimatedDuration": "S"
+        }
+      ]
+    },
+    {
+      "status": "todo",
+      "lifecycleStatus": "PLAN",
+      "coldCase": false,
+      "isDeleted": false,
+      "createdAt": "2026-06-19T19:00:00.000Z",
+      "inTimeline": false,
+      "userMission": true,
+      "moduleId": "HDUA",
+      "auditReports": [],
+      "auditLog": [
+        {
+          "ts": "2026-06-19T19:00:00.000Z",
+          "event": "MISSION_CREATED",
+          "actor": "plan-manager"
+        }
+      ],
+      "sequenceIndex": 224,
+      "id": "HDUA-23-PROFILE-SETTINGS",
+      "name": "Profil — Nastavení (interaktivní)",
+      "purpose": "Stávající nastavení je jen display-only; uživatel nemůže měnit jazyk, notifikace ani spravovat účet.",
+      "phase": "Build",
+      "priority": "P1",
+      "domains": [
+        "FRONTEND",
+        "BACKEND"
+      ],
+      "estimatedComplexity": "M",
+      "modulePath": "SYSTEM/hotdroppz/HDUA/src/app/profile/settings.tsx",
+      "description": "Nová obrazovka profile/settings.tsx: language picker (PickerSheet), přepínače push_enabled a personalization_opt_out, account actions, delete-account (ConfirmDialog). Zápis přes updateSettings (HDUA-21). Delete-account smaže data + odhlásí.",
+      "importantInfo": "DEPENDS: HDUA-21 (updateSettings) + HDUA-22 (PickerSheet/SettingRow/ConfirmDialog/useModalA11y). BLOKER: hard-delete účtu nelze anon klientem — vyžaduje Supabase EDGE FUNCTION (samostatná backend práce, viz sub03). Toggly/jazyk fungují bez edge fn. FLAG: i18n — language picker se přidává; ostatní texty zůstávají v češtině.",
+      "rationale": "Aby uživatel reálně ovládal jazyk, notifikace a účet, ne jen viděl statické řádky.",
+      "successCriteria": [
+        "profile/settings.tsx mění jazyk a přepínače a ukládá přes updateSettings",
+        "Account actions + delete-account UI s ConfirmDialog",
+        "Delete-account zapojen na edge function (sub03 — backend blokuje, anon client nestačí)"
+      ],
+      "subMissions": [
+        {
+          "id": "01",
+          "name": "Settings UI + toggly",
+          "description": "Language picker + push/personalization přepínače napojené na updateSettings.",
+          "why": "Jádro interaktivního nastavení.",
+          "status": "todo",
+          "owner": "frontend-engineer",
+          "estimatedDuration": "M"
+        },
+        {
+          "id": "02",
+          "name": "Account actions UI",
+          "description": "Sekce účtu vč. delete-account s ConfirmDialog.",
+          "why": "Správa účtu z UI.",
+          "status": "todo",
+          "owner": "ui-ux-designer",
+          "estimatedDuration": "S"
+        },
+        {
+          "id": "03",
+          "name": "Delete-account edge fn (BLOKED)",
+          "description": "Supabase edge function pro hard-delete uživatele + dat; UI ji zavolá.",
+          "why": "Anon client nedokáže tvrdě smazat účet.",
+          "status": "todo",
+          "owner": "backend-engineer",
+          "estimatedDuration": "M"
+        }
+      ]
+    },
+    {
+      "status": "todo",
+      "lifecycleStatus": "PLAN",
+      "coldCase": false,
+      "isDeleted": false,
+      "createdAt": "2026-06-19T19:00:00.000Z",
+      "inTimeline": false,
+      "userMission": true,
+      "moduleId": "HDUA",
+      "auditReports": [],
+      "auditLog": [
+        {
+          "ts": "2026-06-19T19:00:00.000Z",
+          "event": "MISSION_CREATED",
+          "actor": "plan-manager"
+        }
+      ],
+      "sequenceIndex": 225,
+      "id": "HDUA-24-PROFILE-EDIT",
+      "name": "Profil — Editace + avatar",
+      "purpose": "Uživatel nemá jak změnit jméno, username, bio, zemi ani avatar.",
+      "phase": "Build",
+      "priority": "P1",
+      "domains": [
+        "FRONTEND",
+        "BACKEND"
+      ],
+      "estimatedComplexity": "M",
+      "modulePath": "SYSTEM/hotdroppz/HDUA/src/app/profile/edit.tsx",
+      "description": "Nová obrazovka profile/edit.tsx: editace display_name, username (lowercase, format/unikátnost dle CHECK), bio (<=280), country, avatar. Avatar upload přes uploadAvatar do bucketu hdua-avatars/<uid>/, zápis přes updateProfile.",
+      "importantInfo": "DEPENDS: HDUA-21 (updateProfile/uploadAvatar + bio/username constraint + hdua-avatars bucket) + HDUA-22 (Avatar/Field/ConfirmationNotice). BLOKER: reálný upload avataru vyžaduje živý bucket hdua-avatars -> nepřímo závislý na HDUA-21 sub03 (live apply, credential-blocked); UI a kód lze hotovit dřív. Username psát lower() před zápisem (CI unique index).",
+      "rationale": "Editace identity je jádro „připravit profilové rozhraní“.",
+      "successCriteria": [
+        "profile/edit.tsx upravuje name/username/bio/country a ukládá přes updateProfile",
+        "Avatar lze nahrát přes uploadAvatar (hdua-avatars/<uid>/) a zobrazí se",
+        "Validace username (lowercase, 3–30, [a-z0-9_]) a bio (<=280) odpovídá DB CHECK"
+      ],
+      "subMissions": [
+        {
+          "id": "01",
+          "name": "Edit form",
+          "description": "Pole name/username/bio/country + validace + updateProfile.",
+          "why": "Změna identity uživatele.",
+          "status": "todo",
+          "owner": "frontend-engineer",
+          "estimatedDuration": "M"
+        },
+        {
+          "id": "02",
+          "name": "Avatar upload",
+          "description": "Výběr obrázku + uploadAvatar do hdua-avatars/<uid>/ + náhled.",
+          "why": "Vizuální identita profilu.",
+          "status": "todo",
+          "owner": "frontend-engineer",
+          "estimatedDuration": "S"
+        }
+      ]
+    },
+    {
+      "status": "todo",
+      "lifecycleStatus": "PLAN",
+      "coldCase": false,
+      "isDeleted": false,
+      "createdAt": "2026-06-19T19:00:00.000Z",
+      "inTimeline": false,
+      "userMission": true,
+      "moduleId": "HDUA",
+      "auditReports": [],
+      "auditLog": [
+        {
+          "ts": "2026-06-19T19:00:00.000Z",
+          "event": "MISSION_CREATED",
+          "actor": "plan-manager"
+        }
+      ],
+      "sequenceIndex": 226,
+      "id": "HDUA-25-PROFILE-TAB-UPGRADE",
+      "name": "Profil — upgrade záložky (tabs)/profile",
+      "purpose": "Stávající profilová záložka je read-only a bez vstupů do editace, nastavení a sbírek.",
+      "phase": "Build",
+      "priority": "P2",
+      "domains": [
+        "FRONTEND"
+      ],
+      "estimatedComplexity": "S",
+      "modulePath": "SYSTEM/hotdroppz/HDUA/src/app/(tabs)/profile.tsx",
+      "description": "Upgrade (tabs)/profile.tsx: reálný avatar (místo ikony), bio, pressable stat tiles -> profile/collection (Saved/Liked/Followed), vstupy do profile/edit a profile/settings. Zachovat logout a stávající layout/voice.",
+      "importantInfo": "DEPENDS: HDUA-22 (Avatar) + HDUA-24 (edit route) + HDUA-23 (settings route) + HDUA-26 (collection route — stat tiles na ni míří). Lze začít po HDUA-22; plně funkční po dokončení 23/24/26. Nemeasakovat stávající getProfile read flow.",
+      "rationale": "Záložka je rozcestník — propojuje profilovou sekci dohromady.",
+      "successCriteria": [
+        "(tabs)/profile.tsx ukazuje reálný avatar + bio",
+        "Stat tiles jsou pressable a vedou do collection (Saved/Liked/Followed)",
+        "Vstupy do edit a settings; logout zachován"
+      ],
+      "subMissions": [
+        {
+          "id": "01",
+          "name": "Avatar + bio render",
+          "description": "Nahradit ikonu reálným avatarem, doplnit bio.",
+          "why": "Pravdivý profil.",
+          "status": "todo",
+          "owner": "frontend-engineer",
+          "estimatedDuration": "S"
+        },
+        {
+          "id": "02",
+          "name": "Navigace + pressable tiles",
+          "description": "Vstupy do edit/settings + stat tiles -> collection.",
+          "why": "Rozcestník profilové sekce.",
+          "status": "todo",
+          "owner": "frontend-engineer",
+          "estimatedDuration": "S"
+        }
+      ]
+    },
+    {
+      "status": "todo",
+      "lifecycleStatus": "PLAN",
+      "coldCase": false,
+      "isDeleted": false,
+      "createdAt": "2026-06-19T19:00:00.000Z",
+      "inTimeline": false,
+      "userMission": true,
+      "moduleId": "HDUA",
+      "auditReports": [],
+      "auditLog": [
+        {
+          "ts": "2026-06-19T19:00:00.000Z",
+          "event": "MISSION_CREATED",
+          "actor": "plan-manager"
+        }
+      ],
+      "sequenceIndex": 227,
+      "id": "HDUA-26-PROFILE-COLLECTION",
+      "name": "Profil — Sbírka (Uložené/Lajky/Sledovaní)",
+      "purpose": "Interakce uživatele (save/like/follow) nejsou nikde k zobrazení.",
+      "phase": "Build",
+      "priority": "P2",
+      "domains": [
+        "FRONTEND"
+      ],
+      "estimatedComplexity": "M",
+      "modulePath": "SYSTEM/hotdroppz/HDUA/src/app/profile/collection.tsx",
+      "description": "Nová obrazovka profile/collection.tsx se Segmented taby Saved/Liked/Followed. Saved/Liked přes getSaved/getLiked (join post_id -> hdua_feed_items client-side), Followed přes getFollowedArtists s follow/unfollow.",
+      "importantInfo": "DEPENDS: HDUA-21 (getSaved/getLiked/getFollowedArtists/follow/unfollow) + HDUA-22 (Segmented/Avatar). Cíl pressable stat tiles z HDUA-25. getSaved/getLiked dělají join client-side (.in id), žádné FK.",
+      "rationale": "Dává hodnotu uloženým/lajkovaným položkám a sledovaným umělcům.",
+      "successCriteria": [
+        "profile/collection.tsx má taby Saved/Liked/Followed",
+        "Saved/Liked načítají reálné položky přes getSaved/getLiked",
+        "Followed list s funkčním follow/unfollow přes getFollowedArtists"
+      ],
+      "subMissions": [
+        {
+          "id": "01",
+          "name": "Saved/Liked taby",
+          "description": "Segmented + seznamy z getSaved/getLiked (join na feed items).",
+          "why": "Zobrazit uložené/lajkované drops.",
+          "status": "todo",
+          "owner": "frontend-engineer",
+          "estimatedDuration": "M"
+        },
+        {
+          "id": "02",
+          "name": "Followed tab",
+          "description": "Seznam sledovaných umělců + follow/unfollow.",
+          "why": "Správa sledování přímo v profilu.",
+          "status": "todo",
+          "owner": "frontend-engineer",
+          "estimatedDuration": "S"
+        }
+      ]
+    },
+    {
+      "status": "todo",
+      "lifecycleStatus": "PLAN",
+      "coldCase": false,
+      "isDeleted": false,
+      "createdAt": "2026-06-19T19:00:00.000Z",
+      "inTimeline": false,
+      "userMission": true,
+      "moduleId": "HDUA",
+      "auditReports": [],
+      "auditLog": [
+        {
+          "ts": "2026-06-19T19:00:00.000Z",
+          "event": "MISSION_CREATED",
+          "actor": "plan-manager"
+        }
+      ],
+      "sequenceIndex": 228,
+      "id": "HDUA-27-AUTH-PASSWORD-RESET",
+      "name": "Auth — reset hesla + doladění ověření e-mailu",
+      "purpose": "Uživatel nemá jak obnovit zapomenuté heslo; email-confirmation flow je jen základní notice.",
+      "phase": "Build",
+      "priority": "P2",
+      "domains": [
+        "FRONTEND",
+        "BACKEND"
+      ],
+      "estimatedComplexity": "S",
+      "modulePath": "SYSTEM/hotdroppz/HDUA/src/app/forgot-password.tsx",
+      "description": "Nové obrazovky forgot-password.tsx a reset-password.tsx. Do src/stores/auth.ts doplnit requestPasswordReset a updatePassword. Doladit email-verify polish (ConfirmationNotice, jasný stav po sign-up). Paralelní s profilovou větví.",
+      "importantInfo": "DEPENDS: HDUA-22 (Field/ConfirmationNotice/useModalA11y) + HDUA-14 (auth — done). NEZÁVISÍ na HDUA-21 (žádná profilová DB), lze stavět PARALELNĚ s profilovou větví. Deep-link / redirect pro reset přes Supabase auth (žádná nová tabulka).",
+      "rationale": "Bez resetu hesla je přihlášení křehké; doladění verify zvyšuje dokončení registrace.",
+      "successCriteria": [
+        "forgot-password.tsx + reset-password.tsx existují a fungují",
+        "auth.ts má requestPasswordReset + updatePassword",
+        "Email-verify má jasný ConfirmationNotice stav po sign-up"
+      ],
+      "subMissions": [
+        {
+          "id": "01",
+          "name": "Reset flow",
+          "description": "requestPasswordReset/updatePassword + dvě obrazovky.",
+          "why": "Obnova zapomenutého hesla.",
+          "status": "todo",
+          "owner": "frontend-engineer",
+          "estimatedDuration": "S"
+        },
+        {
+          "id": "02",
+          "name": "Verify polish",
+          "description": "Doladit email-confirmation notice/stav po sign-up.",
+          "why": "Vyšší dokončenost registrace.",
+          "status": "todo",
+          "owner": "ui-ux-designer",
+          "estimatedDuration": "S"
+        }
       ]
     }
   ],
