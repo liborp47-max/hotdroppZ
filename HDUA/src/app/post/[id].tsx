@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
 import { FlashList } from '@shopify/flash-list'
 import { Ionicons } from '@expo/vector-icons'
@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { PostView } from '@/components/post/PostView'
 import { usePost } from '@/hooks/usePost'
 import { useFeed } from '@/hooks/useFeed'
+import { useScrollbarSurface } from '@/hooks/useScrollbarSurface'
 import { colors, radius, spacing, typography } from '@/styles/theme'
 import type { FeedItem, Post } from '@/types'
 
@@ -53,12 +54,17 @@ export default function PostDetailScreen() {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage()
   }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
+  // HDUA-18: drive the app-wide scrollbar from the reader's own scroll position.
+  const listRef = useRef<FlashList<Row>>(null)
+  const onScroll = useScrollbarSurface((y) => listRef.current?.scrollToOffset({ offset: y, animated: false }))
+
   return (
     <View style={styles.root}>
       {isLoading && !post ? (
         <View style={styles.center}><ActivityIndicator color={colors.accent} /></View>
       ) : (
         <FlashList
+          ref={listRef}
           data={rows}
           renderItem={renderItem}
           keyExtractor={(r) => `${r.kind}-${r.post.id}`}
@@ -66,6 +72,8 @@ export default function PostDetailScreen() {
           estimatedItemSize={640}
           showsVerticalScrollIndicator
           contentContainerStyle={{ paddingBottom: spacing.xxl }}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
           onEndReached={onEndReached}
           onEndReachedThreshold={0.8}
           ListFooterComponent={isFetchingNextPage ? <View style={styles.footer}><ActivityIndicator color={colors.accent} /></View> : null}

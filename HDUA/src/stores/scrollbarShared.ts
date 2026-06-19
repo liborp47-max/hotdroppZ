@@ -21,6 +21,19 @@ export function setScroller(s: Scroller | null) {
   activeScroller = s
 }
 
+/** Current owner of the bar — lets a pushed surface (the reader) save & restore it
+ *  on focus/blur so the surface underneath (the feed) keeps its draggable bar. */
+export function getScroller(): Scroller | null {
+  return activeScroller
+}
+
+/** Neutralize the bar: full thumb at top, no foreign scroll position shown
+ *  (HDUA-18 — for surfaces with nothing scrollable / on blur with no prior owner). */
+export function resetScrollbar() {
+  sbProgress.value = 0
+  sbThumbFraction.value = 1
+}
+
 /** Called (via runOnJS) from the scrollbar's drag gesture. */
 export function driveScroll(progress: number) {
   activeScroller?.(progress)
