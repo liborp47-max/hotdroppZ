@@ -3,6 +3,8 @@
 > **Realtime Music Intelligence Platform** pro rap, hudbu, kulturu, fashion, celebrity, drama a globální trendy.
 > Koncová aplikace pro uživatele. HDCC zůstává backend intelligence systém.
 
+📚 **Dokumentace:** [`docs/`](docs/README.md) — architektura, DB, feed engine, API, UI systém, deployment.
+
 ---
 
 ## Co je HDUA
