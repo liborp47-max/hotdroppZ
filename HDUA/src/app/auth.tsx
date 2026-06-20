@@ -7,20 +7,18 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { Field } from '@/components/shared/Field'
+import { Segmented } from '@/components/shared/Segmented'
 import { useAuth } from '@/stores/auth'
 import { colors, glows, radius, spacing, typography } from '@/styles/theme'
 
 type Mode = 'signIn' | 'signUp'
-
-// Web-only: kill the default focus outline on inputs (RN types don't include it).
-const webNoOutline = { outlineStyle: 'none' } as object
 
 /**
  * Auth screen (HDUA-14 sub01) — email/password sign-in & registration plus
@@ -110,15 +108,17 @@ export default function AuthScreen() {
         </Text>
 
         {/* Segmented mode switch */}
-        <View style={styles.segment}>
-          {(['signIn', 'signUp'] as Mode[]).map((m) => (
-            <Pressable key={m} style={[styles.segmentBtn, mode === m && styles.segmentBtnActive]} onPress={() => { setMode(m); setError(null) }}>
-              <Text style={[styles.segmentText, mode === m && styles.segmentTextActive]}>
-                {m === 'signIn' ? 'Přihlásit' : 'Registrovat'}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+        <Segmented
+          options={[
+            { value: 'signIn', label: 'Přihlásit' },
+            { value: 'signUp', label: 'Registrovat' },
+          ]}
+          value={mode}
+          onChange={(m) => {
+            setMode(m)
+            setError(null)
+          }}
+        />
 
         <View style={styles.form}>
           {isSignUp ? (
@@ -175,21 +175,6 @@ export default function AuthScreen() {
   )
 }
 
-function Field(props: React.ComponentProps<typeof TextInput> & { icon: keyof typeof Ionicons.glyphMap }) {
-  const { icon, ...input } = props
-  return (
-    <View style={styles.field}>
-      <Ionicons name={icon} size={18} color={colors.textFaint} />
-      <TextInput
-        {...input}
-        style={[styles.input, Platform.OS === 'web' ? webNoOutline : null]}
-        placeholderTextColor={colors.textFaint}
-        selectionColor={colors.accent}
-      />
-    </View>
-  )
-}
-
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   scroll: { flexGrow: 1, paddingHorizontal: spacing.xl, paddingBottom: spacing.xxl },
@@ -199,19 +184,7 @@ const styles = StyleSheet.create({
   title: { color: colors.text, fontSize: typography.display, fontWeight: '800' },
   sub: { color: colors.textMuted, fontSize: typography.body, marginTop: spacing.xs, marginBottom: spacing.xl },
 
-  segment: { flexDirection: 'row', backgroundColor: colors.surface, borderRadius: radius.md, padding: 3, borderWidth: 1, borderColor: colors.border },
-  segmentBtn: { flex: 1, paddingVertical: spacing.sm, alignItems: 'center', borderRadius: radius.sm },
-  segmentBtnActive: { backgroundColor: colors.accent },
-  segmentText: { color: colors.textMuted, fontSize: typography.label, fontWeight: '700' },
-  segmentTextActive: { color: colors.bg },
-
   form: { marginTop: spacing.xl, gap: spacing.md },
-  field: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
-    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
-    borderRadius: radius.md, paddingHorizontal: spacing.md,
-  },
-  input: { flex: 1, color: colors.text, fontSize: typography.body, paddingVertical: spacing.md },
 
   error: { color: colors.danger, fontSize: typography.label, fontWeight: '600' },
   notice: { color: colors.accent, fontSize: typography.label, fontWeight: '600' },
