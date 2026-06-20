@@ -35,6 +35,7 @@ export default function RootLayout() {
               <Stack.Screen name="post/[id]" options={{ animation: 'fade' }} />
               <Stack.Screen name="profile/settings" />
               <Stack.Screen name="profile/edit" />
+              <Stack.Screen name="profile/collection" />
               <Stack.Screen name="auth" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
             </Stack>
             <ShareSheet />
