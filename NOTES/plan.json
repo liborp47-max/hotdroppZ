@@ -1,6 +1,6 @@
 {
-  "version": 7,
-  "updatedAt": "2026-06-20T00:48:27.648Z",
+  "version": 8,
+  "updatedAt": "2026-06-20T00:50:34.622Z",
   "missions": [
     {
       "status": "solved",
@@ -20838,8 +20838,8 @@
       ]
     },
     {
-      "status": "todo",
-      "lifecycleStatus": "PLAN",
+      "status": "solved",
+      "lifecycleStatus": "MISSION_DONE",
       "coldCase": false,
       "isDeleted": false,
       "createdAt": "2026-06-19T19:00:00.000Z",
@@ -20852,6 +20852,12 @@
           "ts": "2026-06-19T19:00:00.000Z",
           "event": "MISSION_CREATED",
           "actor": "plan-manager"
+        },
+        {
+          "ts": "2026-06-20T00:00:00.000Z",
+          "event": "PROGRESS",
+          "actor": "claude",
+          "note": "SOLVED (commit a181980). (tabs)/profile.tsx: sub01 real Avatar (image/initials) replaces person icon + bio render. sub02 stat tiles pressable -> /profile/collection?tab=liked|saved|followed; \"Upravit profil\" -> /profile/edit; gear -> /profile/settings; logout + settings-preview kept. No credential block (initials until avatar uploaded). tsc 0, lint 0, 17/17 tests. Whole profile package now navigable: tab -> edit/settings/collection."
         }
       ],
       "sequenceIndex": 226,
@@ -20879,18 +20885,20 @@
           "name": "Avatar + bio render",
           "description": "Nahradit ikonu reálným avatarem, doplnit bio.",
           "why": "Pravdivý profil.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
-          "estimatedDuration": "S"
+          "estimatedDuration": "S",
+          "completedAt": "2026-06-20T00:00:00.000Z"
         },
         {
           "id": "02",
           "name": "Navigace + pressable tiles",
           "description": "Vstupy do edit/settings + stat tiles -> collection.",
           "why": "Rozcestník profilové sekce.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
-          "estimatedDuration": "S"
+          "estimatedDuration": "S",
+          "completedAt": "2026-06-20T00:00:00.000Z"
         }
       ]
     },
