@@ -8,6 +8,7 @@ import { StatusBar } from 'expo-status-bar'
 
 import { AuthProvider } from '@/components/auth/AuthProvider'
 import { OnboardingGate } from '@/components/auth/OnboardingGate'
+import { Player } from '@/components/media/Player'
 import { ShareSheet } from '@/components/share/ShareSheet'
 import { GlobalScrollbar } from '@/components/shared/GlobalScrollbar'
 import { queryClient } from '@/lib/query-client'
@@ -44,6 +45,7 @@ export default function RootLayout() {
             </Stack>
             <OnboardingGate />
             <ShareSheet />
+            <Player />
             <GlobalScrollbar />
           </AuthProvider>
         </QueryClientProvider>

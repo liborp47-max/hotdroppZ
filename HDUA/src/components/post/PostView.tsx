@@ -3,7 +3,7 @@ import { Linking, Pressable, StyleSheet, Text, View, useWindowDimensions } from 
 import { Image } from 'expo-image'
 import { Ionicons } from '@expo/vector-icons'
 
-import { AudioPreview } from '@/components/media/AudioPreview'
+import { usePlayer } from '@/stores/player'
 import { useShareSheet } from '@/stores/shareSheet'
 import { colors, radius, spacing, typography } from '@/styles/theme'
 import { timeAgo } from '@/utils/text'
@@ -26,6 +26,7 @@ const SOURCE_META: Record<SourcePlatform, { label: string; color: string; icon: 
 function PostViewBase({ post, audioUri }: { post: Post | FeedItem; audioUri?: string | null }) {
   const { width } = useWindowDimensions()
   const openShare = useShareSheet((s) => s.open)
+  const play = usePlayer((s) => s.play)
   const sources = post.sources ?? []
   const body = 'body' in post && post.body ? post.body : post.content
 
@@ -58,7 +59,17 @@ function PostViewBase({ post, audioUri }: { post: Post | FeedItem; audioUri?: st
           </Pressable>
         </View>
 
-        {audioUri ? <AudioPreview uri={audioUri} title={post.title} /> : null}
+        {audioUri ? (
+          <Pressable
+            style={styles.playBtn}
+            onPress={() =>
+              play({ id: post.id, title: post.title, artist: post.artist, cover: post.coverImage, audioUrl: audioUri })
+            }
+          >
+            <Ionicons name="play" size={18} color={colors.bg} />
+            <Text style={styles.playText}>Přehrát ukázku</Text>
+          </Pressable>
+        ) : null}
 
         {body ? <Text style={styles.content}>{body}</Text> : null}
 
@@ -107,6 +118,11 @@ const styles = StyleSheet.create({
   actionRow: { flexDirection: 'row' },
   shareBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.accent, borderRadius: radius.pill, paddingHorizontal: spacing.lg, paddingVertical: 9 },
   shareText: { color: colors.bg, fontSize: typography.label, fontWeight: '700' },
+  playBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
+    backgroundColor: colors.accent, borderRadius: radius.md, paddingVertical: spacing.md,
+  },
+  playText: { color: colors.bg, fontSize: typography.body, fontWeight: '800' },
   content: { color: colors.textMuted, fontSize: typography.body, lineHeight: 24 },
   sources: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   sourceBtn: {
