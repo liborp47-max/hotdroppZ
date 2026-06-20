@@ -1,6 +1,6 @@
 {
-  "version": 9,
-  "updatedAt": "2026-06-20T00:53:56.235Z",
+  "version": 10,
+  "updatedAt": "2026-06-20T00:58:30.772Z",
   "missions": [
     {
       "status": "solved",
@@ -1424,14 +1424,14 @@
       "importantInfo": "REVIVE 2026-06-19 (plan-manager): byla SIMULATED_ONLY, ověřeno NENÍ postaveno — vracím do PLAN/todo s reálným scope místo duplikace. DEPENDS: HDUA-21 (updateProfile/updateSettings + onboarding_completed sloupec) + HDUA-22 (SelectableChip/Segmented/PickerSheet). STAVÍ SE JAKO POSLEDNÍ (krok 8) — potřebuje hotovou write vrstvu i primitivy. FLAG: zdroj genres/artists/countries — static seed vs endpoint (rozhodnout s product-manager). Měří se v Analytics (D1 retence target >40%).",
       "phase": "Sprint",
       "priority": "P1",
-      "status": "todo",
+      "status": "solved",
       "domains": [
         "SOFTWARE",
         "PRODUCT"
       ],
       "createdAt": "2026-05-14T08:00:00.000Z",
       "urgencyScore": 75,
-      "lifecycleStatus": "PLAN",
+      "lifecycleStatus": "MISSION_DONE",
       "coldCase": false,
       "isDeleted": false,
       "owners": [
@@ -1528,6 +1528,12 @@
           "event": "MISSION_CREATED",
           "actor": "plan-manager",
           "note": "REVIVE 2026-06-19: SIMULATED_ONLY -> PLAN/todo. Reálný scope navázán na HDUA-21 (write API + onboarding_completed) a HDUA-22 (primitivy). Bez duplikace (nová onboarding mise se NEvytváří)."
+        },
+        {
+          "ts": "2026-06-20T00:00:00.000Z",
+          "event": "PROGRESS",
+          "actor": "claude",
+          "note": "SOLVED (commit 94233e9). REAL build (was SIMULATED_ONLY, revived). app/onboarding.tsx multi-step welcome->genres->artists->countries->notifications on shared primitives (SelectableChip/Switch/PickerSheet/ConfirmationNotice), progress bar + Back/Skip/Continue. Persists once at finish via updateProfile({onboardingCompleted:true}) + updateSettings({followedGenres/Artists/Countries, language, pushEnabled}) — anon+RLS, no service key. Static taxonomy seeds (decision: static over endpoint, works without pipeline data). OnboardingGate (root) redirects authed users with onboarding_completed=false; loop-guarded by route segment + cache-seed before navigate. tsc 0, lint 0, 17/17 tests. Built on HDUA-21 (write API) + HDUA-22 (primitivy) as planned."
         }
       ],
       "sequenceIndex": 108,
