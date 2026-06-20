@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { getProfile, getSettings } from '@/api/user'
 import { RequireAuth } from '@/components/auth/RequireAuth'
+import { Avatar } from '@/components/shared/Avatar'
 import { useAuth } from '@/stores/auth'
 import { useInteractions } from '@/stores/userInteractions'
 import { colors, radius, spacing, typography } from '@/styles/theme'
@@ -39,9 +40,7 @@ function ProfileContent() {
   return (
     <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.lg }]}>
       <View style={styles.head}>
-        <View style={styles.avatar}>
-          <Ionicons name="person" size={30} color={colors.accent} />
-        </View>
+        <Avatar uri={profile?.avatar_url} name={name} size={60} />
         <View style={styles.headText}>
           {loadingProfile ? (
             <ActivityIndicator color={colors.accent} />
@@ -63,10 +62,17 @@ function ProfileContent() {
         </Pressable>
       </View>
 
+      {profile?.bio ? <Text style={styles.bio}>{profile.bio}</Text> : null}
+
+      <Pressable style={styles.editBtn} onPress={() => router.push('/profile/edit')} accessibilityRole="button">
+        <Ionicons name="create-outline" size={16} color={colors.accent} />
+        <Text style={styles.editText}>Upravit profil</Text>
+      </Pressable>
+
       <View style={styles.stats}>
-        <Stat label="Líbí se" value={likedCount} icon="heart" />
-        <Stat label="Uloženo" value={savedCount} icon="bookmark" />
-        <Stat label="Sleduji" value={followed} icon="star" />
+        <Stat label="Líbí se" value={likedCount} icon="heart" onPress={() => router.push('/profile/collection?tab=liked')} />
+        <Stat label="Uloženo" value={savedCount} icon="bookmark" onPress={() => router.push('/profile/collection?tab=saved')} />
+        <Stat label="Sleduji" value={followed} icon="star" onPress={() => router.push('/profile/collection?tab=followed')} />
       </View>
 
       <View style={styles.section}>
@@ -85,13 +91,23 @@ function ProfileContent() {
   )
 }
 
-function Stat({ label, value, icon }: { label: string; value: number; icon: keyof typeof Ionicons.glyphMap }) {
+function Stat({
+  label,
+  value,
+  icon,
+  onPress,
+}: {
+  label: string
+  value: number
+  icon: keyof typeof Ionicons.glyphMap
+  onPress: () => void
+}) {
   return (
-    <View style={styles.stat}>
+    <Pressable style={styles.stat} onPress={onPress} accessibilityRole="button" accessibilityLabel={label}>
       <Ionicons name={icon} size={18} color={colors.accent} />
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
-    </View>
+    </Pressable>
   )
 }
 
@@ -110,11 +126,6 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, gap: spacing.lg },
 
   head: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  avatar: {
-    width: 60, height: 60, borderRadius: radius.lg,
-    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.borderActive,
-    alignItems: 'center', justifyContent: 'center',
-  },
   headText: { flex: 1, gap: 2 },
   gear: {
     width: 40, height: 40, borderRadius: radius.md,
@@ -123,6 +134,13 @@ const styles = StyleSheet.create({
   },
   name: { color: colors.text, fontSize: typography.title, fontWeight: '800' },
   email: { color: colors.textMuted, fontSize: typography.label },
+  bio: { color: colors.textMuted, fontSize: typography.body, lineHeight: 20 },
+  editBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.borderActive,
+    borderRadius: radius.md, paddingVertical: spacing.sm,
+  },
+  editText: { color: colors.accent, fontSize: typography.label, fontWeight: '700' },
 
   stats: { flexDirection: 'row', gap: spacing.sm },
   stat: {
