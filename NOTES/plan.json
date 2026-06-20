@@ -1,6 +1,6 @@
 {
-  "version": 5,
-  "updatedAt": "2026-06-20T00:41:15.186Z",
+  "version": 6,
+  "updatedAt": "2026-06-20T00:46:16.832Z",
   "missions": [
     {
       "status": "solved",
@@ -20772,8 +20772,8 @@
       ]
     },
     {
-      "status": "todo",
-      "lifecycleStatus": "PLAN",
+      "status": "in_progress",
+      "lifecycleStatus": "BUILD",
       "coldCase": false,
       "isDeleted": false,
       "createdAt": "2026-06-19T19:00:00.000Z",
@@ -20786,6 +20786,12 @@
           "ts": "2026-06-19T19:00:00.000Z",
           "event": "MISSION_CREATED",
           "actor": "plan-manager"
+        },
+        {
+          "ts": "2026-06-20T00:00:00.000Z",
+          "event": "PROGRESS",
+          "actor": "claude",
+          "note": "sub01 + sub02 code-DONE (commit b7cbf7b). app/profile/edit.tsx: name/username/bio/country fields; username validated vs DB CHECK (lower(), ^[a-z0-9_]{3,30}$) + inline hint, bio<=280 counter, country PickerSheet; saves via updateProfile (anon+RLS, no service key needed); empty username left untouched. Avatar: web file-input picker -> uploadAvatar to hdua-avatars/<uid>/ + Avatar preview; native shows web-only notice (avoids expo-image-picker / AVG-TLS install risk). Route in _layout. tsc 0, lint 0, 17/17 tests. Left in_progress: real avatar upload is gated on the live hdua-avatars bucket = HDUA-21 sub03 (credential-blocked); edit/save itself is fully functional."
         }
       ],
       "sequenceIndex": 225,
@@ -20814,18 +20820,20 @@
           "name": "Edit form",
           "description": "Pole name/username/bio/country + validace + updateProfile.",
           "why": "Změna identity uživatele.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
-          "estimatedDuration": "M"
+          "estimatedDuration": "M",
+          "completedAt": "2026-06-20T00:00:00.000Z"
         },
         {
           "id": "02",
           "name": "Avatar upload",
           "description": "Výběr obrázku + uploadAvatar do hdua-avatars/<uid>/ + náhled.",
           "why": "Vizuální identita profilu.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
-          "estimatedDuration": "S"
+          "estimatedDuration": "S",
+          "completedAt": "2026-06-20T00:00:00.000Z"
         }
       ]
     },
