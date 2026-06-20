@@ -37,6 +37,8 @@ export default function RootLayout() {
               <Stack.Screen name="profile/edit" />
               <Stack.Screen name="profile/collection" />
               <Stack.Screen name="auth" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+              <Stack.Screen name="forgot-password" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+              <Stack.Screen name="reset-password" />
             </Stack>
             <ShareSheet />
             <GlobalScrollbar />

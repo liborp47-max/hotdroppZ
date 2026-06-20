@@ -28,6 +28,10 @@ interface AuthState {
   ) => Promise<{ needsConfirmation: boolean }>
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
+  /** Send a password-recovery e-mail (HDUA-27). */
+  requestPasswordReset: (email: string) => Promise<void>
+  /** Set a new password for the recovered session (HDUA-27). */
+  updatePassword: (newPassword: string) => Promise<void>
 }
 
 let subscribed = false
@@ -99,5 +103,20 @@ export const useAuth = create<AuthState>((set) => ({
   signOut: async () => {
     const { error } = await supabase.auth.signOut()
     if (error) throw new Error(error.message)
+  },
+
+  requestPasswordReset: async (email) => {
+    // Web returns the user to /reset-password with a recovery session in the URL
+    // (detectSessionInUrl picks it up). Native uses the app's deep-link scheme.
+    const redirectTo =
+      Platform.OS === 'web' ? `${window.location.origin}/reset-password` : 'hdua://reset-password'
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo })
+    if (error) throw new Error(error.message)
+  },
+
+  updatePassword: async (newPassword) => {
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) throw new Error(error.message)
+    // onAuthStateChange keeps the store in sync.
   },
 }))

@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { ConfirmationNotice } from '@/components/shared/ConfirmationNotice'
 import { Field } from '@/components/shared/Field'
 import { Segmented } from '@/components/shared/Segmented'
 import { useAuth } from '@/stores/auth'
@@ -148,8 +149,8 @@ export default function AuthScreen() {
             autoCapitalize="none"
           />
 
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          {notice ? <Text style={styles.notice}>{notice}</Text> : null}
+          {error ? <ConfirmationNotice tone="error" message={error} /> : null}
+          {notice ? <ConfirmationNotice tone="success" message={notice} /> : null}
 
           <Pressable style={[styles.submit, !canSubmit && styles.submitDisabled]} onPress={onSubmit} disabled={!canSubmit}>
             {busy ? (
@@ -158,6 +159,12 @@ export default function AuthScreen() {
               <Text style={styles.submitText}>{isSignUp ? 'Vytvořit účet' : 'Přihlásit se'}</Text>
             )}
           </Pressable>
+
+          {!isSignUp ? (
+            <Pressable style={styles.forgot} onPress={() => router.push('/forgot-password')} hitSlop={8}>
+              <Text style={styles.forgotText}>Zapomněl(a) jsi heslo?</Text>
+            </Pressable>
+          ) : null}
 
           <View style={styles.divider}>
             <View style={styles.divLine} />
@@ -186,8 +193,8 @@ const styles = StyleSheet.create({
 
   form: { marginTop: spacing.xl, gap: spacing.md },
 
-  error: { color: colors.danger, fontSize: typography.label, fontWeight: '600' },
-  notice: { color: colors.accent, fontSize: typography.label, fontWeight: '600' },
+  forgot: { alignSelf: 'center', paddingVertical: spacing.xs },
+  forgotText: { color: colors.textMuted, fontSize: typography.label, fontWeight: '600' },
 
   submit: {
     marginTop: spacing.sm, backgroundColor: colors.accent, borderRadius: radius.md,
