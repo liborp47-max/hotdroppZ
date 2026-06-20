@@ -51,7 +51,8 @@ create trigger hdua_settings_touch before update on hdua_settings
 
 -- ── 2. Avatar storage bucket + object RLS ────────────────────────────────────
 -- Bucket: public read (avatars render in <Image>), owner-only write/update/delete.
--- Path convention enforced by policy: avatars/<auth.uid()>/<filename>.
+-- Path convention enforced by policy: <auth.uid()>/<filename> inside the bucket
+-- (uploadAvatar writes <uid>/avatar.jpg; the bucket name is not part of the path).
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
   'hdua-avatars', 'hdua-avatars', true,

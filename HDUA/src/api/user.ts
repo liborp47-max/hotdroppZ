@@ -4,6 +4,9 @@
  * authenticated session.
  */
 import { supabase } from '@/lib/supabase'
+import { FEED_COLUMNS, FEED_VIEW } from '@/api/content'
+import { mapFeedItem } from '@/api/mappers'
+import type { FeedItem, Paginated } from '@/types'
 
 export interface Alert {
   id: string
@@ -59,7 +62,7 @@ export async function getProfile() {
   if (!auth.user) return null
   const { data, error } = await supabase
     .from('hdua_profiles')
-    .select('id,username,display_name,avatar_url,country')
+    .select('id,username,display_name,avatar_url,country,bio,onboarding_completed')
     .eq('id', auth.user.id)
     .maybeSingle()
   if (error) throw new Error(`getProfile: ${error.message}`)
@@ -120,4 +123,160 @@ export async function toggleSave(postId: string, saved: boolean): Promise<void> 
     const { error } = await supabase.from('hdua_saved_posts').delete().eq('user_id', auth.user.id).eq('post_id', postId)
     if (error) throw new Error(error.message)
   }
+}
+
+// ── Profile + settings writes (HDUA-21) ───────────────────────────────────────
+// All scoped to the signed-in user by RLS. CamelCase in → snake_case columns out.
+// Requires migration 06 (bio, onboarding_completed, hdua-avatars bucket).
+
+const AVATAR_BUCKET = 'hdua-avatars'
+
+export interface ProfileUpdate {
+  displayName?: string
+  username?: string
+  bio?: string
+  country?: string
+  avatarUrl?: string
+  onboardingCompleted?: boolean
+}
+
+/** PATCH /profile — upsert the current user's profile row. */
+export async function updateProfile(fields: ProfileUpdate) {
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user) throw new Error('not authenticated')
+
+  const patch: Record<string, unknown> = { id: auth.user.id, updated_at: new Date().toISOString() }
+  if (fields.displayName !== undefined) patch.display_name = fields.displayName
+  if (fields.username !== undefined) patch.username = fields.username.trim().toLowerCase()
+  if (fields.bio !== undefined) patch.bio = fields.bio
+  if (fields.country !== undefined) patch.country = fields.country
+  if (fields.avatarUrl !== undefined) patch.avatar_url = fields.avatarUrl
+  if (fields.onboardingCompleted !== undefined) patch.onboarding_completed = fields.onboardingCompleted
+
+  const { data, error } = await supabase
+    .from('hdua_profiles')
+    .upsert(patch, { onConflict: 'id' })
+    .select('id,username,display_name,avatar_url,country,bio,onboarding_completed')
+    .single()
+  if (error) {
+    // 23505 = unique violation on the case-insensitive username index (migration 06).
+    if (error.code === '23505') throw new Error('Toto uživatelské jméno už je obsazené.')
+    throw new Error(`updateProfile: ${error.message}`)
+  }
+  return data
+}
+
+export interface SettingsUpdate {
+  language?: string
+  pushEnabled?: boolean
+  personalizationOptOut?: boolean
+  followedArtists?: string[]
+  followedCountries?: string[]
+  followedGenres?: string[]
+}
+
+/** PATCH /settings — upsert the current user's settings row. */
+export async function updateSettings(fields: SettingsUpdate) {
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user) throw new Error('not authenticated')
+
+  const patch: Record<string, unknown> = { user_id: auth.user.id, updated_at: new Date().toISOString() }
+  if (fields.language !== undefined) patch.language = fields.language
+  if (fields.pushEnabled !== undefined) patch.push_enabled = fields.pushEnabled
+  if (fields.personalizationOptOut !== undefined) patch.personalization_opt_out = fields.personalizationOptOut
+  if (fields.followedArtists !== undefined) patch.followed_artists = fields.followedArtists
+  if (fields.followedCountries !== undefined) patch.followed_countries = fields.followedCountries
+  if (fields.followedGenres !== undefined) patch.followed_genres = fields.followedGenres
+
+  const { data, error } = await supabase
+    .from('hdua_settings')
+    .upsert(patch, { onConflict: 'user_id' })
+    .select('user_id,language,followed_artists,followed_countries,followed_genres,push_enabled,personalization_opt_out')
+    .single()
+  if (error) throw new Error(`updateSettings: ${error.message}`)
+  return data
+}
+
+/** Upload an avatar to the hdua-avatars bucket (path `<uid>/avatar.jpg`) and
+ *  persist its public URL on the profile. Returns the cache-busted public URL. */
+export async function uploadAvatar(file: Blob | ArrayBuffer, contentType = 'image/jpeg'): Promise<string> {
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user) throw new Error('not authenticated')
+
+  const path = `${auth.user.id}/avatar.jpg`
+  const { error: upErr } = await supabase.storage
+    .from(AVATAR_BUCKET)
+    .upload(path, file, { upsert: true, contentType })
+  if (upErr) throw new Error(`uploadAvatar: ${upErr.message}`)
+
+  // Path is stable across re-uploads → cache-bust so the CDN serves the new image.
+  const { data: pub } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(path)
+  const url = `${pub.publicUrl}?v=${Date.now()}`
+  await updateProfile({ avatarUrl: url })
+  return url
+}
+
+// ── Collection feeds (Saved / Liked) — interactions ⋈ hdua_feed_items ─────────
+
+type InteractionRow = { post_id: string; created_at: string }
+
+async function interactionFeed(
+  table: 'hdua_saved_posts' | 'hdua_liked_posts',
+  limit: number,
+  cursor: string | null,
+): Promise<Paginated<FeedItem>> {
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user) return { items: [], nextCursor: null }
+
+  // 1) The user's interactions, newest first (cursor on created_at).
+  let q = supabase
+    .from(table)
+    .select('post_id,created_at')
+    .eq('user_id', auth.user.id)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (cursor) q = q.lt('created_at', cursor)
+  const { data, error } = await q
+  if (error) throw new Error(`${table}: ${error.message}`)
+
+  const rows = (data ?? []) as InteractionRow[]
+  if (rows.length === 0) return { items: [], nextCursor: null }
+
+  // 2) Hydrate from the content view in one round-trip, then restore interaction order.
+  const { data: feed, error: fErr } = await supabase
+    .from(FEED_VIEW)
+    .select(FEED_COLUMNS)
+    .in('id', rows.map((r) => r.post_id))
+  if (fErr) throw new Error(`${table} feed: ${fErr.message}`)
+
+  const byId = new Map((feed ?? []).map((row) => mapFeedItem(row)).map((it) => [it.id, it]))
+  const items = rows.map((r) => byId.get(r.post_id)).filter((x): x is FeedItem => Boolean(x))
+  const nextCursor = rows.length === limit ? rows[rows.length - 1].created_at : null
+  return { items, nextCursor }
+}
+
+/** GET /me/saved — saved posts, newest-saved first, cursor-paginated. */
+export const getSaved = (limit = 20, cursor: string | null = null): Promise<Paginated<FeedItem>> =>
+  interactionFeed('hdua_saved_posts', limit, cursor)
+
+/** GET /me/liked — liked posts, newest-liked first, cursor-paginated. */
+export const getLiked = (limit = 20, cursor: string | null = null): Promise<Paginated<FeedItem>> =>
+  interactionFeed('hdua_liked_posts', limit, cursor)
+
+// ── Followed artists (array on hdua_settings.followed_artists) ─────────────────
+
+export async function getFollowedArtists(): Promise<string[]> {
+  const settings = await getSettings()
+  return settings?.followed_artists ?? []
+}
+
+export async function followArtist(name: string): Promise<void> {
+  const current = await getFollowedArtists()
+  if (current.includes(name)) return
+  await updateSettings({ followedArtists: [...current, name] })
+}
+
+export async function unfollowArtist(name: string): Promise<void> {
+  const current = await getFollowedArtists()
+  await updateSettings({ followedArtists: current.filter((a) => a !== name) })
 }

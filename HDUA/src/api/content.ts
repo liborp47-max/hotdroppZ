@@ -14,10 +14,10 @@ import { supabase } from '@/lib/supabase'
 import { mapFeedItem, mapPost } from '@/api/mappers'
 import type { Artist, FeedItem, FeedItemType, Paginated, Post } from '@/types'
 
-const FEED_VIEW = 'hdua_feed_items'
+export const FEED_VIEW = 'hdua_feed_items'
 const DEFAULT_LIMIT = 20
 
-const FEED_COLUMNS =
+export const FEED_COLUMNS =
   'id,type,title,content,cover_image,artist,country,language,category,subcategory,source,source_url,score,tags,created_at,updated_at,published_at,extra'
 
 export interface FeedQuery {
