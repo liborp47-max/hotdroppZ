@@ -1,6 +1,6 @@
 {
-  "version": 3,
-  "updatedAt": "2026-06-20T00:17:37.190Z",
+  "version": 4,
+  "updatedAt": "2026-06-20T00:26:29.216Z",
   "missions": [
     {
       "status": "solved",
@@ -20622,8 +20622,8 @@
       ]
     },
     {
-      "status": "todo",
-      "lifecycleStatus": "PLAN",
+      "status": "solved",
+      "lifecycleStatus": "MISSION_DONE",
       "coldCase": false,
       "isDeleted": false,
       "createdAt": "2026-06-19T19:00:00.000Z",
@@ -20636,6 +20636,12 @@
           "ts": "2026-06-19T19:00:00.000Z",
           "event": "MISSION_CREATED",
           "actor": "plan-manager"
+        },
+        {
+          "ts": "2026-06-20T00:00:00.000Z",
+          "event": "PROGRESS",
+          "actor": "claude",
+          "note": "DONE (commit 6521962). sub01: Field + Segmented extracted from auth.tsx into src/components/shared (Field +optional label/multiline, Segmented generic over value); auth.tsx rewired, no behavior change. sub02: Avatar (image/initials + camera badge), SettingRow, SelectableChip, ConfirmationNotice (success/error/info), PickerSheet (single/multi bottom sheet), ConfirmDialog (destructive/busy). sub03: useModalA11y hook — web Esc-to-close + Tab focus trap + focus restore, native no-op; PickerSheet/ConfirmDialog consume it. tsc 0 errors, eslint clean, 17/17 tests. Unblocks HDUA-23/24/25/26 + P1-004-ONBOARDING. Not visually verified (needs Expo runtime)."
         }
       ],
       "sequenceIndex": 223,
@@ -20663,27 +20669,30 @@
           "name": "Extrakce z auth",
           "description": "Field + Segmented vytáhnout z auth.tsx do sdílených komponent.",
           "why": "Znovupoužití bez duplikace; auth zůstává funkční.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
-          "estimatedDuration": "S"
+          "estimatedDuration": "S",
+          "completedAt": "2026-06-20T00:00:00.000Z"
         },
         {
           "id": "02",
           "name": "Nové komponenty",
           "description": "Avatar, SettingRow, PickerSheet, SelectableChip, ConfirmationNotice, ConfirmDialog.",
           "why": "Stavební kameny Settings/Edit/Collection/Onboarding.",
-          "status": "todo",
+          "status": "done",
           "owner": "ui-ux-designer",
-          "estimatedDuration": "M"
+          "estimatedDuration": "M",
+          "completedAt": "2026-06-20T00:00:00.000Z"
         },
         {
           "id": "03",
           "name": "useModalA11y",
           "description": "Web Esc + focus trap hook pro modály/sheety.",
           "why": "Přístupnost a UX na webu.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
-          "estimatedDuration": "S"
+          "estimatedDuration": "S",
+          "completedAt": "2026-06-20T00:00:00.000Z"
         }
       ]
     },
