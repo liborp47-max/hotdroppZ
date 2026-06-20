@@ -7,6 +7,7 @@ import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 
 import { AuthProvider } from '@/components/auth/AuthProvider'
+import { OnboardingGate } from '@/components/auth/OnboardingGate'
 import { ShareSheet } from '@/components/share/ShareSheet'
 import { GlobalScrollbar } from '@/components/shared/GlobalScrollbar'
 import { queryClient } from '@/lib/query-client'
@@ -39,7 +40,9 @@ export default function RootLayout() {
               <Stack.Screen name="auth" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
               <Stack.Screen name="forgot-password" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
               <Stack.Screen name="reset-password" />
+              <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
             </Stack>
+            <OnboardingGate />
             <ShareSheet />
             <GlobalScrollbar />
           </AuthProvider>
