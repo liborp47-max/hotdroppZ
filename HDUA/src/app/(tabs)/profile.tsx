@@ -1,5 +1,6 @@
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -20,6 +21,7 @@ export default function ProfileScreen() {
 
 function ProfileContent() {
   const insets = useSafeAreaInsets()
+  const router = useRouter()
   const user = useAuth((s) => s.user)
   const signOut = useAuth((s) => s.signOut)
   const likedCount = useInteractions((s) => s.liked.size)
@@ -50,6 +52,15 @@ function ProfileContent() {
             </>
           )}
         </View>
+        <Pressable
+          style={styles.gear}
+          onPress={() => router.push('/profile/settings')}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Nastavení"
+        >
+          <Ionicons name="settings-outline" size={22} color={colors.textMuted} />
+        </Pressable>
       </View>
 
       <View style={styles.stats}>
@@ -105,6 +116,11 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   headText: { flex: 1, gap: 2 },
+  gear: {
+    width: 40, height: 40, borderRadius: radius.md,
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+    alignItems: 'center', justifyContent: 'center',
+  },
   name: { color: colors.text, fontSize: typography.title, fontWeight: '800' },
   email: { color: colors.textMuted, fontSize: typography.label },
 

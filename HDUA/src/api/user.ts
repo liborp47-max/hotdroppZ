@@ -280,3 +280,25 @@ export async function unfollowArtist(name: string): Promise<void> {
   const current = await getFollowedArtists()
   await updateSettings({ followedArtists: current.filter((a) => a !== name) })
 }
+
+// ── Account deletion (HDUA-23) ────────────────────────────────────────────────
+
+/**
+ * DELETE /me — hard-delete the account and all owned rows, then sign out.
+ *
+ * The anon client can delete the user's own table rows under RLS but CANNOT
+ * delete the `auth.users` row (that needs the service role). So the actual wipe
+ * runs in the `hdua-delete-account` Supabase edge function (service-role; source
+ * draft in supabase/functions/hdua-delete-account). Until that function is
+ * DEPLOYED (HDUA-23 sub03 — credential-blocked, needs the service key), this
+ * call fails and the Settings screen surfaces the error instead of half-deleting.
+ */
+export async function deleteAccount(): Promise<void> {
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user) throw new Error('not authenticated')
+
+  const { error } = await supabase.functions.invoke('hdua-delete-account', { method: 'POST' })
+  if (error) throw new Error(`deleteAccount: ${error.message}`)
+
+  await supabase.auth.signOut()
+}
