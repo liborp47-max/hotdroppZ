@@ -1,6 +1,6 @@
 {
-  "version": 4,
-  "updatedAt": "2026-06-20T00:26:29.216Z",
+  "version": 5,
+  "updatedAt": "2026-06-20T00:41:15.186Z",
   "missions": [
     {
       "status": "solved",
@@ -20697,8 +20697,8 @@
       ]
     },
     {
-      "status": "todo",
-      "lifecycleStatus": "PLAN",
+      "status": "in_progress",
+      "lifecycleStatus": "BUILD",
       "coldCase": false,
       "isDeleted": false,
       "createdAt": "2026-06-19T19:00:00.000Z",
@@ -20711,6 +20711,12 @@
           "ts": "2026-06-19T19:00:00.000Z",
           "event": "MISSION_CREATED",
           "actor": "plan-manager"
+        },
+        {
+          "ts": "2026-06-20T00:00:00.000Z",
+          "event": "PROGRESS",
+          "actor": "claude",
+          "note": "sub01 + sub02 DONE (commit fccb09a). app/profile/settings.tsx: language PickerSheet (en/cs/de/fr/es/pl) + push/personalization toggles via optimistic TanStack mutation → updateSettings (anon client + RLS, works WITHOUT service key); account section = e-mail (read-only), logout (ConfirmDialog), delete-account (destructive ConfirmDialog + busy). Entry point = settings gear in profile tab header; route registered in _layout. tsc 0, lint 0 errors, 17/17 tests. sub03 BLOCKED on deploy: deleteAccount() invokes hdua-delete-account edge fn; source drafted in HDUA/supabase/functions/hdua-delete-account (Deno service-role wipe), excluded from tsc/eslint. Needs `supabase functions deploy hdua-delete-account` + service key (same credential block as HDUA-21 sub03). Mission stays in_progress until the edge fn is deployed."
         }
       ],
       "sequenceIndex": 224,
@@ -20739,25 +20745,27 @@
           "name": "Settings UI + toggly",
           "description": "Language picker + push/personalization přepínače napojené na updateSettings.",
           "why": "Jádro interaktivního nastavení.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
-          "estimatedDuration": "M"
+          "estimatedDuration": "M",
+          "completedAt": "2026-06-20T00:00:00.000Z"
         },
         {
           "id": "02",
           "name": "Account actions UI",
           "description": "Sekce účtu vč. delete-account s ConfirmDialog.",
           "why": "Správa účtu z UI.",
-          "status": "todo",
+          "status": "done",
           "owner": "ui-ux-designer",
-          "estimatedDuration": "S"
+          "estimatedDuration": "S",
+          "completedAt": "2026-06-20T00:00:00.000Z"
         },
         {
           "id": "03",
           "name": "Delete-account edge fn (BLOKED)",
           "description": "Supabase edge function pro hard-delete uživatele + dat; UI ji zavolá.",
           "why": "Anon client nedokáže tvrdě smazat účet.",
-          "status": "todo",
+          "status": "blocked",
           "owner": "backend-engineer",
           "estimatedDuration": "M"
         }
