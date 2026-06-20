@@ -1,6 +1,6 @@
 {
-  "version": 8,
-  "updatedAt": "2026-06-20T00:50:34.622Z",
+  "version": 9,
+  "updatedAt": "2026-06-20T00:53:56.235Z",
   "missions": [
     {
       "status": "solved",
@@ -20968,8 +20968,8 @@
       ]
     },
     {
-      "status": "todo",
-      "lifecycleStatus": "PLAN",
+      "status": "solved",
+      "lifecycleStatus": "MISSION_DONE",
       "coldCase": false,
       "isDeleted": false,
       "createdAt": "2026-06-19T19:00:00.000Z",
@@ -20982,6 +20982,12 @@
           "ts": "2026-06-19T19:00:00.000Z",
           "event": "MISSION_CREATED",
           "actor": "plan-manager"
+        },
+        {
+          "ts": "2026-06-20T00:00:00.000Z",
+          "event": "PROGRESS",
+          "actor": "claude",
+          "note": "SOLVED (commit e7ec282). sub01: auth.ts requestPasswordReset (resetPasswordForEmail, web->/reset-password redirect + native deep link) + updatePassword (updateUser); new forgot-password.tsx (anti-enumeration) + reset-password.tsx (new+confirm pw, invalid/expired-link state); \"Zapomněl jsi heslo?\" link on sign-in; routes in _layout. sub02: auth.tsx error/confirm states now via shared ConfirmationNotice (consistent post-sign-up verify message). Anon-client auth only, no service key. tsc 0, lint 0, 17/17 tests."
         }
       ],
       "sequenceIndex": 228,
@@ -21010,18 +21016,20 @@
           "name": "Reset flow",
           "description": "requestPasswordReset/updatePassword + dvě obrazovky.",
           "why": "Obnova zapomenutého hesla.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
-          "estimatedDuration": "S"
+          "estimatedDuration": "S",
+          "completedAt": "2026-06-20T00:00:00.000Z"
         },
         {
           "id": "02",
           "name": "Verify polish",
           "description": "Doladit email-confirmation notice/stav po sign-up.",
           "why": "Vyšší dokončenost registrace.",
-          "status": "todo",
+          "status": "done",
           "owner": "ui-ux-designer",
-          "estimatedDuration": "S"
+          "estimatedDuration": "S",
+          "completedAt": "2026-06-20T00:00:00.000Z"
         }
       ]
     }
