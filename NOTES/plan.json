@@ -1,6 +1,6 @@
 {
-  "version": 10,
-  "updatedAt": "2026-06-20T00:58:30.772Z",
+  "version": 11,
+  "updatedAt": "2026-06-20T01:04:55.235Z",
   "missions": [
     {
       "status": "solved",
@@ -19592,8 +19592,8 @@
       "completedAt": "2026-06-10T15:31:46.387Z"
     },
     {
-      "status": "todo",
-      "lifecycleStatus": "PLAN",
+      "status": "in_progress",
+      "lifecycleStatus": "BUILD",
       "coldCase": false,
       "isDeleted": false,
       "createdAt": "2026-06-10T06:20:00.000Z",
@@ -19607,6 +19607,12 @@
           "event": "MISSION_CREATED",
           "actor": "plan-manager",
           "note": "HDUA seed — native Expo user app, plan from CEO master prompt"
+        },
+        {
+          "ts": "2026-06-20T00:00:00.000Z",
+          "event": "PROGRESS",
+          "actor": "claude",
+          "note": "sub01 + sub02 DONE (commit 00fbfff). stores/player.ts = Zustand store over one module-level expo-av Sound (persists across nav): track+queue, position/duration/isPlaying, play/toggle/next/prev/seek/close, auto-advance on finish, playsInSilentModeIOS init. components/media/Player.tsx = mini-player bar above tab bar (cover/title/artist/play-pause/skip/close/progress) -> full-screen modal (big cover, tap-to-seek progress, prev/play/next); mounted once at root. PostView \"Přehrát ukázku\" launches it from FeedItem.audioPreviewUrl (Spotify preview); removed superseded inline AudioPreview seed. tsc 0, lint 0, 17/17 tests. sub03 (background audio + lock-screen) left TODO: needs native config (app.json UIBackgroundModes + Audio staysActiveInBackground + notification controls), not verifiable headless on web-first dev."
         }
       ],
       "sequenceIndex": 208,
@@ -19636,18 +19642,20 @@
           "name": "Player store",
           "description": "Globální Zustand store (track, queue, stav, pozice).",
           "why": "Jeden zdroj pravdy pro přehrávání napříč appkou.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
-          "estimatedDuration": "M"
+          "estimatedDuration": "M",
+          "completedAt": "2026-06-20T00:00:00.000Z"
         },
         {
           "id": "02",
           "name": "Mini + full UI",
           "description": "Mini-player bar + full screen s waveform a progress, gesto pro expand.",
           "why": "Ovládání bez vytržení z feedu.",
-          "status": "todo",
+          "status": "done",
           "owner": "ui-ux-designer",
-          "estimatedDuration": "M"
+          "estimatedDuration": "M",
+          "completedAt": "2026-06-20T00:00:00.000Z"
         },
         {
           "id": "03",
