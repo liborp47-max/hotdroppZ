@@ -1,6 +1,6 @@
 {
-  "version": 6,
-  "updatedAt": "2026-06-20T00:46:16.832Z",
+  "version": 7,
+  "updatedAt": "2026-06-20T00:48:27.648Z",
   "missions": [
     {
       "status": "solved",
@@ -20895,8 +20895,8 @@
       ]
     },
     {
-      "status": "todo",
-      "lifecycleStatus": "PLAN",
+      "status": "solved",
+      "lifecycleStatus": "MISSION_DONE",
       "coldCase": false,
       "isDeleted": false,
       "createdAt": "2026-06-19T19:00:00.000Z",
@@ -20909,6 +20909,12 @@
           "ts": "2026-06-19T19:00:00.000Z",
           "event": "MISSION_CREATED",
           "actor": "plan-manager"
+        },
+        {
+          "ts": "2026-06-20T00:00:00.000Z",
+          "event": "PROGRESS",
+          "actor": "claude",
+          "note": "SOLVED (commit 11d39fb). app/profile/collection.tsx: Segmented Saved/Liked/Followed, initial tab from ?tab= param. Saved/Liked = infinite cursor FlatList of FeedCard via getSaved/getLiked (client-side post_id->hdua_feed_items join) + onEndReached paging + EmptyState. Followed = getFollowedArtists + optimistic unfollow/rollback, Avatar initials. All reads via anon client + RLS -> fully functional WITHOUT service key (no credential block). Route in _layout. tsc 0, lint 0, 17/17 tests. Done; only awaits HDUA-25 stat tiles to link in."
         }
       ],
       "sequenceIndex": 227,
@@ -20936,18 +20942,20 @@
           "name": "Saved/Liked taby",
           "description": "Segmented + seznamy z getSaved/getLiked (join na feed items).",
           "why": "Zobrazit uložené/lajkované drops.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
-          "estimatedDuration": "M"
+          "estimatedDuration": "M",
+          "completedAt": "2026-06-20T00:00:00.000Z"
         },
         {
           "id": "02",
           "name": "Followed tab",
           "description": "Seznam sledovaných umělců + follow/unfollow.",
           "why": "Správa sledování přímo v profilu.",
-          "status": "todo",
+          "status": "done",
           "owner": "frontend-engineer",
-          "estimatedDuration": "S"
+          "estimatedDuration": "S",
+          "completedAt": "2026-06-20T00:00:00.000Z"
         }
       ]
     },
