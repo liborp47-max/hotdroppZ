@@ -143,6 +143,29 @@ const SIGNOFFS: Record<string, SignOff> = {
       ],
     },
   },
+  'PM-MISS-002': {
+    summary:
+      'Snapshot Reliability Gate: evaluateSnapshotReliability runs on every /analytics/snapshot sync — freshness gate (snapshot age + stage data-freshness vs 24h SLO) + completeness gate (required fields, status consistency, upstream dependency availability) → ok/degraded verdict with concrete reasons. 11 tests, tsc 0 errors.',
+    evidence: {
+      testsRun: [
+        { name: 'tests/snapshot-reliability.test.ts', result: 'PASS', output: '11/11' },
+        { name: 'tsc --noEmit', result: 'PASS', output: '0 errors' },
+      ],
+      changedFiles: [
+        'command-centrum/lib/hd-central/snapshot-reliability.ts',
+        'command-centrum/tests/snapshot-reliability.test.ts',
+        'command-centrum/app/api/hd-central/analytics/snapshot/route.ts',
+      ],
+      deliverables: [
+        'Snapshot reliability gate (freshness + completeness) with degraded verdict + reason codes',
+        'Wired into the /analytics/snapshot sync (reliability payload + X-Snapshot-Reliability header)',
+      ],
+      auditorVerdict: 'PASS',
+      realDbOrRuntime: [
+        { command: 'npx tsx --test tests/snapshot-reliability.test.ts', exitCode: 0, summary: '11/11 pass' },
+      ],
+    },
+  },
 }
 
 const plan = readPlan()

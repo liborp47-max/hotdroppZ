@@ -123,6 +123,7 @@ jobs:
           npm run test:mission-filters
           npm run test:mission-auditor
           npm run test:mission-health
+          npm run test:snapshot-reliability
           npm run test:audit-popup
           npm run test:plans-logic
           npm run test:process-store-contract

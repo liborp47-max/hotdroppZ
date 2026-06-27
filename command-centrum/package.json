@@ -62,6 +62,7 @@
     "test:mission-filters": "tsx --test tests/mission-filters.test.ts",
     "test:mission-auditor": "tsx --test tests/mission-auditor.test.ts",
     "test:mission-health": "tsx --test tests/mission-health.test.ts",
+    "test:snapshot-reliability": "tsx --test tests/snapshot-reliability.test.ts",
     "audit:missions": "tsx scripts/mission-auditor.ts",
     "test:audit-popup": "tsx --test tests/audit-popup.test.ts",
     "test:plans-logic": "tsx --test tests/plans-logic.test.ts",
