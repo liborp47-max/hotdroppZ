@@ -33,6 +33,12 @@ export interface MissionFilters {
   search: string
   sortKey: MissionSortKey
   sortDir: SortDir
+  /**
+   * Hide MISSION_DONE missions across every scope except the dedicated "done"
+   * segment. Lets the CEO clear finished noise from inbox/timeline/all without
+   * losing the ability to inspect the archive via the Hotové tab.
+   */
+  hideDone: boolean
 }
 
 export const DEFAULT_MISSION_FILTERS: MissionFilters = {
@@ -42,6 +48,7 @@ export const DEFAULT_MISSION_FILTERS: MissionFilters = {
   search: '',
   sortKey: 'sequence',
   sortDir: 'asc',
+  hideDone: false,
 }
 
 /** Sensible initial direction when a column is first selected. */
@@ -141,6 +148,9 @@ export function applyMissionFilters(missions: readonly Mission[], filters: Missi
   const dir = filters.sortDir === 'desc' ? -1 : 1
   return missions
     .filter((m) => matchesScope(m, filters.scope))
+    // "Hide done" never hides the dedicated Hotové segment — there it would
+    // empty the list; everywhere else it strips finished missions.
+    .filter((m) => !filters.hideDone || filters.scope === 'done' || !isDone(m))
     .filter((m) => filters.priority === 'all' || m.priority === filters.priority)
     .filter((m) => filters.phase === 'all' || m.phase === filters.phase)
     .filter((m) => matchesSearch(m, filters.search))

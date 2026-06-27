@@ -121,6 +121,8 @@ jobs:
         working-directory: SYSTEM/hotdroppz/command-centrum
         run: |
           npm run test:mission-filters
+          npm run test:mission-auditor
+          npm run test:mission-health
           npm run test:audit-popup
           npm run test:plans-logic
           npm run test:process-store-contract
@@ -129,6 +131,14 @@ jobs:
           npm run test:plan-schema
           npm run test:plan-store
           npm run test:pipeline-monitor
+          npm run test:project-status
+          npm run test:json-extract
+          npm run test:ssrf-wiring
+          npm run test:auth-guard
+          npm run test:analytics-snapshot
+          npm run test:ai-usage-analytics
+          npm run test:gate-engine
+          npm run test:economy
       - name: SRL + consumer-rewiring tests (PR-S4)
         working-directory: SYSTEM/hotdroppz/command-centrum
         run: |

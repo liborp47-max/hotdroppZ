@@ -6,6 +6,7 @@
 import { supabase } from '@/lib/supabase'
 import { FEED_COLUMNS, FEED_VIEW } from '@/api/content'
 import { mapFeedItem } from '@/api/mappers'
+import { ContentApiError, dbError, unauthenticated } from '@/api/errors'
 import type { FeedItem, Paginated } from '@/types'
 
 export interface Alert {
@@ -35,7 +36,7 @@ export async function getAlerts(limit = 30): Promise<Alert[]> {
     .select('id,priority,title,body,post_id,artist,created_at')
     .order('created_at', { ascending: false })
     .limit(limit)
-  if (error) throw new Error(`getAlerts: ${error.message}`)
+  if (error) throw dbError('getAlerts', error)
   return (data ?? []).map((r) => ({
     id: r.id, priority: r.priority, title: r.title, body: r.body,
     postId: r.post_id, artist: r.artist, createdAt: r.created_at,
@@ -49,7 +50,7 @@ export async function getNotifications(limit = 50): Promise<AppNotification[]> {
     .select('id,type,title,body,post_id,read_at,created_at')
     .order('created_at', { ascending: false })
     .limit(limit)
-  if (error) throw new Error(`getNotifications: ${error.message}`)
+  if (error) throw dbError('getNotifications', error)
   return (data ?? []).map((r) => ({
     id: r.id, type: r.type, title: r.title, body: r.body,
     postId: r.post_id, readAt: r.read_at, createdAt: r.created_at,
@@ -65,7 +66,7 @@ export async function getProfile() {
     .select('id,username,display_name,avatar_url,country,bio,onboarding_completed')
     .eq('id', auth.user.id)
     .maybeSingle()
-  if (error) throw new Error(`getProfile: ${error.message}`)
+  if (error) throw dbError('getProfile', error)
   return data
 }
 
@@ -78,7 +79,7 @@ export async function getSettings() {
     .select('user_id,language,followed_artists,followed_countries,followed_genres,push_enabled,personalization_opt_out')
     .eq('user_id', auth.user.id)
     .maybeSingle()
-  if (error) throw new Error(`getSettings: ${error.message}`)
+  if (error) throw dbError('getSettings', error)
   return data
 }
 
@@ -91,8 +92,8 @@ export async function getMyInteractions(): Promise<{ liked: string[]; saved: str
     supabase.from('hdua_liked_posts').select('post_id').eq('user_id', auth.user.id),
     supabase.from('hdua_saved_posts').select('post_id').eq('user_id', auth.user.id),
   ])
-  if (likedRes.error) throw new Error(`getMyInteractions(liked): ${likedRes.error.message}`)
-  if (savedRes.error) throw new Error(`getMyInteractions(saved): ${savedRes.error.message}`)
+  if (likedRes.error) throw dbError('getMyInteractions(liked)', likedRes.error)
+  if (savedRes.error) throw dbError('getMyInteractions(saved)', savedRes.error)
   return {
     liked: (likedRes.data ?? []).map((r) => r.post_id),
     saved: (savedRes.data ?? []).map((r) => r.post_id),
@@ -103,25 +104,25 @@ export async function getMyInteractions(): Promise<{ liked: string[]; saved: str
 
 export async function toggleLike(postId: string, liked: boolean): Promise<void> {
   const { data: auth } = await supabase.auth.getUser()
-  if (!auth.user) throw new Error('not authenticated')
+  if (!auth.user) throw unauthenticated('toggleLike')
   if (liked) {
     const { error } = await supabase.from('hdua_liked_posts').insert({ user_id: auth.user.id, post_id: postId })
-    if (error && error.code !== '23505') throw new Error(error.message)
+    if (error && error.code !== '23505') throw dbError('toggleLike', error, error.message)
   } else {
     const { error } = await supabase.from('hdua_liked_posts').delete().eq('user_id', auth.user.id).eq('post_id', postId)
-    if (error) throw new Error(error.message)
+    if (error) throw dbError('toggleLike', error, error.message)
   }
 }
 
 export async function toggleSave(postId: string, saved: boolean): Promise<void> {
   const { data: auth } = await supabase.auth.getUser()
-  if (!auth.user) throw new Error('not authenticated')
+  if (!auth.user) throw unauthenticated('toggleSave')
   if (saved) {
     const { error } = await supabase.from('hdua_saved_posts').insert({ user_id: auth.user.id, post_id: postId })
-    if (error && error.code !== '23505') throw new Error(error.message)
+    if (error && error.code !== '23505') throw dbError('toggleSave', error, error.message)
   } else {
     const { error } = await supabase.from('hdua_saved_posts').delete().eq('user_id', auth.user.id).eq('post_id', postId)
-    if (error) throw new Error(error.message)
+    if (error) throw dbError('toggleSave', error, error.message)
   }
 }
 
@@ -143,7 +144,7 @@ export interface ProfileUpdate {
 /** PATCH /profile — upsert the current user's profile row. */
 export async function updateProfile(fields: ProfileUpdate) {
   const { data: auth } = await supabase.auth.getUser()
-  if (!auth.user) throw new Error('not authenticated')
+  if (!auth.user) throw unauthenticated('updateProfile')
 
   const patch: Record<string, unknown> = { id: auth.user.id, updated_at: new Date().toISOString() }
   if (fields.displayName !== undefined) patch.display_name = fields.displayName
@@ -160,8 +161,9 @@ export async function updateProfile(fields: ProfileUpdate) {
     .single()
   if (error) {
     // 23505 = unique violation on the case-insensitive username index (migration 06).
-    if (error.code === '23505') throw new Error('Toto uživatelské jméno už je obsazené.')
-    throw new Error(`updateProfile: ${error.message}`)
+    if (error.code === '23505')
+      throw new ContentApiError({ endpoint: 'updateProfile', code: 'conflict', dbCode: '23505', message: 'Toto uživatelské jméno už je obsazené.' })
+    throw dbError('updateProfile', error)
   }
   return data
 }
@@ -178,7 +180,7 @@ export interface SettingsUpdate {
 /** PATCH /settings — upsert the current user's settings row. */
 export async function updateSettings(fields: SettingsUpdate) {
   const { data: auth } = await supabase.auth.getUser()
-  if (!auth.user) throw new Error('not authenticated')
+  if (!auth.user) throw unauthenticated('updateSettings')
 
   const patch: Record<string, unknown> = { user_id: auth.user.id, updated_at: new Date().toISOString() }
   if (fields.language !== undefined) patch.language = fields.language
@@ -193,7 +195,7 @@ export async function updateSettings(fields: SettingsUpdate) {
     .upsert(patch, { onConflict: 'user_id' })
     .select('user_id,language,followed_artists,followed_countries,followed_genres,push_enabled,personalization_opt_out')
     .single()
-  if (error) throw new Error(`updateSettings: ${error.message}`)
+  if (error) throw dbError('updateSettings', error)
   return data
 }
 
@@ -201,13 +203,13 @@ export async function updateSettings(fields: SettingsUpdate) {
  *  persist its public URL on the profile. Returns the cache-busted public URL. */
 export async function uploadAvatar(file: Blob | ArrayBuffer, contentType = 'image/jpeg'): Promise<string> {
   const { data: auth } = await supabase.auth.getUser()
-  if (!auth.user) throw new Error('not authenticated')
+  if (!auth.user) throw unauthenticated('uploadAvatar')
 
   const path = `${auth.user.id}/avatar.jpg`
   const { error: upErr } = await supabase.storage
     .from(AVATAR_BUCKET)
     .upload(path, file, { upsert: true, contentType })
-  if (upErr) throw new Error(`uploadAvatar: ${upErr.message}`)
+  if (upErr) throw dbError('uploadAvatar', upErr)
 
   // Path is stable across re-uploads → cache-bust so the CDN serves the new image.
   const { data: pub } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(path)
@@ -237,7 +239,7 @@ async function interactionFeed(
     .limit(limit)
   if (cursor) q = q.lt('created_at', cursor)
   const { data, error } = await q
-  if (error) throw new Error(`${table}: ${error.message}`)
+  if (error) throw dbError(table, error)
 
   const rows = (data ?? []) as InteractionRow[]
   if (rows.length === 0) return { items: [], nextCursor: null }
@@ -247,7 +249,7 @@ async function interactionFeed(
     .from(FEED_VIEW)
     .select(FEED_COLUMNS)
     .in('id', rows.map((r) => r.post_id))
-  if (fErr) throw new Error(`${table} feed: ${fErr.message}`)
+  if (fErr) throw dbError(`${table} feed`, fErr)
 
   const byId = new Map((feed ?? []).map((row) => mapFeedItem(row)).map((it) => [it.id, it]))
   const items = rows.map((r) => byId.get(r.post_id)).filter((x): x is FeedItem => Boolean(x))
@@ -295,10 +297,10 @@ export async function unfollowArtist(name: string): Promise<void> {
  */
 export async function deleteAccount(): Promise<void> {
   const { data: auth } = await supabase.auth.getUser()
-  if (!auth.user) throw new Error('not authenticated')
+  if (!auth.user) throw unauthenticated('deleteAccount')
 
   const { error } = await supabase.functions.invoke('hdua-delete-account', { method: 'POST' })
-  if (error) throw new Error(`deleteAccount: ${error.message}`)
+  if (error) throw dbError('deleteAccount', error)
 
   await supabase.auth.signOut()
 }

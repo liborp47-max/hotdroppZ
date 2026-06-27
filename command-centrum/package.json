@@ -16,6 +16,7 @@
     "lint:ci": "eslint . --max-warnings 243",
     "lint:md": "markdownlint ../INFO/**/*.md --config ../.markdownlint.json",
     "typecheck": "tsc --noEmit",
+    "test:audit-orchestrator": "tsx --test tests/audit-orchestrator.test.ts",
     "test:truth-gate": "npm run test:missions && npm run test:evidence-contract && npm run test:refresh-truth && npm run test:stage-registry && npm run test:local-runner && npm run test:evidence-summary && npm run test:agent-runner && npm run test:mission-lifecycle",
     "test:degraded": "tsx --test tests/degraded-contract.test.ts",
     "test:contracts": "tsx --test tests/api-response-contract.test.ts",
@@ -59,6 +60,9 @@
     "test:ssrf-guard": "tsx --test tests/ssrf-guard.test.ts",
     "test:mission-lifecycle": "tsx --test tests/mission-lifecycle.test.ts",
     "test:mission-filters": "tsx --test tests/mission-filters.test.ts",
+    "test:mission-auditor": "tsx --test tests/mission-auditor.test.ts",
+    "test:mission-health": "tsx --test tests/mission-health.test.ts",
+    "audit:missions": "tsx scripts/mission-auditor.ts",
     "test:audit-popup": "tsx --test tests/audit-popup.test.ts",
     "test:plans-logic": "tsx --test tests/plans-logic.test.ts",
     "test:process-store-contract": "tsx --test tests/process-store-contract.test.ts",
@@ -77,7 +81,14 @@
     "smoke:routes": "node scripts/smoke-route-check.mjs",
     "test:plan-schema": "tsx --test tests/plan-schema.test.ts",
     "test:plan-store": "tsx --test tests/plan-store.test.ts",
-    "test:pipeline-monitor": "tsx --test tests/pipeline-monitor.test.ts"
+    "test:pipeline-monitor": "tsx --test tests/pipeline-monitor.test.ts",
+    "test:project-status": "tsx --test tests/project-status.test.ts",
+    "test:analytics-snapshot": "tsx --test tests/analytics-snapshot.test.ts",
+    "test:json-extract": "tsx --test tests/json-extract.test.ts",
+    "test:ssrf-wiring": "tsx --test tests/ssrf-wiring.test.ts",
+    "test:auth-guard": "tsx --test tests/auth-guard.test.ts",
+    "test:gate-engine": "tsx --test tests/gate-engine.test.ts",
+    "test:economy": "tsx --test tests/economy.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",

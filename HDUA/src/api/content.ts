@@ -12,6 +12,7 @@
  */
 import { supabase } from '@/lib/supabase'
 import { mapFeedItem, mapPost } from '@/api/mappers'
+import { dbError } from '@/api/errors'
 import type { Artist, FeedItem, FeedItemType, Paginated, Post } from '@/types'
 
 export const FEED_VIEW = 'hdua_feed_items'
@@ -41,7 +42,7 @@ export async function getFeed(q: FeedQuery = {}): Promise<Paginated<FeedItem>> {
   if (q.category) query = query.eq('category', q.category)
 
   const { data, error } = await query
-  if (error) throw new Error(`getFeed: ${error.message}`)
+  if (error) throw dbError('getFeed', error)
 
   const items = (data ?? []).map(mapFeedItem)
   const nextCursor = items.length === limit ? items[items.length - 1].publishedAt : null
@@ -59,7 +60,7 @@ export async function getTrending(q: FeedQuery = {}): Promise<Paginated<FeedItem
     .select(FEED_COLUMNS)
     .order('score', { ascending: false, nullsFirst: false })
     .limit(limit)
-  if (error) throw new Error(`getTrending: ${error.message}`)
+  if (error) throw dbError('getTrending', error)
   return { items: (data ?? []).map(mapFeedItem), nextCursor: null }
 }
 
@@ -77,7 +78,7 @@ export async function getRecommended(q: FeedQuery = {}): Promise<Paginated<FeedI
 /** GET /post/:id — full detail + related. */
 export async function getPost(id: string): Promise<Post | null> {
   const { data, error } = await supabase.from(FEED_VIEW).select(FEED_COLUMNS).eq('id', id).maybeSingle()
-  if (error) throw new Error(`getPost: ${error.message}`)
+  if (error) throw dbError('getPost', error)
   if (!data) return null
   const post = mapPost(data)
   // Related: same category, newest, excluding self.
@@ -103,7 +104,7 @@ export async function search(term: string, limit = DEFAULT_LIMIT): Promise<FeedI
     .ilike('title', `%${term}%`)
     .order('published_at', { ascending: false, nullsFirst: false })
     .limit(limit)
-  if (error) throw new Error(`search: ${error.message}`)
+  if (error) throw dbError('search', error)
   return (data ?? []).map(mapFeedItem)
 }
 
@@ -116,7 +117,7 @@ export async function searchArtists(term: string, limit = 20): Promise<Artist[]>
     .ilike('artist', `%${term}%`)
     .not('artist', 'is', null)
     .limit(200)
-  if (error) throw new Error(`searchArtists: ${error.message}`)
+  if (error) throw dbError('searchArtists', error)
   const seen = new Set<string>()
   const artists: Artist[] = []
   for (const row of data ?? []) {

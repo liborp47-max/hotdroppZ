@@ -7,7 +7,8 @@
 // slide-over (MissionDetailDrawer) for rich per-mission work. Replaces the old
 // split between this component and the 1265-line UserMissionsPanel.
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import {
   AlertTriangle,
   ArrowDown,
@@ -17,6 +18,7 @@ import {
   ChevronRight,
   Flag,
   Layers,
+  ListChecks,
   Loader2,
   RefreshCw,
   Send,
@@ -27,8 +29,8 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { Mission, Phase, Plan, Priority } from '@/lib/hd-central/types'
-import { getEvidenceSummary, type EvidenceSummary } from '@/lib/hd-central/evidence-summary'
 import { computeSlaAlerts } from '@/lib/hd-central/mission-sla'
+import { evaluateMissionHealth, type MissionHealthState } from '@/lib/hd-central/mission-health'
 import { usePlanStream } from '@/lib/hd-central/use-plan-stream'
 import {
   applyMissionFilters,
@@ -42,12 +44,12 @@ import {
 import { MissionFilterBar } from './mission-filter-bar'
 import { MissionDetailDrawer } from './mission-detail-drawer'
 
-const EVIDENCE_TEXT_TONE: Record<EvidenceSummary['tone'], string> = {
+// Unified mission-health tone (PM-MISS-001) — one mapping for every status cell.
+const HEALTH_TONE: Record<MissionHealthState, string> = {
   green: 'text-[#1AEE99]',
   amber: 'text-[#F0C040]',
   red: 'text-[#F06868]',
-  slate: 'text-[#9AA4B2]',
-  gray: 'text-[#A8A8A8]',
+  neutral: 'text-[#9AA4B2]',
 }
 
 function priorityBadgeClass(p?: Priority): string {
@@ -118,18 +120,32 @@ function SortHeader({
 }
 
 export function MissionsSection() {
+  const searchParams = useSearchParams()
   const { plan, loading, setPlan, refresh } = usePlanStream()
   const [filters, setFilters] = useState<MissionFilters>(DEFAULT_MISSION_FILTERS)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [scheduledAt, setScheduledAt] = useState('')
   const [busyAction, setBusyAction] = useState<string | null>(null)
   const [actionInfo, setActionInfo] = useState<string | null>(null)
+  const [auditing, setAuditing] = useState(false)
   const [detailMission, setDetailMission] = useState<Mission | null>(null)
 
   const allMissions = useMemo(() => (plan?.missions ?? []).filter((m) => !m.isDeleted), [plan])
+  // Live id set so mission-health can detect orphan follow-ups (PM-MISS-001).
+  const knownIds = useMemo(() => new Set(allMissions.map((m) => m.id)), [allMissions])
   const counts = useMemo(() => computeScopeCounts(allMissions), [allMissions])
   const visibleMissions = useMemo(() => applyMissionFilters(allMissions, filters), [allMissions, filters])
   const slaAlerts = useMemo(() => computeSlaAlerts(allMissions), [allMissions])
+
+  useEffect(() => {
+    const missionId = searchParams.get('missionId')
+    if (!missionId) return
+
+    const target = allMissions.find((m) => m.id === missionId)
+    if (target) {
+      setDetailMission(target)
+    }
+  }, [allMissions, searchParams])
 
   const patchFilters = useCallback((patch: Partial<MissionFilters>) => {
     setFilters((f) => ({ ...f, ...patch }))
@@ -211,6 +227,37 @@ export function MissionsSection() {
     }
   }
 
+  // ── Mission Audit: relevance/logic pass + re-queue into technical order ──
+  const runMissionAudit = useCallback(async () => {
+    setAuditing(true)
+    setActionInfo(null)
+    try {
+      const res = await fetch('/api/hd-central/missions/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apply: true }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data?.ok) {
+        setActionInfo(data?.error?.message ? `Audit selhal — ${data.error.message}` : 'Audit misí selhal.')
+        return
+      }
+      const c = data.counts ?? {}
+      setActionInfo(
+        `Audit OK · ${data.activeCount}/${data.totalMissions} aktivních · ` +
+          `KEEP ${c.KEEP ?? 0} · UPDATE ${c.UPDATE ?? 0} · MERGE ${c.MERGE ?? 0} · ` +
+          `PAUSE ${c.PAUSE ?? 0} · ARCHIVE ${c.ARCHIVE ?? 0} · DONE ${c.DONE ?? 0} · DELETE ${c.DELETE ?? 0}` +
+          (data.applied ? ' · fronta přeřazena' : '') +
+          (data.reportPath ? ` · report: ${data.reportPath}` : ''),
+      )
+      await refresh()
+    } catch {
+      setActionInfo('Audit misí selhal — síťová chyba.')
+    } finally {
+      setAuditing(false)
+    }
+  }, [refresh])
+
   const allVisibleSelected = visibleMissions.length > 0 && visibleMissions.every((m) => selectedIds.has(m.id))
 
   return (
@@ -222,8 +269,18 @@ export function MissionsSection() {
           <h1 className="text-lg font-light uppercase tracking-[2px] text-[#f0f0f0]">Velín misí</h1>
         </div>
         <div className="flex items-center gap-3 text-xs text-[#A8A8A8]">
-          {actionInfo && <span className="max-w-md truncate">{actionInfo}</span>}
+          {actionInfo && <span className="max-w-md truncate" title={actionInfo}>{actionInfo}</span>}
           <span>{counts.all} celkem</span>
+          <button
+            type="button"
+            onClick={() => void runMissionAudit()}
+            disabled={auditing || loading}
+            title="Auditovat mise — ověřit aktuálnost/relevanci/logiku a přeřadit frontu do technického pořadí. Report se uloží do SYSTEM/INFO/AUDITS/MISSION_RELEVANCE_AUDIT."
+            className="inline-flex h-8 items-center gap-1.5 border border-[rgba(0,224,133,0.35)] bg-[rgba(0,224,133,0.12)] px-2.5 text-[11px] text-[#00E085] hover:bg-[rgba(0,224,133,0.22)] disabled:opacity-40"
+          >
+            {auditing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ListChecks className="h-3.5 w-3.5" />}
+            Audit misí
+          </button>
           <button
             type="button"
             onClick={() => void refresh()}
@@ -415,21 +472,19 @@ export function MissionsSection() {
                       </td>
                       <td className="px-2 py-2 font-mono text-[#D0D0D0]">{m.urgencyScore ?? 0}</td>
                       <td className="px-2 py-2">
-                        {isInbox ? (
-                          <span className="text-[10px] text-amber-300">příchozí</span>
-                        ) : m.coldCase ? (
-                          <span className="text-[10px] text-[#6EC3A1]">cold</span>
-                        ) : (() => {
-                          // P1-UI-001 — evidence-aware status: SIMULATED_ONLY must NOT
-                          // read as green/DONE. Reasons surfaced on hover.
-                          const ev = getEvidenceSummary(m)
+                        {(() => {
+                          // PM-MISS-001 — one unified health rule per row: tone from
+                          // health.state, an explicit (never-empty) reason on hover,
+                          // so a status never reads as a bare/unexplained colour.
+                          const health = evaluateMissionHealth(m, { knownIds })
+                          const label = isInbox ? 'příchozí' : m.coldCase ? 'cold' : (m.lifecycleStatus ?? 'PLAN')
                           return (
                             <span
-                              className={`text-[10px] ${EVIDENCE_TEXT_TONE[ev.tone]}`}
-                              title={ev.reasons.length ? `${ev.label}\n${ev.reasons.join('\n')}` : ev.label}
+                              className={`text-[10px] ${HEALTH_TONE[health.state]}`}
+                              title={health.detail ? `${health.reason} · ${health.detail}` : health.reason}
                             >
-                              {m.lifecycleStatus ?? 'PLAN'}
-                              {ev.state === 'simulated' && ' ⚠'}
+                              {label}
+                              {health.reasonCode === 'DONE_SIMULATED' && ' ⚠'}
                             </span>
                           )
                         })()}

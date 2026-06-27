@@ -1,11 +1,10 @@
 // HDUA-23 sub03 — hard-delete the calling user + all their owned rows.
 //
-// DRAFT / NOT DEPLOYED. The anon app client cannot remove an `auth.users` row,
-// so deletion runs here with the service role. Deploy + secrets are blocked on
-// the empty SUPABASE_SERVICE_ROLE_KEY (see HDUA-21 sub03):
-//
-//   supabase functions deploy hdua-delete-account
-//   supabase secrets set SUPABASE_SERVICE_ROLE_KEY=... SUPABASE_URL=... SUPABASE_ANON_KEY=...
+// DEPLOYED 2026-06-26 (project cudycxvbpewmuhxydcas, version 1, verify_jwt=true).
+// The anon app client cannot remove an `auth.users` row, so deletion runs here
+// with the service role. SUPABASE_URL / SUPABASE_ANON_KEY / SUPABASE_SERVICE_ROLE_KEY
+// are injected by the platform as default secrets — no manual `secrets set` needed.
+// Redeploy with: supabase functions deploy hdua-delete-account (or MCP deploy_edge_function).
 //
 // This file is a Deno edge function — it is intentionally OUTSIDE the Expo
 // app's tsc/eslint scope (HDUA tsconfig + eslint exclude `supabase/`).

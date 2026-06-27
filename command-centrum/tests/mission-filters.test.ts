@@ -90,6 +90,24 @@ test('sort status asc: groups by lifecycleStatus string', () => {
   assert.ok(out.length > 0)
 })
 
+test('hideDone: strips MISSION_DONE outside the done scope', () => {
+  const out = applyMissionFilters(missions as never, f({ scope: 'all', hideDone: true }))
+  const ids = out.map((m) => m.id)
+  assert.ok(!ids.includes('DONE-1'), 'DONE-1 hidden')
+  assert.ok(!ids.includes('SPEC-DONE'), 'SPEC-DONE hidden')
+  assert.ok(ids.includes('TL-1'), 'open missions still shown')
+})
+
+test('hideDone: never empties the dedicated done scope', () => {
+  const out = applyMissionFilters(missions as never, f({ scope: 'done', hideDone: true }))
+  assert.deepEqual(out.map((m) => m.id).sort(), ['DONE-1', 'SPEC-DONE'])
+})
+
+test('hideDone: default off keeps done missions visible', () => {
+  const out = applyMissionFilters(missions as never, f({ scope: 'all' }))
+  assert.ok(out.some((m) => m.id === 'DONE-1'))
+})
+
 test('computeScopeCounts: counts per scope, deleted excluded', () => {
   const c = computeScopeCounts(missions as never)
   assert.equal(c.inbox, 1)

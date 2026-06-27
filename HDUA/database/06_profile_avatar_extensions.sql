@@ -9,8 +9,8 @@
 --                  followed_genres[], push_enabled, personalization_opt_out, updated_at
 --   RLS owner-only on both; hdua_handle_new_user trigger provisions both rows.
 --
--- BLOCKER: SUPABASE_DB_URL / service-role key are EMPTY in this workspace, so this
--- file is design-only. Apply + verify once the credential is set:
+-- APPLIED 2026-06-26 to live project cudycxvbpewmuhxydcas via Supabase MCP
+-- apply_migration (HDUA-21 sub03). Re-apply with:
 --   node command-centrum/scripts/apply-sql.mjs HDUA/database/06_profile_avatar_extensions.sql
 -- (or Supabase MCP apply_migration, as 05 was).
 
@@ -32,9 +32,12 @@ alter table hdua_profiles add  constraint hdua_profiles_username_fmt
 create unique index if not exists idx_hdua_profiles_username_ci
   on hdua_profiles (lower(username)) where username is not null;
 
--- keep updated_at honest on profile writes
+-- keep updated_at honest on profile writes.
+-- search_path pinned to pg_catalog (function_search_path_mutable advisory) — the
+-- body only uses now(), so pg_catalog is sufficient and safe.
 create or replace function hdua_touch_updated_at()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql
+set search_path = pg_catalog as $$
 begin new.updated_at = now(); return new; end $$;
 
 drop trigger if exists hdua_profiles_touch on hdua_profiles;
@@ -64,10 +67,10 @@ on conflict (id) do update
       file_size_limit = excluded.file_size_limit,
       allowed_mime_types = excluded.allowed_mime_types;
 
--- Public read (bucket is public, but be explicit for the SELECT policy too).
+-- Public bucket serves avatars via the public object URL — intentionally NO broad
+-- SELECT policy on storage.objects: it would let clients LIST every file
+-- (public_bucket_allows_listing advisory) without being needed for URL rendering.
 drop policy if exists hdua_avatars_read on storage.objects;
-create policy hdua_avatars_read on storage.objects
-  for select using (bucket_id = 'hdua-avatars');
 
 -- Owner can write/update/delete ONLY under their own uid folder.
 -- storage.foldername(name)[1] is the first path segment.

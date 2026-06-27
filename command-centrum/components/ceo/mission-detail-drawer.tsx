@@ -20,6 +20,7 @@ import { PromptDialog } from './prompt-dialog'
 import { useModalA11y } from '@/components/hooks/use-modal-a11y'
 import type { Mission, Plan, SubMission, SubMissionStatus } from '@/lib/hd-central/types'
 import { getEvidenceSummary, type EvidenceSummary } from '@/lib/hd-central/evidence-summary'
+import { evaluateMissionHealth, type MissionHealthState } from '@/lib/hd-central/mission-health'
 
 const EVIDENCE_TONE: Record<EvidenceSummary['tone'], string> = {
   green: 'border-[#00E085]/40 bg-[rgba(0,224,133,0.12)] text-[#1AEE99]',
@@ -27,6 +28,14 @@ const EVIDENCE_TONE: Record<EvidenceSummary['tone'], string> = {
   red: 'border-[#E04848]/40 bg-[rgba(224,72,72,0.12)] text-[#F06868]',
   slate: 'border-[#5A6472]/40 bg-[rgba(90,100,114,0.12)] text-[#9AA4B2]',
   gray: 'border-[#4A4A4A]/40 bg-[rgba(120,120,120,0.10)] text-[#A8A8A8]',
+}
+
+// PM-MISS-001 — health-state → badge tone (drawer reuses the evidence palette).
+const HEALTH_TONE: Record<MissionHealthState, string> = {
+  green: EVIDENCE_TONE.green,
+  amber: EVIDENCE_TONE.amber,
+  red: EVIDENCE_TONE.red,
+  neutral: EVIDENCE_TONE.slate,
 }
 
 const SUB_STATUSES: SubMissionStatus[] = ['todo', 'in_progress', 'blocked', 'done']
@@ -179,6 +188,23 @@ export function MissionDetailDrawer({ mission, onClose, onPlanUpdate }: MissionD
             <MetaCell label="Stav" value={mission.lifecycleStatus ?? 'PLAN'} />
             <MetaCell label="Modul" value={mission.moduleId ?? mission.modulePath ?? '—'} />
           </div>
+
+          {/* Mission health (PM-MISS-001) — explicit reason for the status, never empty */}
+          {(() => {
+            const health = evaluateMissionHealth(mission)
+            return (
+              <section>
+                <p className="text-[10px] uppercase tracking-widest text-[#6E6E6E]">Důvod stavu</p>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <Badge className={`px-2 py-0.5 text-[10px] font-medium ${HEALTH_TONE[health.state]}`}>
+                    {health.reasonCode}
+                  </Badge>
+                  <span className="text-[11px] leading-relaxed text-[#D0D0D0]">{health.reason}</span>
+                  {health.detail && <span className="text-[10px] text-[#6E6E6E]">· {health.detail}</span>}
+                </div>
+              </section>
+            )
+          })()}
 
           {/* Evidence verdict (P1-UI-001) — WHY a mission is/ isn't DONE */}
           {(() => {

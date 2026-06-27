@@ -95,6 +95,19 @@ export function MissionFilterBar({ filters, counts, onChange }: MissionFilterBar
           </SelectContent>
         </Select>
 
+        <label
+          className="flex h-8 cursor-pointer select-none items-center gap-1.5 border border-white/10 bg-black/50 px-2.5 text-xs text-[#A8A8A8] backdrop-blur-xl hover:text-[#E8E8E8]"
+          title="Skrýt hotové (MISSION_DONE) mise ve všech záložkách kromě Hotové"
+        >
+          <input
+            type="checkbox"
+            checked={filters.hideDone}
+            onChange={(e) => onChange({ hideDone: e.target.checked })}
+            className="accent-[#00E085]"
+          />
+          Skrýt hotové
+        </label>
+
         <span className="text-[10px] text-[#6E6E6E]">Řazení: klikni na záhlaví sloupce</span>
       </div>
     </div>
