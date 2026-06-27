@@ -1,6 +1,6 @@
 {
-  "version": 53,
-  "updatedAt": "2026-06-27T06:14:45.005Z",
+  "version": 56,
+  "updatedAt": "2026-06-27T13:58:19.602Z",
   "missions": [
     {
       "status": "solved",
@@ -33,7 +33,7 @@
       "phase": "Validate",
       "priority": "P0",
       "urgencyScore": 96,
-      "sequenceIndex": 1145,
+      "sequenceIndex": 146,
       "domains": [
         "QUALITY",
         "SOFTWARE"
@@ -80,7 +80,7 @@
       ],
       "completedAt": "2026-06-07T19:18:10.977Z",
       "modulePath": "SYSTEM/hotdroppz/scripts/reconcile-evidence.mjs, SYSTEM/INFO/AUDITS/EVIDENCE_RECONCILE",
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -126,7 +126,7 @@
       "phase": "Build",
       "priority": "P0",
       "urgencyScore": 90,
-      "sequenceIndex": 7,
+      "sequenceIndex": 52,
       "domains": [
         "BACKEND",
         "SOFTWARE",
@@ -174,8 +174,8 @@
       "modulePath": "command-centrum/lib/hd-central/agent-runner.ts, command-centrum/app/api/hd-central/mission/[id]/solve/route.ts, command-centrum/tests/agent-runner.test.ts",
       "blockedReason": "Empty ANTHROPIC_API_KEY in .env.local — live agent run (criterion #1) cannot be demonstrated. Code built + unit-proven.",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-07T21-43-09-626Z-p0truth002.md",
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)"
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager"
     },
     {
       "status": "solved",
@@ -201,7 +201,7 @@
       "phase": "Validate",
       "priority": "P1",
       "urgencyScore": 68,
-      "sequenceIndex": 1170,
+      "sequenceIndex": 171,
       "domains": [
         "QUALITY",
         "INFRASTRUCTURE"
@@ -238,7 +238,7 @@
       ],
       "modulePath": "command-centrum/package.json, .github/workflows/command-centrum-quality.yml, .husky/pre-commit",
       "completedAt": "2026-06-07T20:01:43.141Z",
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -266,7 +266,7 @@
       "phase": "Build",
       "priority": "P1",
       "urgencyScore": 60,
-      "sequenceIndex": 1113,
+      "sequenceIndex": 113,
       "domains": [
         "FRONTEND",
         "UI",
@@ -304,7 +304,7 @@
       ],
       "completedAt": "2026-06-07T20:53:51.165Z",
       "modulePath": "command-centrum/lib/hd-central/evidence-summary.ts, command-centrum/components/ceo/mission-detail-drawer.tsx, command-centrum/components/ceo/missions-section.tsx",
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -435,12 +435,12 @@
           "note": "Evidence reconcile: VERIFIED_GRANDFATHERED. Confirmed MISSION_DONE."
         }
       ],
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-05-15T14-10-39-361Z-733475bc.md",
       "evidenceGrandfathered": true,
       "inTimeline": true,
-      "sequenceIndex": 1004
+      "sequenceIndex": 4
     },
     {
       "id": "P0-002-OWASP",
@@ -527,8 +527,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK_INFERRED (backend/src/config/cors.ts, backend/src/main.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1013,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 13,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-20260604-p0-002-owasp-done.md",
       "completedAt": "2026-06-04T00:00:00.000Z",
@@ -617,8 +617,8 @@
           "note": "Truth-gate reconcile 2026-06-18: deliverable VERIFIED + now version-controlled. docker-compose.yml (commit 8d7e32e) has redis --requirepass + --appendonly yes, env-driven REDIS_PASSWORD (LOCAL-ONLY dev fallback), and redis is `expose`-only (no host 6379). Satisfies requirepass+persistence and removes the unauthenticated exposure. Prior SIMULATED_ONLY was because the file was untracked."
         }
       ],
-      "sequenceIndex": 1014,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 14,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-20260604-p0-003-redis-done.md",
       "completedAt": "2026-06-04T00:00:00.000Z",
@@ -738,8 +738,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK_INFERRED (command-centrum/app/api/analytics/route.ts, command-centrum/app/(dashboard)/analytics/page.tsx). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1015,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 15,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-28-54-590Z-790e6125.md",
       "inTimeline": true
@@ -804,8 +804,8 @@
           "note": "Plan-manager sync: lifecycleStatus aligned with isDeleted=true."
         }
       ],
-      "sequenceIndex": 1007,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 7,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "deletedAt": "2026-05-17T18:40:04.115Z",
       "status": "blocked"
@@ -926,8 +926,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK_INFERRED (command-centrum/vercel.json, command-centrum/app/api/cron/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1016,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 16,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "resolvedAt": "2026-06-05T14:29:16.918Z",
       "inTimeline": true,
@@ -1004,8 +1004,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK_INFERRED (frontend-web/components/consent/ConsentProvider.tsx, frontend-web/lib/consent/consent.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1017,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 17,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "resolvedAt": "2026-06-05T18:18:51.626Z",
       "inTimeline": true
@@ -1056,8 +1056,8 @@
           "note": "Bulk cleanup per AUD-20260517-MISSIONS-RELEVANCE."
         }
       ],
-      "sequenceIndex": 1018,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 18,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "archiveReason": "Contradicts 06-decision-free-sources.md (Instagram/TikTok → auth_pending, X dropped, Billboard not purchased).",
       "inTimeline": true,
@@ -1182,8 +1182,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK_INFERRED (.github/workflows/backend-quality.yml, .github/workflows/command-centrum-quality.yml). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1190,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 191,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "resolvedAt": "2026-06-06T04:36:42.072Z",
       "inTimeline": true,
@@ -1303,8 +1303,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK_INFERRED (frontend-web/app/sitemap.ts, frontend-web/app/robots.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1191,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 192,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "resolvedAt": "2026-06-06T04:48:58.163Z",
       "inTimeline": true,
@@ -1418,9 +1418,9 @@
           "note": "Truth-gate reconcile 2026-06-18: VERIFIED NOT DONE: no POST /api/feed/[id]/interact endpoint + no like/view/share counters anywhere (HDUA has client-side ShareSheet only, not the counter API). SIMULATED_ONLY is correct. Real backlog if still wanted."
         }
       ],
-      "sequenceIndex": 50,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 193,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "inTimeline": true,
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-29-21-025Z-d82b277b.md"
     },
@@ -1544,8 +1544,8 @@
           "note": "SOLVED (commit 94233e9). REAL build (was SIMULATED_ONLY, revived). app/onboarding.tsx multi-step welcome->genres->artists->countries->notifications on shared primitives (SelectableChip/Switch/PickerSheet/ConfirmationNotice), progress bar + Back/Skip/Continue. Persists once at finish via updateProfile({onboardingCompleted:true}) + updateSettings({followedGenres/Artists/Countries, language, pushEnabled}) — anon+RLS, no service key. Static taxonomy seeds (decision: static over endpoint, works without pipeline data). OnboardingGate (root) redirects authed users with onboarding_completed=false; loop-guarded by route segment + cache-seed before navigate. tsc 0, lint 0, 17/17 tests. Built on HDUA-21 (write API) + HDUA-22 (primitivy) as planned."
         }
       ],
-      "sequenceIndex": 1193,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 194,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "inTimeline": true,
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-29-27-671Z-4d40c766.md"
@@ -1673,8 +1673,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK_INFERRED (command-centrum/app/api/distribution/queue/route.ts, command-centrum/app/(dashboard)/distribution/page.tsx). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1194,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 195,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "blockedReason": "Depends on P0-008-SOCIAL-API which was archived (contradicts free-source decision). Needs re-scoping before activation.",
       "inTimeline": true,
@@ -1787,9 +1787,9 @@
           "note": "Truth-gate reconcile 2026-06-18: NOT VERIFIABLE IN CODE: deliverable is external PostHog saved queries + Slack alerts; no in-repo artifact found. SIMULATED_ONLY correct — needs PostHog-side proof, not code."
         }
       ],
-      "sequenceIndex": 51,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 196,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "inTimeline": true,
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-40-45-211Z-840eb071.md"
     },
@@ -1887,8 +1887,8 @@
         "verdict": "PASS",
         "timestamp": "2026-05-14T01:35:55.235Z"
       },
-      "sequenceIndex": 1019,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 19,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "deletedAt": "2026-05-17T18:40:04.115Z",
       "archiveReason": "Empty shell mission with no actionable subMissions (auto-generated noise). Deleted per AUD-20260517-MISSIONS-RELEVANCE.",
@@ -1925,8 +1925,8 @@
           "note": "Bulk cleanup per AUD-20260517-MISSIONS-RELEVANCE."
         }
       ],
-      "sequenceIndex": 1179,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 180,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "deletedAt": "2026-05-17T18:40:04.115Z",
       "archiveReason": "Empty shell mission with no actionable subMissions (auto-generated noise). Deleted per AUD-20260517-MISSIONS-RELEVANCE.",
@@ -1964,8 +1964,8 @@
           "note": "Bulk cleanup per AUD-20260517-MISSIONS-RELEVANCE."
         }
       ],
-      "sequenceIndex": 1184,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 185,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "deletedAt": "2026-05-17T18:40:04.115Z",
       "archiveReason": "Empty shell mission with no actionable subMissions (auto-generated noise). Deleted per AUD-20260517-MISSIONS-RELEVANCE.",
@@ -2003,8 +2003,8 @@
           "note": "Bulk cleanup per AUD-20260517-MISSIONS-RELEVANCE."
         }
       ],
-      "sequenceIndex": 1058,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 58,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "deletedAt": "2026-05-17T18:40:04.115Z",
       "archiveReason": "Empty shell mission with no actionable subMissions (auto-generated noise). Deleted per AUD-20260517-MISSIONS-RELEVANCE.",
@@ -2042,8 +2042,8 @@
           "note": "Bulk cleanup per AUD-20260517-MISSIONS-RELEVANCE."
         }
       ],
-      "sequenceIndex": 1177,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 178,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "deletedAt": "2026-05-17T18:40:04.115Z",
       "archiveReason": "Empty shell mission with no actionable subMissions (auto-generated noise). Deleted per AUD-20260517-MISSIONS-RELEVANCE.",
@@ -2081,8 +2081,8 @@
           "note": "Bulk cleanup per AUD-20260517-MISSIONS-RELEVANCE."
         }
       ],
-      "sequenceIndex": 1185,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 186,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "deletedAt": "2026-05-17T18:40:04.115Z",
       "archiveReason": "Empty shell mission with no actionable subMissions (auto-generated noise). Deleted per AUD-20260517-MISSIONS-RELEVANCE.",
@@ -2120,8 +2120,8 @@
           "note": "Bulk cleanup per AUD-20260517-MISSIONS-RELEVANCE."
         }
       ],
-      "sequenceIndex": 1023,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 23,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "deletedAt": "2026-05-17T18:40:04.115Z",
       "archiveReason": "Empty shell mission with no actionable subMissions (auto-generated noise). Deleted per AUD-20260517-MISSIONS-RELEVANCE.",
@@ -2159,8 +2159,8 @@
           "note": "Bulk cleanup per AUD-20260517-MISSIONS-RELEVANCE."
         }
       ],
-      "sequenceIndex": 1186,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 187,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "deletedAt": "2026-05-17T18:40:04.115Z",
       "archiveReason": "Empty shell mission with no actionable subMissions (auto-generated noise). Deleted per AUD-20260517-MISSIONS-RELEVANCE.",
@@ -2465,8 +2465,8 @@
           "note": "Evidence reconcile: VERIFIED_GRANDFATHERED. Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1011,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 11,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-05-30T01-58-21-758Z-49bedb7b.md",
       "evidenceGrandfathered": true,
@@ -2623,8 +2623,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/lib/pipeline/filter.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1154,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 155,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-32-21-320Z-f494defa.md"
     },
@@ -2788,8 +2788,8 @@
           "note": "Evidence reconcile: RETIRED_STAGE. Deliverable is a retired stage; archived (do NOT re-queue)."
         }
       ],
-      "sequenceIndex": 1040,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 40,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "archiveReason": "Retired pipeline stage (stage-registry.ts) — deliverable intentionally removed.",
       "followUp": "Same as UM-MULTILANG: UM-LOCALIZER-EXTEND.",
@@ -2931,8 +2931,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/lib/pipeline/curator.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1151,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 152,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-31-11-629Z-79360ebd.md"
     },
@@ -3087,8 +3087,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/lib/pipeline/cluster.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1149,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 150,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-30-29-921Z-fe16b53e.md"
     },
@@ -3235,8 +3235,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/lib/pipeline/enrichment.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1152,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 153,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-31-28-324Z-aee31f8c.md"
     },
@@ -3460,8 +3460,8 @@
           "note": "Evidence reconcile: VERIFIED_GRANDFATHERED. Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1041,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 41,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-25-17-650Z-259ca5b7.md",
       "evidenceGrandfathered": true,
@@ -3657,8 +3657,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/lib/pipeline/feed-engine.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1067,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 67,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-32-04-529Z-1c15c1d2.md"
     },
@@ -3852,8 +3852,8 @@
           "note": "Evidence reconcile: RETIRED_STAGE. Deliverable is a retired stage; archived (do NOT re-queue)."
         }
       ],
-      "sequenceIndex": 1070,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 70,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-33-19-785Z-a5858bd8.md",
       "archiveReason": "Retired pipeline stage (stage-registry.ts) — deliverable intentionally removed.",
@@ -4009,8 +4009,8 @@
           "note": "Evidence reconcile: RETIRED_STAGE. Deliverable is a retired stage; archived (do NOT re-queue)."
         }
       ],
-      "sequenceIndex": 1069,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 69,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "archiveReason": "Retired pipeline stage (stage-registry.ts) — deliverable intentionally removed.",
       "followUp": "New mission needed if monetization service should re-emerge in cockpit. Original spec stale.",
@@ -4223,8 +4223,8 @@
           "note": "Evidence reconcile: VERIFIED_GRANDFATHERED. Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1035,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 35,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-23-18-090Z-5f092901.md",
       "evidenceGrandfathered": true
@@ -4501,8 +4501,8 @@
           "note": "Evidence reconcile: VERIFIED_GRANDFATHERED. Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1009,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 9,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-05-21T15-54-55-277Z-219fb3da.md",
       "evidenceGrandfathered": true,
@@ -4650,8 +4650,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/hd-central/ceo/brainstorming/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1065,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 65,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-29-34-320Z-656eec09.md"
     },
@@ -4808,8 +4808,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/hd-central/ceo/missions/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1038,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 38,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-24-22-079Z-50ab5206.md"
     },
@@ -5095,8 +5095,8 @@
           "note": "Evidence reconcile: VERIFIED_GRANDFATHERED. Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1010,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 10,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-20260603-um-plan-hq-done-2f9a6b41.md",
       "evidenceGrandfathered": true,
@@ -5276,8 +5276,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/hd-central/auditor/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1064,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 64,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-20260603-um-auditor-done-8a1c3f52.md",
       "followUp": "UM-AUDITOR-EXTEND (SM-3/4/5 with corrected tool list incl. Write+Bash)",
@@ -5494,8 +5494,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/hd-central/intel/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1068,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 68,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-32-38-028Z-f7495d44.md"
     },
@@ -5664,8 +5664,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/hd-central/analytics/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1063,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 63,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "runId": "run-20260529-um-analytics-ui-scoped",
       "startedAt": "2026-05-29T02:45:28.448Z",
@@ -5839,8 +5839,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/scout-hq/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1039,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 39,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-24-38-799Z-098a13b1.md"
     },
@@ -6011,8 +6011,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/sources/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1071,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 71,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "archiveReason": "Superseded by UM-SRC_PR_S3_UI_REDESIGN (8 sections incl. Sources).",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-20260603-um-sources-done-7c4e2a90.md",
@@ -6244,8 +6244,8 @@
           "note": "Evidence reconcile: VERIFIED_GRANDFATHERED. Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1036,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 36,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-23-37-683Z-286bf2ec.md",
       "evidenceGrandfathered": true
@@ -6386,8 +6386,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/story-builder/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1156,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 157,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-33-39-280Z-fa45dc86.md"
     },
@@ -6476,8 +6476,8 @@
           "note": "Plan-manager sync: lifecycleStatus aligned with isDeleted=true."
         }
       ],
-      "sequenceIndex": 1146,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 147,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "deletedAt": "2026-05-17T18:40:04.115Z",
       "status": "blocked"
@@ -6626,8 +6626,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/creator/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1150,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 151,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-30-52-148Z-bec5f77b.md"
     },
@@ -6767,8 +6767,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/creator-facts/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1153,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 154,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-31-47-828Z-47679dc2.md"
     },
@@ -7095,8 +7095,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/feed/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1037,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 37,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-23-59-900Z-bdbdba3f.md",
       "severity": "Critical",
@@ -7254,9 +7254,9 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/monetization/). Confirmed MISSION_DONE."
         }
       ],
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
-      "sequenceIndex": 1118,
+      "sequenceIndex": 118,
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-41-50-210Z-af0d57db.md"
     },
     {
@@ -7386,8 +7386,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/published/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1172,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 173,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-42-09-693Z-0fb0dfa3.md"
     },
@@ -7540,8 +7540,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/ai-control/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1147,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 148,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-20260603-um-ai-control-done-9e2a6c54.md",
       "completedAt": "2026-06-03T00:00:00.000Z"
@@ -7625,8 +7625,8 @@
           "note": "Audit verdict: both subs delivered. Feed health checker = app/api/sources/health/route.ts + lib/sources/srl/scoring/health.ts; performance metrics = app/api/sources/performance/route.ts + source-performance-panel.tsx (test:source-performance passes)."
         }
       ],
-      "sequenceIndex": 1155,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 156,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "archiveReason": "Superseded by UM-SRC_PR_S3_UI_REDESIGN (Feeds section).",
       "status": "solved",
@@ -7725,9 +7725,9 @@
           "note": "Truth-gate reconcile 2026-06-18: PARTIAL: sources/gallery/page.tsx + /api/editorial/media-assets exist, but S3 asset storage + upload workflow + auto-tag NOT proven. SIMULATED_ONLY correct (UI shell only)."
         }
       ],
-      "sequenceIndex": 53,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 116,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "archiveReason": "Superseded by UM-SRC_PR_S3_UI_REDESIGN (Assets section).",
       "status": "in_progress"
     },
@@ -7832,9 +7832,9 @@
           "note": "Truth-gate reconcile 2026-06-18: PARTIAL: media/fun-facts + media/quotes pages exist, but Spotify/YouTube embed PROVIDERS not integrated. SIMULATED_ONLY correct."
         }
       ],
-      "sequenceIndex": 54,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 117,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "archiveReason": "Superseded by UM-SRC_PR_S3_UI_REDESIGN (Assets section).",
       "status": "in_progress"
     },
@@ -8035,8 +8035,8 @@
           "note": "Evidence reconcile: VERIFIED_GRANDFATHERED. Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1008,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 8,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "evidenceGrandfathered": true,
       "reportPath": "SYSTEM/INFO/MISSIONS/run-20260604-um-cc-schema-migration-done.md",
@@ -8243,8 +8243,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (backend/src/ads/ads.controller.ts, command-centrum/app/api/ai/ab-test/route.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1034,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 34,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "dependencies": [
         "UM-SCHEMA_MANIFEST_CONSOLIDATION",
@@ -8414,8 +8414,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (backend/src/ads/ads.controller.ts, frontend-web/lib/api.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1148,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 149,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-29-50-998Z-3fe51a9c.md"
     },
@@ -8568,8 +8568,8 @@
           "note": "Evidence reconcile: VERIFIED_GRANDFATHERED. Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1020,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 20,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "evidenceGrandfathered": true,
       "reportPath": "SYSTEM/INFO/MISSIONS/run-20260604-um-cc-dependency-hygiene-done.md",
@@ -8719,8 +8719,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (backend/src/ads/ads.controller.ts, ai/agents/scout.py). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1171,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 172,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-40-51-829Z-1f8e9313.md"
     },
@@ -8874,9 +8874,9 @@
           "note": "Truth-gate reconcile 2026-06-18: VERIFIED NOT DONE: no command-centrum/lib/cleanup or backend/src/jobs retention/cron deliverable on disk. SIMULATED_ONLY correct."
         }
       ],
-      "sequenceIndex": 46,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 181,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-41-30-763Z-c59cc52c.md"
     },
     {
@@ -9023,8 +9023,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (backend/src/articles/articles.service.ts, command-centrum/lib/actions/artists.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1115,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 115,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-41-11-339Z-19ae161c.md"
     },
@@ -9189,8 +9189,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/supabase/schema-audit.sql, backend/src/articles/articles.service.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1066,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 66,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-30-10-418Z-9f0b3d08.md"
     },
@@ -9458,8 +9458,8 @@
           "note": "Real evidence on disk + live DB. Vsech 5 success criteria splneno (migrace clean, count-match, backwards-compat row-parita, Scout actions funguji pres INSTEAD OF triggery bez code changes, CHANGELOG zapsan). Truth-gate: realny DB dukaz nahrazuje predchozi SIMULATED_ONLY. Report: SYSTEM/INFO/MISSIONS/run-20260614-um-src-pr-s1-db-migration-realapply.md"
         }
       ],
-      "sequenceIndex": 1012,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 12,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "completedAt": "2026-06-14T10:15:00.000Z",
       "runId": "run-20260614-um-src-pr-s1-db-migration-realapply",
@@ -9554,7 +9554,7 @@
           "ownerActor": "@system-auditor"
         }
       ],
-      "sequenceIndex": 1143,
+      "sequenceIndex": 144,
       "status": "solved",
       "createdAt": "2026-05-23T05:14:08.082Z",
       "inTimeline": true,
@@ -9682,7 +9682,7 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/api/hd-central/quarterly-plan/route.ts, command-centrum/lib/hd-central/active-runs.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "completedAt": "2026-05-25T10:00:00.000Z",
       "runId": "run-20260525-um-cc-build-gate-recovery",
@@ -9777,7 +9777,7 @@
           "estimatedDuration": "S"
         }
       ],
-      "sequenceIndex": 1005,
+      "sequenceIndex": 5,
       "status": "solved",
       "createdAt": "2026-05-23T05:14:08.082Z",
       "inTimeline": true,
@@ -9884,7 +9884,7 @@
           "note": "Evidence reconcile: VERIFIED_DISK (backend/src/auth/auth.controller.ts, command-centrum/app/api/ai/ab-test/route.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "completedAt": "2026-05-25T10:30:00.000Z",
       "runId": "run-20260523-um-sec-auth-and-secret-lockdown",
@@ -9982,7 +9982,7 @@
           "ownerActor": "@frontend-engineer"
         }
       ],
-      "sequenceIndex": 1144,
+      "sequenceIndex": 145,
       "status": "solved",
       "createdAt": "2026-05-23T05:14:08.082Z",
       "inTimeline": true,
@@ -10104,7 +10104,7 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/lib/hd-central/lifecycle.ts, command-centrum/app/api/hd-central/alerts/route.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "completedAt": "2026-05-26T08:00:00.000Z",
       "runId": "run-20260525-um-mission-truth-gate",
@@ -10221,7 +10221,7 @@
           "artifact": "SYSTEM/INFO/MISSIONS/run-20260523-um-schema-manifest-consolidation/sub-05-system-auditor.md"
         }
       ],
-      "sequenceIndex": 1006,
+      "sequenceIndex": 6,
       "status": "solved",
       "createdAt": "2026-05-23T05:14:08.082Z",
       "inTimeline": true,
@@ -10316,7 +10316,7 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/supabase/add-negative-keywords.sql, command-centrum/app/api/feed/distribute/route.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "completedAt": "2026-05-23T15:30:00.000Z",
       "runId": "run-20260523-um-schema-manifest-consolidation",
@@ -10427,7 +10427,7 @@
           "ownerActor": "@qa"
         }
       ],
-      "sequenceIndex": 1043,
+      "sequenceIndex": 43,
       "status": "solved",
       "createdAt": "2026-05-23T05:14:08.082Z",
       "inTimeline": true,
@@ -10556,7 +10556,7 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/feed/approval/page.tsx, command-centrum/app/api/feed/distribute/route.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "completedAt": "2026-05-25T09:30:00.000Z",
       "runId": "run-20260523-um-feed-schema-and-editor-done",
@@ -10720,8 +10720,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/lib/sources/srl/api/auth.ts, command-centrum/app/api/sources/resolve/artist/[artistId]/route.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1042,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 42,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-05-27T00-16-51-314Z-b9c2e26e.md"
     },
@@ -10895,8 +10895,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/components/sources/intel-progress-modal.tsx, command-centrum/app/(dashboard)/sources/artists/layout.tsx). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1072,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 72,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-33-55-968Z-47c418eb.md"
     },
@@ -11098,9 +11098,9 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/lib/services/artist-service.ts, command-centrum/lib/scout/workers/music/spotify-artists-worker.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 44,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 158,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-34-25-064Z-41a71e79.md"
     },
     {
@@ -11249,8 +11249,8 @@
       "followUpOf": "UM-FILTER",
       "followUpReason": "Parent UM-FILTER mělo 4 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1160,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 161,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -11430,8 +11430,8 @@
       "followUpOf": "UM-TRANSLATOR",
       "followUpReason": "Parent UM-TRANSLATOR mělo 5 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1044,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 44,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -11591,8 +11591,8 @@
       "followUpOf": "UM-CURATOR",
       "followUpReason": "Parent UM-CURATOR mělo 4 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1159,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 160,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -11767,8 +11767,8 @@
       "followUpOf": "UM-CLUSTER",
       "followUpReason": "Parent UM-CLUSTER mělo 6 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1158,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 159,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -11935,8 +11935,8 @@
       "followUpOf": "UM-ENRICHMENT",
       "followUpReason": "Parent UM-ENRICHMENT mělo 5 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1162,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 163,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -12135,8 +12135,8 @@
       "followUpOf": "UM-WRITER",
       "followUpReason": "Parent UM-WRITER mělo 6 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1045,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 45,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -12304,8 +12304,8 @@
       "followUpOf": "UM-MULTILANG",
       "followUpReason": "Parent UM-MULTILANG mělo 5 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1076,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 76,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -12474,8 +12474,8 @@
       "followUpOf": "UM-MONETIZER",
       "followUpReason": "Parent UM-MONETIZER mělo 5 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1075,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 75,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -12636,8 +12636,8 @@
       "followUpOf": "UM-BRAINSTORMING",
       "followUpReason": "Parent UM-BRAINSTORMING mělo 4 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1074,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 74,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -12807,8 +12807,8 @@
       "followUpOf": "UM-AUDITOR",
       "followUpReason": "Parent UM-AUDITOR mělo 5 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1073,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 73,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -12937,8 +12937,8 @@
       "followUpOf": "UM-SOURCES",
       "followUpReason": "Parent UM-SOURCES mělo 5 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1077,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 77,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -13097,8 +13097,8 @@
       "followUpOf": "UM-STORY_BUILDER",
       "followUpReason": "Parent UM-STORY_BUILDER mělo 4 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1163,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 164,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -13266,8 +13266,8 @@
       "followUpOf": "UM-CREATOR",
       "followUpReason": "Parent UM-CREATOR mělo 5 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1161,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 162,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -13427,8 +13427,8 @@
       "followUpOf": "UM-FACT_BUILDER",
       "followUpReason": "Parent UM-FACT_BUILDER mělo 4 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1166,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 167,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -13621,8 +13621,8 @@
       "followUpOf": "UM-FEED_UI",
       "followUpReason": "Parent UM-FEED_UI mělo 6 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1047,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 47,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -13789,8 +13789,8 @@
       "followUpOf": "UM-MONETIZATION_UI",
       "followUpReason": "Parent UM-MONETIZATION_UI mělo 5 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1122,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 122,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -13941,8 +13941,8 @@
       "followUpOf": "UM-PUBLISHED",
       "followUpReason": "Parent UM-PUBLISHED mělo 3 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1174,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 175,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -14110,8 +14110,8 @@
       "followUpOf": "UM-AI_CONTROL",
       "followUpReason": "Parent UM-AI_CONTROL mělo 5 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1164,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 165,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -14254,8 +14254,8 @@
       "followUpOf": "UM-RSS_SOURCES",
       "followUpReason": "Parent UM-RSS_SOURCES mělo 2 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1167,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 168,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -14408,8 +14408,8 @@
       "followUpOf": "UM-GALLERY",
       "followUpReason": "Parent UM-GALLERY mělo 3 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1120,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 120,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -14570,8 +14570,8 @@
       "followUpOf": "UM-MEDIA",
       "followUpReason": "Parent UM-MEDIA mělo 4 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1121,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 121,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -14804,8 +14804,8 @@
       "followUpOf": "UM-CC_DATA_CONSISTENCY",
       "followUpReason": "Parent UM-CC_DATA_CONSISTENCY mělo 5 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1046,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 46,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -14973,8 +14973,8 @@
       "followUpOf": "UM-CC_API_CONTRACT",
       "followUpReason": "Parent UM-CC_API_CONTRACT mělo 5 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1165,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 166,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -15142,8 +15142,8 @@
       "followUpOf": "UM-CC_OBSERVABILITY",
       "followUpReason": "Parent UM-CC_OBSERVABILITY mělo 5 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1173,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 174,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -15317,8 +15317,8 @@
       "followUpOf": "UM-CC_RESOURCE_CLEANUP",
       "followUpReason": "Parent UM-CC_RESOURCE_CLEANUP mělo 5 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1181,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 182,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -15487,8 +15487,8 @@
       "followUpOf": "UM-CC_PERFORMANCE",
       "followUpReason": "Parent UM-CC_PERFORMANCE mělo 5 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1119,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 119,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -15656,8 +15656,8 @@
       "followUpOf": "UM-CC_AUDIT_TRAIL",
       "followUpReason": "Parent UM-CC_AUDIT_TRAIL mělo 5 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1078,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 78,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -15851,8 +15851,8 @@
       "followUpOf": "UM-SRC_PR_S3_UI_REDESIGN",
       "followUpReason": "Parent UM-SRC_PR_S3_UI_REDESIGN mělo 8 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1079,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 79,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -16046,8 +16046,8 @@
       "followUpOf": "UM-SRC_PR_S4_CONSUMER_REWIRING",
       "followUpReason": "Parent UM-SRC_PR_S4_CONSUMER_REWIRING mělo 8 nedokončených kroků při DONE verifikaci. Tato +1 mise je seskupuje pro dotažení.",
       "followUpLevel": 1,
-      "sequenceIndex": 1168,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 169,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -16246,8 +16246,8 @@
       "followUpOf": "UM-WRITER+1",
       "followUpReason": "Parent UM-WRITER+1 mělo 6 nedokončených kroků při DONE verifikaci. Tato +2 mise je seskupuje pro dotažení.",
       "followUpLevel": 2,
-      "sequenceIndex": 1048,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 48,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -16457,8 +16457,8 @@
       "followUpOf": "UM-FEED_UI+1",
       "followUpReason": "Parent UM-FEED_UI+1 mělo 6 nedokončených kroků při DONE verifikaci. Tato +2 mise je seskupuje pro dotažení.",
       "followUpLevel": 2,
-      "sequenceIndex": 1049,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 49,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -16617,8 +16617,8 @@
       "followUpOf": "UM-TRANSLATOR+1",
       "followUpReason": "Parent UM-TRANSLATOR+1 mělo 4 nedokončených kroků při DONE verifikaci. Tato +2 mise je seskupuje pro dotažení.",
       "followUpLevel": 2,
-      "sequenceIndex": 1050,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 50,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -16812,8 +16812,8 @@
       "followUpOf": "UM-WRITER+1+1",
       "followUpReason": "Parent UM-WRITER+1+1 mělo 6 nedokončených kroků při DONE verifikaci. Tato +3 mise je seskupuje pro dotažení.",
       "followUpLevel": 3,
-      "sequenceIndex": 1051,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 51,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -16936,8 +16936,8 @@
       "followUpOf": "UM-SOURCES+1",
       "followUpReason": "Parent UM-SOURCES+1 mělo 5 nedokončených kroků při DONE verifikaci. Tato +2 mise je seskupuje pro dotažení.",
       "followUpLevel": 2,
-      "sequenceIndex": 1080,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 80,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -17021,8 +17021,8 @@
           "timestamp": "2026-06-06T05:02:05.944Z"
         }
       ],
-      "sequenceIndex": 1081,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 81,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -17185,8 +17185,8 @@
         }
       ],
       "reportPath": "SYSTEM/INFO/MISSIONS/run-2026-06-06T15-44-44-919Z-e4c719fe.md",
-      "sequenceIndex": 1125,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 125,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -17340,8 +17340,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/lib/hd-central/refresh-truth.ts). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1024,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 24,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -17476,8 +17476,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/hd-central/analytics/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1123,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 123,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -17635,8 +17635,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/app/(dashboard)/hd-central/planning/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1082,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 82,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -17760,8 +17760,8 @@
           "note": "Evidence reconcile: VERIFIED_DISK (command-centrum/lib/audit-dashboard/). Confirmed MISSION_DONE."
         }
       ],
-      "sequenceIndex": 1124,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 124,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -17839,8 +17839,8 @@
         }
       ],
       "auditReports": [],
-      "sequenceIndex": 1053,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 53,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -17910,8 +17910,8 @@
         }
       ],
       "completedAt": "2026-06-08T18:19:35.676Z",
-      "sequenceIndex": 1032,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 32,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -17982,8 +17982,8 @@
         }
       ],
       "completedAt": "2026-06-08T18:26:52.605Z",
-      "sequenceIndex": 1033,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 33,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -18047,8 +18047,8 @@
         }
       ],
       "completedAt": "2026-06-08T18:29:04.122Z",
-      "sequenceIndex": 1054,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 54,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -18112,8 +18112,8 @@
         }
       ],
       "completedAt": "2026-06-08T18:34:00.843Z",
-      "sequenceIndex": 1055,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 55,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -18177,8 +18177,8 @@
         }
       ],
       "completedAt": "2026-06-08T18:38:46.372Z",
-      "sequenceIndex": 1059,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 59,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -18242,8 +18242,8 @@
         }
       ],
       "completedAt": "2026-06-08T18:42:00.707Z",
-      "sequenceIndex": 1060,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 60,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -18306,8 +18306,8 @@
         }
       ],
       "completedAt": "2026-06-08T19:28:23.414Z",
-      "sequenceIndex": 1061,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 61,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -18369,8 +18369,8 @@
         }
       ],
       "completedAt": "2026-06-08T19:30:10.755Z",
-      "sequenceIndex": 1062,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 62,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -18434,8 +18434,8 @@
         }
       ],
       "completedAt": "2026-06-08T19:33:33.377Z",
-      "sequenceIndex": 1109,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 109,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -18498,8 +18498,8 @@
         }
       ],
       "completedAt": "2026-06-08T19:37:40.116Z",
-      "sequenceIndex": 1110,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 110,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -18563,8 +18563,8 @@
         }
       ],
       "completedAt": "2026-06-08T19:49:26.800Z",
-      "sequenceIndex": 1111,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 111,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -18628,8 +18628,8 @@
         }
       ],
       "completedAt": "2026-06-08T20:00:53.663Z",
-      "sequenceIndex": 1112,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 112,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -18692,8 +18692,8 @@
         }
       ],
       "completedAt": "2026-06-08T19:41:13.868Z",
-      "sequenceIndex": 1126,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 126,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -18740,9 +18740,9 @@
           "note": "Vytvořeno z full-system auditu 2026-06-08 (SYSTEM/INFO/AUDITS/SYSTEM_FULL_AUDIT/2026-06-08)."
         }
       ],
-      "sequenceIndex": 42,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)"
+      "sequenceIndex": 140,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager"
     },
     {
       "coldCase": false,
@@ -18796,9 +18796,9 @@
           "note": "Follow-up z AUD-SEC-001."
         }
       ],
-      "sequenceIndex": 30,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)"
+      "sequenceIndex": 107,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager"
     },
     {
       "coldCase": false,
@@ -18857,8 +18857,8 @@
           "note": "Shared lib/hd-central/plan-store.ts (readPlan/writePlanAtomic/mutatePlan: in-process mutex + atomic unique-tmp+rename + optimistic version CAS + createIfMissing). All 15 hd-central plan.json writers retrofitted onto it; zero routes define a local plan.json writer. EVIDENCE: tests/plan-store.test.ts proves no lost update under 25 concurrent async mutations + CAS rejection + chain recovery (criterion 3); tsc 0 errors; 68 plan/mission tests green; commits on master (plan-store + full retrofit). Criteria 1-3 all met."
         }
       ],
-      "sequenceIndex": 1114,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 114,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -18911,8 +18911,8 @@
           "note": "Rolled out useModalA11y (Esc/focus-trap/focus-restore/scroll-lock/role/aria-modal) to ALL hand-rolled modals: 7 audit-listed (AuditDashboard drawer, GetPromptModal, IntelDrillDown, live-pipeline InfoModal, mission-detail-drawer, ceo-main auditor popup, pipeline-delete-bar) + intel-progress/result modals + inline add-source/rss/artist/release/reject page modals. EVIDENCE: scan for fixed-inset overlays finds ZERO hand-rolled modals without the hook (Radix ui/dialog+sheet excluded, already accessible); tsc 0 errors; no new lint errors. Both success criteria met. Commit 7cbcdc6."
         }
       ],
-      "sequenceIndex": 1141,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 141,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -18939,7 +18939,7 @@
           "note": "Expo app scaffolded, web boots (HTTP 200, title HotDroppZ), lounchapp archived, typecheck clean"
         }
       ],
-      "sequenceIndex": 1000,
+      "sequenceIndex": 0,
       "id": "HDUA-00-SCAFFOLD",
       "name": "HDUA modul — scaffold nativní Expo app + úklid složek",
       "purpose": "Založit samostatný HDUA modul jako nativní React Native (Expo) aplikaci a uklidit/sjednotit předešlé složky.",
@@ -19015,7 +19015,7 @@
       ],
       "completedAt": "2026-06-10T04:41:31.517Z",
       "urgencyScore": 100,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -19042,7 +19042,7 @@
           "note": "Migrations applied to live Supabase: 11 hdua_ tables + hdua_feed_items view (17 rows), RLS verified, security-hardened (security_invoker view, pinned search_path)"
         }
       ],
-      "sequenceIndex": 1001,
+      "sequenceIndex": 1,
       "id": "HDUA-01-DATABASE",
       "name": "HDUA databázová vrstva",
       "purpose": "Připravit datový model HDUA: uživatelské tabulky + sjednocený feed pohled nad pipeline daty.",
@@ -19117,7 +19117,7 @@
       ],
       "completedAt": "2026-06-10T04:47:33.812Z",
       "urgencyScore": 100,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -19178,7 +19178,7 @@
           "note": "Content API v1: unified ContentApiError envelope across content.ts+user.ts (26 throw-sites), realtime HDCC→HDUA bridge verified. tsc 0 errors, HDUA suite 25/25, error-envelope 8/8."
         }
       ],
-      "sequenceIndex": 0,
+      "sequenceIndex": 2,
       "id": "HDUA-02-CONTENT-API",
       "name": "Content API + HDCC→HDUA bridge",
       "purpose": "Stabilní read-API, které nativní HDUA app konzumuje, plněné eventy z HDCC pipeline.",
@@ -19263,8 +19263,8 @@
         }
       ],
       "urgencyScore": 100,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "auditReport": {
         "missionId": "HDUA-02-CONTENT-API",
         "runId": "signoff-2026-06-26-192332",
@@ -19328,7 +19328,7 @@
           "note": "App shell + 5-tab Expo Router navigation (Home/Search/Create/Alerts/Profile) + auth gate. Shell (subs 01/02) shipped; auth gate (sub03) delivered under HDUA-14 (useAuth + RequireAuth + OAuth + native scheme) — HDUA-03 OVERLAPS HDUA-14 on sub03 (auditor MERGE note). tsc 0 errors, suite 25/25."
         }
       ],
-      "sequenceIndex": 3,
+      "sequenceIndex": 25,
       "id": "HDUA-03-APP-SHELL-NAV",
       "name": "App shell + spodní navigace",
       "purpose": "Skelet aplikace s Expo Router a spodní navigací Home / Search / Create / Alerts / Profile.",
@@ -19382,8 +19382,8 @@
         }
       ],
       "urgencyScore": 100,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "auditReport": {
         "missionId": "HDUA-03-APP-SHELL-NAV",
         "runId": "signoff-2026-06-26-153007",
@@ -19419,7 +19419,7 @@
           "note": "Media: expo-image cover (blurhash/cache), AudioPreview (expo-av), inline Spotify/YouTube iframe embeds on web (Embed.web.tsx) + native link fallback. Multi-image galleries + native WebView player = refinement; embeds light up once enrichment fills spotify/youtube URLs (currently 0/17)."
         }
       ],
-      "sequenceIndex": 1083,
+      "sequenceIndex": 83,
       "id": "HDUA-04-MEDIA-LAYER",
       "name": "Media vrstva",
       "purpose": "Zobrazení a přehrávání médií: obrázky, galerie, audio preview, YouTube/Spotify embedy.",
@@ -19474,7 +19474,7 @@
       ],
       "completedAt": "2026-06-10T17:49:05.329Z",
       "urgencyScore": 75,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -19501,7 +19501,7 @@
           "note": "FlashList virtualized infinite feed (cursor pagination, getItemType recycle, pull-to-refresh, optimistic like, empty/error/loading). Realtime new-posts (sub04) pending Content API bridge. Web bundles clean, 17 live items."
         }
       ],
-      "sequenceIndex": 1026,
+      "sequenceIndex": 26,
       "id": "HDUA-05-FEED-ENGINE",
       "name": "Feed Engine (klient)",
       "purpose": "Nekonečný, výkonný, virtualizovaný feed konzumující Content API.",
@@ -19576,7 +19576,7 @@
       ],
       "completedAt": "2026-06-10T14:56:32.540Z",
       "urgencyScore": 100,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -19603,7 +19603,7 @@
           "note": "Feed card per mockup: cover+NEW DROP badge+play overlay, header, title/preview, tags, live signals, action bar, source pills, type-aware. Full per-type layouts (quote/hero/AI-take) = refinement (sub04)."
         }
       ],
-      "sequenceIndex": 1027,
+      "sequenceIndex": 27,
       "id": "HDUA-06-FEED-CARD",
       "name": "Feed Card layout",
       "purpose": "Vizuál karty příspěvku dle referenčních mockupů.",
@@ -19667,7 +19667,7 @@
       ],
       "completedAt": "2026-06-10T14:56:31.692Z",
       "urgencyScore": 100,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -19694,7 +19694,7 @@
           "note": "Continuous reader works: open post -> full PostView -> scroll flows into next posts inline (FlashList infinite) -> back keeps feed. Content renderer (cover/body/sources/audio). Shared-element expand transition (sub01) = refinement; current uses stack fade."
         }
       ],
-      "sequenceIndex": 1028,
+      "sequenceIndex": 28,
       "id": "HDUA-07-POST-DETAIL",
       "name": "Post Detail Engine + plynulý přechod",
       "purpose": "Detail příspěvku se smooth expand a nekonečným navázáním na další obsah (TikTok + Apple News).",
@@ -19759,7 +19759,7 @@
       ],
       "completedAt": "2026-06-10T15:31:46.387Z",
       "urgencyScore": 100,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -19785,7 +19785,7 @@
           "note": "sub01 + sub02 DONE (commit 00fbfff). stores/player.ts = Zustand store over one module-level expo-av Sound (persists across nav): track+queue, position/duration/isPlaying, play/toggle/next/prev/seek/close, auto-advance on finish, playsInSilentModeIOS init. components/media/Player.tsx = mini-player bar above tab bar (cover/title/artist/play-pause/skip/close/progress) -> full-screen modal (big cover, tap-to-seek progress, prev/play/next); mounted once at root. PostView \"Přehrát ukázku\" launches it from FeedItem.audioPreviewUrl (Spotify preview); removed superseded inline AudioPreview seed. tsc 0, lint 0, 17/17 tests. sub03 (background audio + lock-screen) left TODO: needs native config (app.json UIBackgroundModes + Audio staysActiveInBackground + notification controls), not verifiable headless on web-first dev."
         }
       ],
-      "sequenceIndex": 10,
+      "sequenceIndex": 84,
       "id": "HDUA-08-PLAYER",
       "name": "Globální přehrávač",
       "purpose": "Perzistentní audio/preview přehrávač (mini-player + full screen).",
@@ -19838,8 +19838,8 @@
         }
       ],
       "urgencyScore": 75,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)"
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager"
     },
     {
       "status": "solved",
@@ -19865,7 +19865,7 @@
           "note": "Signal tracker (lib/analytics.ts): batched view/dwell to hdua_post_views (anon insert verified 201). Recommended via hdua_recommended_feed RPC (engagement x quality x freshness). GDPR opt-out flag."
         }
       ],
-      "sequenceIndex": 1085,
+      "sequenceIndex": 85,
       "id": "HDUA-09-PERSONALIZATION",
       "name": "Personalizace a doporučování",
       "purpose": "AI doporučovací vrstva produkující personalizovaný feed ze signálů uživatele.",
@@ -19920,7 +19920,7 @@
       ],
       "completedAt": "2026-06-10T17:46:29.767Z",
       "urgencyScore": 75,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -19947,7 +19947,7 @@
           "note": "HDCC Live Pipeline Monitor at /hd-central/monitor (sidebar link added). Reuses existing pipeline-state endpoints: lib/hd-central/pipeline-monitor.ts merges /aggregate + /live-metrics into per-stage cards (status/health, latency p95, queue depth, processed today+week, errors, derived warnings, last-run status+duration, 7-day sparkline). Client polls both every 8s with no reload (criterion 2) + pause/refresh; colored ok/warn/error states + sparkline history (criterion 3). Criterion 1 (metrics per stage) met. SCOPE NOTE: renders the 11 REAL pipeline stages (STAGE_TABLE), not the spec brief 12 idealized ones (Parser/Normalizer/etc. do not exist) — no fabricated panels. EVIDENCE: tests/pipeline-monitor.test.ts (6, merge/queue-map/level/warnings/rollup) green + CI-wired; tsc 0 errors; lint clean. Live click-through not run (needs Supabase service key — same standing blocker). Commit on master."
         }
       ],
-      "sequenceIndex": 1178,
+      "sequenceIndex": 179,
       "id": "HDUA-10-PIPELINE-MONITOR",
       "name": "HDCC Live Pipeline Monitor",
       "purpose": "Extrémně detailní realtime logovací panel pipeline uvnitř HDCC.",
@@ -19997,7 +19997,7 @@
         }
       ],
       "urgencyScore": 75,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -20018,7 +20018,7 @@
           "note": "HDUA seed — native Expo user app, plan from CEO master prompt"
         }
       ],
-      "sequenceIndex": 47,
+      "sequenceIndex": 183,
       "id": "HDUA-11-LIVE-PREVIEW",
       "name": "HDUA Live Preview v HDCC",
       "purpose": "Split náhled v HDCC: 60 % pipeline log + 40 % živý mobilní náhled feedu.",
@@ -20068,8 +20068,8 @@
         }
       ],
       "urgencyScore": 50,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)"
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager"
     },
     {
       "status": "todo",
@@ -20089,7 +20089,7 @@
           "note": "HDUA seed — native Expo user app, plan from CEO master prompt"
         }
       ],
-      "sequenceIndex": 48,
+      "sequenceIndex": 184,
       "id": "HDUA-12-ANALYTICS",
       "name": "User Analytics Dashboard",
       "purpose": "Metriky chování uživatelů HDUA.",
@@ -20130,8 +20130,8 @@
         }
       ],
       "urgencyScore": 50,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)"
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager"
     },
     {
       "status": "solved",
@@ -20157,7 +20157,7 @@
           "note": "6-doc living doc set under HDUA/docs/ (commit e98604d): README index + ARCHITECTURE/DATABASE/FEED_ENGINE/UI_SYSTEM/DEPLOYMENT, plus the pre-existing HDUA_API.md referenced + linked. Architecture diagram HDCC→hdua_feed_items view→Content API→HDUA included; DEPLOYMENT covers EAS build + store submit + OTA (notes eas.json still TODO). Linked from HDUA/README.md. Grounded in verified code facts (Expo SDK 52, expo-router 4, useInfiniteQuery, theme.ts tokens, app.json). All 4 success criteria met. Fully verifiable (docs-only, no runtime dependency)."
         }
       ],
-      "sequenceIndex": 1175,
+      "sequenceIndex": 176,
       "id": "HDUA-13-DOCS",
       "name": "HDUA dokumentace",
       "purpose": "Kompletní dokumentace architektury, DB, feed enginu, API, UI systému a nasazení.",
@@ -20210,7 +20210,7 @@
         }
       ],
       "urgencyScore": 50,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -20243,7 +20243,7 @@
           "note": "Project repo confirmed at SYSTEM/hotdroppz/.git (master, node_modules/.env.local correctly ignored). Committed my work selectively as a689ad3 (HDUA-14 auth gate + content-quality pipeline fix, 27 files). LEFT UNSTAGED on purpose: 21 agents/ deletions (unrelated reorg, CEO has agents/agents/AGENTS.md open) + 71 untracked subprojects (ai/backend/frontend-web/SYSTEM/ZALOHA/55 NOTES). STILL OPEN: no git remote; full-repo hygiene (commit/clean the untracked subprojects + resolve agents reorg)."
         }
       ],
-      "sequenceIndex": 1003,
+      "sequenceIndex": 3,
       "id": "HDUA-19-VCS-CHECKPOINT",
       "name": "Git checkpoint — HDUA + HDCC pod verzí",
       "purpose": "Dostat veškerou HDUA/command-centrum práci pod verzování; teď je celé untracked.",
@@ -20287,7 +20287,7 @@
         }
       ],
       "urgencyScore": 100,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -20314,7 +20314,7 @@
           "note": "CEO chose FIX-CONTENT-FIRST over enrichment (2026-06-12). Enrichment (Spotify/YouTube/Genius media) REMAINS BLOCKED on missing API keys — sub01 still pending CEO-provided secrets. Separate content-quality fix shipped instead: classifier+sources+clean rebuild (see CC-CONTENT-QUALITY-2026-06-12). Feed went 17 junk → 55 real drops."
         }
       ],
-      "sequenceIndex": 5,
+      "sequenceIndex": 30,
       "id": "HDUA-15-ENRICHMENT-ACTIVATION",
       "name": "Aktivace enrichmentu — feed s reálnými médii",
       "purpose": "Naplnit feed reálnými daty (artist, cover, Spotify/YouTube) — teď je vizuálně prázdný.",
@@ -20364,8 +20364,8 @@
         }
       ],
       "urgencyScore": 100,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)"
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager"
     },
     {
       "lifecycleStatus": "DONE",
@@ -20390,7 +20390,7 @@
           "note": "Auth gate built: auth store + AuthProvider + RequireAuth gate, /auth modal (email/pw + Google OAuth, venom), profile rebuilt with real data+logout, FeedCard like/save wired to RLS hdua_liked/saved via optimistic interactions store. tsc+eslint clean. Signup triggers verified healthy (hdua_handle_new_user seeds profiles+settings)."
         }
       ],
-      "sequenceIndex": 4,
+      "sequenceIndex": 29,
       "id": "HDUA-14-AUTH-GATE",
       "name": "Auth gate — přihlášení (Supabase)",
       "purpose": "Dokončit HDUA-03 sub03: login/session, aby fungovala uživatelská data.",
@@ -20441,8 +20441,8 @@
         }
       ],
       "urgencyScore": 100,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)"
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager"
     },
     {
       "status": "solved",
@@ -20468,7 +20468,7 @@
           "note": "Venom consistency + cleanup complete. sub01 (surface pass): verified Home/Search/Create/Alerts/Profile + reader (PostView/FeedPage) all venom/sharp via theme tokens or shared scaffolds — create.tsx is an intentional placeholder delegating to ScreenScaffold/EmptyState. sub02 (brand assets): already done by prior partial commit — FlameMark.tsx deleted, share-card-template.svg + assets/README venom #00EC88, zero #B6FF3B anywhere outside the mission doc. sub03 (cleanup): dev-guarded the only console.* (supabase.ts missing-env warn behind __DEV__) so none ships in prod; fixed stale #00E085 accent comment in theme.ts -> #00EC88. NOTE: #FFD000 is the Genius platform brand color (intentional). EVIDENCE: tsc 0 errors; 17 HDUA tests green; commit 36d3219."
         }
       ],
-      "sequenceIndex": 1087,
+      "sequenceIndex": 87,
       "id": "HDUA-17-VENOM-DESIGN-PROPAGATION",
       "name": "Venom/sharp design napříč appkou + úklid",
       "purpose": "Sjednotit nový venom/sharp jazyk na všechny obrazovky a uklidit dead code.",
@@ -20522,7 +20522,7 @@
         }
       ],
       "urgencyScore": 75,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -20548,7 +20548,7 @@
           "note": "Sub01 SOLVED: quality auto-publish gate shipped — lib/pipeline/auto-publish.ts (runAutoPublishPipeline, ai_score>=70 + title + body>=400ch, status-guarded, never-throw), POST /api/publish/auto, registered as stage publish, wired into Pipeline B after writer. Unit tests tests/auto-publish.test.ts (5) + CI wiring; pipeline-b/stage-registry tests updated. hdua_feed_items view already unions posts WHERE status=published. tsc 0 errors. Sub02 (live verify in HDUA) BLOCKED on SUPABASE_SERVICE_ROLE_KEY (no real run possible yet)."
         }
       ],
-      "sequenceIndex": 11,
+      "sequenceIndex": 86,
       "id": "HDUA-16-EDITORIAL-PUBLISH",
       "name": "Publikace editorial článků do HDUA",
       "purpose": "Dostat psané články (posts) do feedu — teď je 0 published.",
@@ -20589,8 +20589,8 @@
         }
       ],
       "urgencyScore": 75,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)"
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager"
     },
     {
       "lifecycleStatus": "BUILD",
@@ -20615,7 +20615,7 @@
           "note": "Reader→scrollbar wiring shipped additively (commit 09b806f), zero feed regression (FeedPager/GlobalScrollbar untouched). sub01 DONE: post/[id] FlashList drives sbProgress/sbThumbFraction + draggable thumb scrolls it via new useScrollbarSurface hook; getScroller/resetScrollbar added; focus saves+restores the feed scroller so its bar survives return. sub02 PARTIAL: reader-blur ownership/reset done, but static-tab-while-feed-mounted neutralization deferred (needs a GlobalScrollbar ownership/opacity signal). tsc 0 errors; 17 HDUA tests green. NOT visually verified — runtime/focus behavior needs the Expo app (no headless harness). Left in_progress, not solved."
         }
       ],
-      "sequenceIndex": 32,
+      "sequenceIndex": 127,
       "id": "HDUA-18-GLOBAL-SCROLLBAR-READER",
       "name": "Globální posuvník i pro čtečku/detail",
       "purpose": "Posuvník teď reflektuje jen feed; napojit i na scroll článku a post/[id].",
@@ -20656,8 +20656,8 @@
         }
       ],
       "urgencyScore": 50,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)"
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager"
     },
     {
       "status": "solved",
@@ -20683,7 +20683,7 @@
           "note": "HDUA detailed audit 2026-06-11 (post UI overhaul)"
         }
       ],
-      "sequenceIndex": 1176,
+      "sequenceIndex": 177,
       "id": "HDUA-20-QUALITY-GATE",
       "name": "Quality gate — testy, lint, CI",
       "purpose": "Zavést minimální testovací a lint bránu pro HDUA.",
@@ -20727,7 +20727,7 @@
         }
       ],
       "urgencyScore": 50,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -20738,7 +20738,7 @@
       "phase": "Build",
       "moduleId": "HDCC",
       "userMission": true,
-      "sequenceIndex": 6,
+      "sequenceIndex": 31,
       "inTimeline": true,
       "createdAt": "2026-06-12T15:14:13.454Z",
       "purpose": "HDUA feed was junk (news/self-promo misclassified as drops). Fix the pipeline root causes + rebuild a clean feed.",
@@ -20768,8 +20768,8 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)"
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager"
     },
     {
       "lifecycleStatus": "MISSION_DONE",
@@ -20827,7 +20827,7 @@
           "note": "Profile DB extensions + write API. Migration 06 applied to live project cudycxvbpewmuhxydcas and verified by SQL: bio+onboarding_completed cols, bio_len+username_fmt constraints, CI username index, 2 touch triggers, public hdua-avatars bucket + owner-only RLS (+ search_path hardening)."
         }
       ],
-      "sequenceIndex": 1,
+      "sequenceIndex": 21,
       "id": "HDUA-21-PROFILE-DB-API",
       "name": "Profil — DB rozšíření + write API (základ)",
       "purpose": "Bez write API a sloupců bio/onboarding_completed nelze profil upravovat ani dokončit onboarding.",
@@ -20880,8 +20880,8 @@
         }
       ],
       "urgencyScore": 75,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -20933,7 +20933,7 @@
           "note": "[push-to-timeline] mode=all · actor=plan-manager"
         }
       ],
-      "sequenceIndex": 1088,
+      "sequenceIndex": 88,
       "id": "HDUA-22-PROFILE-PRIMITIVES",
       "name": "Profil — sdílené UI primitivy",
       "purpose": "Všechny nové profilové obrazovky stojí na stejných komponentách; bez nich by se kód duplikoval.",
@@ -20985,7 +20985,7 @@
         }
       ],
       "urgencyScore": 75,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -21044,7 +21044,7 @@
           "note": "Profile settings + account deletion. hdua-delete-account edge function deployed to cudycxvbpewmuhxydcas (version 1, status ACTIVE, verify_jwt=true) — service-role hard-delete of owned rows + auth.users."
         }
       ],
-      "sequenceIndex": 12,
+      "sequenceIndex": 89,
       "id": "HDUA-23-PROFILE-SETTINGS",
       "name": "Profil — Nastavení (interaktivní)",
       "purpose": "Stávající nastavení je jen display-only; uživatel nemůže měnit jazyk, notifikace ani spravovat účet.",
@@ -21097,8 +21097,8 @@
         }
       ],
       "urgencyScore": 75,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -21149,7 +21149,7 @@
           "note": "[push-to-timeline] mode=all · actor=plan-manager"
         }
       ],
-      "sequenceIndex": 13,
+      "sequenceIndex": 90,
       "id": "HDUA-24-PROFILE-EDIT",
       "name": "Profil — Editace + avatar",
       "purpose": "Uživatel nemá jak změnit jméno, username, bio, zemi ani avatar.",
@@ -21192,8 +21192,8 @@
         }
       ],
       "urgencyScore": 75,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -21234,7 +21234,7 @@
           "note": "[push-to-timeline] mode=all · actor=plan-manager"
         }
       ],
-      "sequenceIndex": 1128,
+      "sequenceIndex": 128,
       "id": "HDUA-25-PROFILE-TAB-UPGRADE",
       "name": "Profil — upgrade záložky (tabs)/profile",
       "purpose": "Stávající profilová záložka je read-only a bez vstupů do editace, nastavení a sbírek.",
@@ -21276,7 +21276,7 @@
         }
       ],
       "urgencyScore": 50,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -21308,7 +21308,7 @@
           "note": "[push-to-timeline] mode=all · actor=plan-manager"
         }
       ],
-      "sequenceIndex": 1129,
+      "sequenceIndex": 129,
       "id": "HDUA-26-PROFILE-COLLECTION",
       "name": "Profil — Sbírka (Uložené/Lajky/Sledovaní)",
       "purpose": "Interakce uživatele (save/like/follow) nejsou nikde k zobrazení.",
@@ -21350,7 +21350,7 @@
         }
       ],
       "urgencyScore": 50,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -21382,7 +21382,7 @@
           "note": "[push-to-timeline] mode=all · actor=plan-manager"
         }
       ],
-      "sequenceIndex": 1130,
+      "sequenceIndex": 130,
       "id": "HDUA-27-AUTH-PASSWORD-RESET",
       "name": "Auth — reset hesla + doladění ověření e-mailu",
       "purpose": "Uživatel nemá jak obnovit zapomenuté heslo; email-confirmation flow je jen základní notice.",
@@ -21425,7 +21425,7 @@
         }
       ],
       "urgencyScore": 50,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager"
     },
     {
@@ -21455,9 +21455,9 @@
           "note": "[push-to-timeline] mode=all · actor=plan-manager"
         }
       ],
-      "sequenceIndex": 49,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 188,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -21496,8 +21496,8 @@
           "note": "[push-to-timeline] mode=all · actor=plan-manager"
         }
       ],
-      "sequenceIndex": 1188,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 189,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -21547,9 +21547,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 14,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 91,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -21598,9 +21598,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 33,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 131,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -21649,9 +21649,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 15,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 92,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -21700,9 +21700,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 34,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 132,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -21751,9 +21751,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 16,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 93,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -21785,7 +21785,7 @@
       "lifecycleStatus": "MISSION_DONE",
       "inTimeline": true,
       "userMission": true,
-      "sequenceIndex": 8,
+      "sequenceIndex": 56,
       "ownerAgent": "backend-engineer",
       "dependencies": [
         "HDUA-02-CONTENT-API"
@@ -21850,8 +21850,8 @@
           "timestamp": "2026-06-27T06:14:45.005Z"
         }
       ],
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "auditReport": {
         "missionId": "PM-MISS-001",
         "runId": "signoff-2026-06-27-061445",
@@ -21872,7 +21872,7 @@
       "importantInfo": "Integrace timeline: vlozit za UM-SRC_PR_S4_CONSUMER_REWIRING. Duvod: po rewiringu je idealni moment pridat reliability gate na snapshot a freshness.",
       "phase": "Build",
       "priority": "P0",
-      "status": "todo",
+      "status": "solved",
       "domains": [
         "DATA",
         "BACKEND",
@@ -21881,10 +21881,10 @@
       "createdAt": "2026-06-25T16:11:00.000Z",
       "urgencyScore": 86,
       "estimatedComplexity": "M",
-      "lifecycleStatus": "PLAN",
+      "lifecycleStatus": "MISSION_DONE",
       "inTimeline": true,
       "userMission": true,
-      "sequenceIndex": 9,
+      "sequenceIndex": 57,
       "ownerAgent": "data-engineer",
       "dependencies": [
         "PM-MISS-001",
@@ -21901,26 +21901,67 @@
         {
           "id": "01",
           "name": "Freshness gate",
-          "description": "Pridat kontrolu stari snapshotu a SLO limit 24 h.",
-          "status": "todo",
+          "description": "Pridat kontrolu stari snapshotu a SLO limit 24 h. [DONE 2026-06-27: freshness gate — snapshot generatedAt age + max stage data-freshness vs 24h SLO (lib/hd-central/snapshot-reliability.ts).]",
+          "status": "done",
           "owner": "data-engineer",
-          "estimatedDuration": "S"
+          "estimatedDuration": "S",
+          "completedAt": "2026-06-27T13:57:55.192Z"
         },
         {
           "id": "02",
           "name": "Completeness gate",
-          "description": "Overit povinna pole, konzistenci statusu a navaznosti misi.",
-          "status": "todo",
+          "description": "Overit povinna pole, konzistenci statusu a navaznosti misi. [DONE 2026-06-27: completeness gate — required fields + status consistency (blocked>active, confidence range, contract fail) + upstream dependency availability (warnings); degraded verdict + reasons; wired into /analytics/snapshot. 11 tests.]",
+          "status": "done",
           "owner": "data-engineer",
-          "estimatedDuration": "M"
+          "estimatedDuration": "M",
+          "completedAt": "2026-06-27T13:57:55.192Z"
         }
       ],
-      "auditLog": [],
+      "auditLog": [
+        {
+          "ts": "2026-06-27T13:58:19.602Z",
+          "event": "AUDITOR_TEST",
+          "actor": "system-auditor",
+          "note": "Evidence gate evaluated for PM-MISS-002"
+        },
+        {
+          "ts": "2026-06-27T13:58:19.602Z",
+          "event": "EVIDENCE_VERIFIED",
+          "actor": "system-auditor",
+          "note": "PASS — tests:2 changedFiles:3 deliverables:2"
+        },
+        {
+          "ts": "2026-06-27T13:58:19.602Z",
+          "event": "MISSION_DONE",
+          "actor": "system-auditor",
+          "note": "Snapshot Reliability Gate: evaluateSnapshotReliability runs on every /analytics/snapshot sync — freshness gate (snapshot age + stage data-freshness vs 24h SLO) + completeness gate (required fields, status consistency, upstream dependency availability) → ok/degraded verdict with concrete reasons. 11 tests, tsc 0 errors."
+        }
+      ],
       "coldCase": false,
       "isDeleted": false,
-      "auditReports": [],
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)"
+      "auditReports": [
+        {
+          "missionId": "PM-MISS-002",
+          "runId": "signoff-2026-06-27-135819",
+          "stepIndex": 0,
+          "totalSteps": 1,
+          "summary": "Snapshot Reliability Gate: evaluateSnapshotReliability runs on every /analytics/snapshot sync — freshness gate (snapshot age + stage data-freshness vs 24h SLO) + completeness gate (required fields, status consistency, upstream dependency availability) → ok/degraded verdict with concrete reasons. 11 tests, tsc 0 errors.",
+          "verdict": "PASS",
+          "timestamp": "2026-06-27T13:58:19.602Z"
+        }
+      ],
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
+      "auditReport": {
+        "missionId": "PM-MISS-002",
+        "runId": "signoff-2026-06-27-135819",
+        "stepIndex": 0,
+        "totalSteps": 1,
+        "summary": "Snapshot Reliability Gate: evaluateSnapshotReliability runs on every /analytics/snapshot sync — freshness gate (snapshot age + stage data-freshness vs 24h SLO) + completeness gate (required fields, status consistency, upstream dependency availability) → ok/degraded verdict with concrete reasons. 11 tests, tsc 0 errors.",
+        "verdict": "PASS",
+        "timestamp": "2026-06-27T13:58:19.602Z"
+      },
+      "reportPath": "SYSTEM/INFO/AUDITS/MISSION_SIGNOFF/2026-06-27/auditor-signoff-2026-06-27-135819.md"
     },
     {
       "id": "PM-MISS-003",
@@ -21942,7 +21983,7 @@
       "lifecycleStatus": "PLAN",
       "inTimeline": true,
       "userMission": true,
-      "sequenceIndex": 31,
+      "sequenceIndex": 108,
       "ownerAgent": "backend-engineer",
       "dependencies": [
         "PM-MISS-002",
@@ -21977,8 +22018,8 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)"
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager"
     },
     {
       "id": "PM-MISS-004",
@@ -22000,7 +22041,7 @@
       "lifecycleStatus": "PLAN",
       "inTimeline": true,
       "userMission": true,
-      "sequenceIndex": 52,
+      "sequenceIndex": 197,
       "ownerAgent": "plan-manager",
       "dependencies": [
         "PM-MISS-003",
@@ -22035,8 +22076,8 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)"
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager"
     },
     {
       "id": "PM-MISS-005",
@@ -22059,7 +22100,7 @@
       "lifecycleStatus": "PLAN",
       "inTimeline": true,
       "userMission": true,
-      "sequenceIndex": 45,
+      "sequenceIndex": 170,
       "ownerAgent": "qa",
       "dependencies": [
         "PM-MISS-004",
@@ -22094,8 +22135,8 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)"
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager"
     },
     {
       "id": "BRAIN-MQTWCWTS",
@@ -22133,9 +22174,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 17,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 94,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22183,9 +22224,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 35,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 133,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22233,9 +22274,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 18,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 95,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22283,9 +22324,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 43,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 143,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22333,9 +22374,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 36,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 134,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22384,9 +22425,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 19,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 96,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22407,7 +22448,7 @@
       "importantInfo": "Source: brainstorm engine | Relevance: This mission is relevant to the Content API + HDCC→HDUA bridge as it ensures the accuracy and integrity of the event data being consumed by the app.",
       "phase": "Foundation",
       "priority": "P1",
-      "status": "todo",
+      "status": "in_progress",
       "domains": [
         "BACKEND",
         "PIPELINE"
@@ -22415,7 +22456,7 @@
       "createdAt": "2026-06-25T19:32:18.640Z",
       "urgencyScore": 75,
       "estimatedComplexity": "L",
-      "lifecycleStatus": "PLAN",
+      "lifecycleStatus": "ACTIVE",
       "inTimeline": true,
       "userMission": false,
       "auditLog": [
@@ -22430,14 +22471,20 @@
           "event": "MISSION_ACTIVATED",
           "actor": "CEO",
           "note": "[push-to-timeline] mode=all · actor=plan-manager"
+        },
+        {
+          "ts": "2026-06-27T13:24:18.740Z",
+          "event": "MISSION_ACTIVATED",
+          "actor": "SYSTEM",
+          "note": "Auto-pull from PLAN"
         }
       ],
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 2,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 22,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22486,9 +22533,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 37,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 135,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22537,9 +22584,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 38,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 136,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22588,9 +22635,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 39,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 137,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22639,9 +22686,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 20,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 97,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22690,9 +22737,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 21,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 98,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22741,9 +22788,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 22,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 99,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22792,9 +22839,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 23,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 100,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22843,9 +22890,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 24,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 101,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22894,9 +22941,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 40,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 138,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22945,9 +22992,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 41,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 139,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -22986,8 +23033,8 @@
           "note": "[push-to-timeline] mode=all · actor=plan-manager"
         }
       ],
-      "sequenceIndex": 1189,
-      "sequencedAt": "2026-06-26T00:02:58.218Z",
+      "sequenceIndex": 190,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
       "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
@@ -23037,9 +23084,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 25,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 102,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -23088,9 +23135,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 26,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 103,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -23139,9 +23186,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 27,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 104,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -23190,9 +23237,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 28,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 105,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -23241,9 +23288,9 @@
       "coldCase": false,
       "isDeleted": false,
       "auditReports": [],
-      "sequenceIndex": 29,
-      "sequencedAt": "2026-06-26T13:51:55.426Z",
-      "sequencedBy": "mission-auditor (worker)",
+      "sequenceIndex": 106,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
       "timelineState": "queued",
       "timelineLog": [
         {
@@ -23261,7 +23308,7 @@
       "coldCase": false,
       "isDeleted": false,
       "createdAt": "2026-06-26T19:22:56.244Z",
-      "inTimeline": false,
+      "inTimeline": true,
       "userMission": true,
       "moduleId": "HDUA",
       "id": "HDUA-02-SRV-API-TIER",
@@ -23335,7 +23382,29 @@
           "owner": "backend",
           "estimatedDuration": "M"
         }
-      ]
+      ],
+      "sequenceIndex": 142,
+      "sequencedAt": "2026-06-27T13:24:18.734Z",
+      "sequencedBy": "plan-manager",
+      "auditLog": [
+        {
+          "ts": "2026-06-27T13:24:18.737Z",
+          "event": "MISSION_ACTIVATED",
+          "actor": "CEO",
+          "note": "[push-to-timeline] mode=all · actor=plan-manager"
+        }
+      ],
+      "timelineState": "queued",
+      "timelineLog": [
+        {
+          "ts": "2026-06-27T13:24:18.737Z",
+          "from": "draft",
+          "to": "queued",
+          "actor": "plan-manager",
+          "reason": "pushed to timeline (all)"
+        }
+      ],
+      "auditReports": []
     }
   ],
   "tasks": [
