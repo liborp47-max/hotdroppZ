@@ -1,6 +1,6 @@
 {
-  "version": 57,
-  "updatedAt": "2026-06-27T14:47:59.791Z",
+  "version": 59,
+  "updatedAt": "2026-06-27T15:00:25.630Z",
   "missions": [
     {
       "status": "solved",
@@ -20349,6 +20349,18 @@
           "event": "NOTE",
           "actor": "opus-4.8",
           "note": "CEO chose FIX-CONTENT-FIRST over enrichment (2026-06-12). Enrichment (Spotify/YouTube/Genius media) REMAINS BLOCKED on missing API keys — sub01 still pending CEO-provided secrets. Separate content-quality fix shipped instead: classifier+sources+clean rebuild (see CC-CONTENT-QUALITY-2026-06-12). Feed went 17 junk → 55 real drops."
+        },
+        {
+          "ts": "2026-06-27T15:00:25.617Z",
+          "event": "NOTE",
+          "actor": "system-auditor",
+          "note": "BLOCKED — credential gate (sub01). .env.local verified 2026-06-27: only GROQ_API_KEY is set; SPOTIFY_CLIENT_ID/SECRET empty, YOUTUBE_API_KEY + GENIUS_ACCESS_TOKEN absent, SUPABASE_SERVICE_ROLE_KEY empty. Spotify client-credentials token returns invalid_client (400). Sub01 \"Klice + overeni\" needs user-supplied API keys — cannot be done by the agent."
+        },
+        {
+          "ts": "2026-06-27T15:00:25.617Z",
+          "event": "NOTE",
+          "actor": "system-auditor",
+          "note": "SCOPE FINDING — premise partially stale. Live DB: all 13 story_clusters already enrichment_status=done but with 0 media (prior run had no keys). hdua_feed_items derives cover_image/artist/spotify by COALESCE feed_posts->story_clusters, but only 4/59 feed_posts have a cluster_id (55 orphaned: no cluster_id, no artist_id, no image). So even with keys, cluster enrichment reaches only ~4 cards — filling the feed also requires a feed_posts re-link/regeneration (candidate split mission)."
         }
       ],
       "sequenceIndex": 30,
@@ -21159,14 +21171,24 @@
       "status": "solved"
     },
     {
-      "lifecycleStatus": "BUILD",
+      "lifecycleStatus": "MISSION_DONE",
       "coldCase": false,
       "isDeleted": false,
       "createdAt": "2026-06-19T19:00:00.000Z",
       "inTimeline": true,
       "userMission": true,
       "moduleId": "HDUA",
-      "auditReports": [],
+      "auditReports": [
+        {
+          "missionId": "HDUA-24-PROFILE-EDIT",
+          "runId": "signoff-2026-06-27-145835",
+          "stepIndex": 0,
+          "totalSteps": 1,
+          "summary": "Profile edit screen + avatar upload. profile/edit.tsx: display_name / username (lowercased, 3-30 [a-z0-9_] regex matching the CI unique CHECK) / bio (<=280 w/ counter) / country picker → updateProfile; avatar pick → uploadAvatar to hdua-avatars/<uid>/avatar.jpg (upsert) + public cache-busted URL + live preview. Built on the HDUA-22 shared components (Avatar/Field/ConfirmationNotice/PickerSheet), gated by RequireAuth, errors via the unified ContentApiError envelope. Dependency satisfied: the live hdua-avatars bucket (public + 3 owner-only RLS policies) shipped under HDUA-21. HDUA suite 25/25, tsc 0 errors. Subs 01 (edit form) + 02 (avatar upload) both done.",
+          "verdict": "PASS",
+          "timestamp": "2026-06-27T14:58:35.960Z"
+        }
+      ],
       "auditLog": [
         {
           "ts": "2026-06-19T19:00:00.000Z",
@@ -21184,6 +21206,24 @@
           "event": "MISSION_ACTIVATED",
           "actor": "CEO",
           "note": "[push-to-timeline] mode=all · actor=plan-manager"
+        },
+        {
+          "ts": "2026-06-27T14:58:35.960Z",
+          "event": "AUDITOR_TEST",
+          "actor": "system-auditor",
+          "note": "Evidence gate evaluated for HDUA-24-PROFILE-EDIT"
+        },
+        {
+          "ts": "2026-06-27T14:58:35.960Z",
+          "event": "EVIDENCE_VERIFIED",
+          "actor": "system-auditor",
+          "note": "PASS — tests:3 changedFiles:2 deliverables:3"
+        },
+        {
+          "ts": "2026-06-27T14:58:35.960Z",
+          "event": "MISSION_DONE",
+          "actor": "system-auditor",
+          "note": "Profile edit screen + avatar upload. profile/edit.tsx: display_name / username (lowercased, 3-30 [a-z0-9_] regex matching the CI unique CHECK) / bio (<=280 w/ counter) / country picker → updateProfile; avatar pick → uploadAvatar to hdua-avatars/<uid>/avatar.jpg (upsert) + public cache-busted URL + live preview. Built on the HDUA-22 shared components (Avatar/Field/ConfirmationNotice/PickerSheet), gated by RequireAuth, errors via the unified ContentApiError envelope. Dependency satisfied: the live hdua-avatars bucket (public + 3 owner-only RLS policies) shipped under HDUA-21. HDUA suite 25/25, tsc 0 errors. Subs 01 (edit form) + 02 (avatar upload) both done."
         }
       ],
       "sequenceIndex": 90,
@@ -21240,7 +21280,18 @@
           "actor": "plan-manager",
           "reason": "pushed to timeline (all)"
         }
-      ]
+      ],
+      "auditReport": {
+        "missionId": "HDUA-24-PROFILE-EDIT",
+        "runId": "signoff-2026-06-27-145835",
+        "stepIndex": 0,
+        "totalSteps": 1,
+        "summary": "Profile edit screen + avatar upload. profile/edit.tsx: display_name / username (lowercased, 3-30 [a-z0-9_] regex matching the CI unique CHECK) / bio (<=280 w/ counter) / country picker → updateProfile; avatar pick → uploadAvatar to hdua-avatars/<uid>/avatar.jpg (upsert) + public cache-busted URL + live preview. Built on the HDUA-22 shared components (Avatar/Field/ConfirmationNotice/PickerSheet), gated by RequireAuth, errors via the unified ContentApiError envelope. Dependency satisfied: the live hdua-avatars bucket (public + 3 owner-only RLS policies) shipped under HDUA-21. HDUA suite 25/25, tsc 0 errors. Subs 01 (edit form) + 02 (avatar upload) both done.",
+        "verdict": "PASS",
+        "timestamp": "2026-06-27T14:58:35.960Z"
+      },
+      "reportPath": "SYSTEM/INFO/AUDITS/MISSION_SIGNOFF/2026-06-27/auditor-signoff-2026-06-27-145835.md",
+      "status": "solved"
     },
     {
       "status": "solved",

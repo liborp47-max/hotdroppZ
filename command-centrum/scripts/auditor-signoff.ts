@@ -170,6 +170,31 @@ const SIGNOFFS: Record<string, SignOff> = {
       ],
     },
   },
+  'HDUA-24-PROFILE-EDIT': {
+    summary:
+      'Profile edit screen + avatar upload. profile/edit.tsx: display_name / username (lowercased, 3-30 [a-z0-9_] regex matching the CI unique CHECK) / bio (<=280 w/ counter) / country picker → updateProfile; avatar pick → uploadAvatar to hdua-avatars/<uid>/avatar.jpg (upsert) + public cache-busted URL + live preview. Built on the HDUA-22 shared components (Avatar/Field/ConfirmationNotice/PickerSheet), gated by RequireAuth, errors via the unified ContentApiError envelope. Dependency satisfied: the live hdua-avatars bucket (public + 3 owner-only RLS policies) shipped under HDUA-21. HDUA suite 25/25, tsc 0 errors. Subs 01 (edit form) + 02 (avatar upload) both done.',
+    evidence: {
+      testsRun: [
+        { name: 'HDUA full suite (tsx --test tests/*.test.ts)', result: 'PASS', output: '25/25' },
+        { name: 'HDUA tsc --noEmit', result: 'PASS', output: '0 errors' },
+        { name: 'live bucket+RLS verification (hdua-avatars public + 3 owner-only policies)', result: 'PASS' },
+      ],
+      changedFiles: [
+        'HDUA/src/app/profile/edit.tsx',
+        'HDUA/src/api/user.ts',
+      ],
+      deliverables: [
+        'profile/edit screen: name/username/bio/country with validation → updateProfile',
+        'avatar upload → hdua-avatars/<uid>/avatar.jpg (upsert) + public URL + live preview',
+        'verified against the live hdua-avatars bucket + owner-only RLS (HDUA-21 dependency satisfied)',
+      ],
+      auditorVerdict: 'PASS',
+      realDbOrRuntime: [
+        { command: 'npx tsx --test tests/*.test.ts (HDUA)', exitCode: 0, summary: '25/25 pass' },
+        { command: 'supabase MCP: storage.buckets + pg_policies(storage.objects)', exitCode: 0, summary: 'hdua-avatars public=true; 3 owner-only policies (insert/update/delete)' },
+      ],
+    },
+  },
   'PM-MISS-002': {
     summary:
       'Snapshot Reliability Gate: evaluateSnapshotReliability runs on every /analytics/snapshot sync — freshness gate (snapshot age + stage data-freshness vs 24h SLO) + completeness gate (required fields, status consistency, upstream dependency availability) → ok/degraded verdict with concrete reasons. 11 tests, tsc 0 errors.',
