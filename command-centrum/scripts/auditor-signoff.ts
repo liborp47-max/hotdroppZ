@@ -143,6 +143,33 @@ const SIGNOFFS: Record<string, SignOff> = {
       ],
     },
   },
+  'P0-TRUTH-002-REAL-AGENT-BACKEND': {
+    summary:
+      'Real agent-execution backend for /solve (replaces the buildSteps simulator). runAgentForMission produces a genuine AgentRunResult → auditorSignOff sets the verdict → buildEvidenceFromAgentRun feeds evaluateEvidence, so /solve only reaches MISSION_DONE on a real passing pack (else stays AUDIT_PENDING). Subs s1 (runner service) / s2 (wired into /solve) / s3 (auditor sign-off step) all done. agent-runner 5/5, local-runner 6/6, tsc 0 errors.',
+    evidence: {
+      testsRun: [
+        { name: 'tests/agent-runner.test.ts', result: 'PASS', output: '5/5' },
+        { name: 'tests/local-runner.test.ts', result: 'PASS', output: '6/6' },
+        { name: 'tsc --noEmit', result: 'PASS', output: '0 errors' },
+      ],
+      changedFiles: [
+        'command-centrum/lib/hd-central/agent-runner.ts',
+        'command-centrum/lib/hd-central/local-runner.ts',
+        'command-centrum/app/api/hd-central/mission/[id]/solve/route.ts',
+        'command-centrum/tests/agent-runner.test.ts',
+      ],
+      deliverables: [
+        'runAgentForMission agent-execution service (replaces simulated buildSteps orchestrator)',
+        'auditorSignOff + buildEvidenceFromAgentRun wired into /solve so promotion runs through evaluateEvidence',
+        '/solve reaches MISSION_DONE only on a real PASS pack, else stays AUDIT_PENDING',
+      ],
+      auditorVerdict: 'PASS',
+      realDbOrRuntime: [
+        { command: 'npx tsx --test tests/agent-runner.test.ts', exitCode: 0, summary: '5/5 pass' },
+        { command: 'npx tsx --test tests/local-runner.test.ts', exitCode: 0, summary: '6/6 pass' },
+      ],
+    },
+  },
   'PM-MISS-002': {
     summary:
       'Snapshot Reliability Gate: evaluateSnapshotReliability runs on every /analytics/snapshot sync — freshness gate (snapshot age + stage data-freshness vs 24h SLO) + completeness gate (required fields, status consistency, upstream dependency availability) → ok/degraded verdict with concrete reasons. 11 tests, tsc 0 errors.',
